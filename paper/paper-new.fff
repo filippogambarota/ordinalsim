@@ -1,0 +1,10 @@
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+
+{\centering \includegraphics{paper-new_files/figure-latex/logit-vs-probit-1}
+
+}
+
+\caption{Logit vs Probit}\label{fig:logit-vs-probit}
+\end{figure*}

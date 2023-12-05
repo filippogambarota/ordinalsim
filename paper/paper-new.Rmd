@@ -1,0 +1,203 @@
+---
+title             : "Ordinal regression models made easy. A tutorial on parameter interpretation, data simulation, and power analysis."
+shorttitle        : "Ordinal regression models made easy"
+
+author: 
+  - name          : "Filippo Gambarota"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Postal address"
+    email         : "filippo.gambarota@unipd.it"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - "Conceptualization"
+      - "Writing - Original Draft Preparation"
+      - "Writing - Review & Editing"
+  - name          : "Gianmarco Altoè"
+    affiliation   : "1"
+    role:
+      - "Writing - Review & Editing"
+      - "Supervision"
+
+affiliation:
+  - id            : "1"
+    institution   : "Department of Developmental Psychology and Socialization, University of Padova, Italy"
+
+authornote: |
+  Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
+
+  Enter author note here.
+
+abstract: |
+  Abstract here
+  
+keywords          : "ordinal, likert, simulations, power"
+wordcount         : "X"
+
+bibliography      : "`r filor::fil()$bib`"
+
+floatsintext      : yes
+linenumbers       : no
+draft             : no
+mask              : no
+
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+
+classoption       : "man"
+output: 
+  papaja::apa6_pdf:
+    latex_engine: xelatex
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      dev = "pdf",
+                      fig.align = "center",
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+```{r packages, include = FALSE}
+library(tidyverse)
+library(ordinal)
+devtools::load_all()
+```
+
+# Introduction
+
+Da citare in qualche modo @Kemp2021-dj
+
+> “As a matter of fact, most of the scales used widely and effectively by psychologists are ordinal scales. In the strictest propriety the ordinary statistics involving means and standard deviations ought not to be used with these scales, for these statistics imply a knowledge of something more than the relative rank-order of data. On the other hand for this ‘illegal’ statisticizing there can be invoked a kind of pragmatic sanction: In numerous instances it leads to fruitful results.” (Stevens, 1946, p. 679.)
+
+> It is straightforward to construct ordinal scales that do not involve rank ordering. For example, one can take the first element encountered and arbitrarily assign it the number 100. If the next element encountered is smaller it is given a smaller arbitrary number, 53 say. If the third element is between these two, it can be given the number 86, and so on. If this construction method is used, the difference between the elements assigned the numbers 70 and 80 will not in any important sense be equal to the difference between the elements assigned 90 and 100, and the intervals between the numbers are not really interpretable. Note, too, that monotonic transformations of the scale essentially leave the mea- sure unaffected.
+
+interessante come @Cliff2016-ck descriva che la maggiorparte dellle domande di ricerca in psicologia siano in riferimento alla location di un costrutto e possano essere gestite in modo ordinale
+
+
+The use of ordinal data is widespread in Psychology. Usually items from questionnaires are created using Likert scales where a certain psychological traits is measured using an intuitive scale with 3-5 or more anchor points. These measure cannot be considered *metric* measure on interval or ratio scales [stevens] but the categories are ordered.
+
+Other examples here
+
+Despite the usage of ordinal variables, statistical models made for these type of data are rarely used in Psychology. @Liddell2018-wu reported that the majority of published papers using likert-like measures used standard methods to analyze the data. In practical terms, they use *metric* models where the response variable cannot be considered fully numeric (vedi se c'è un termine tipo scala a rapporti).
+
+altro sui modelli
+
+Theoretically, using a *metric* for ordinal data is not appropriate but understanding the actual impact is not straightforward. @Liddell2018-wu did a comprehensive work about pitfalls of analzying ordinal data as metric. They showed that metric models produce higher type-1 and type-2 errors compared to the ordinal models. In particular, given the bounded nature of ordinal data, difference in the underlying latent distribution are not always captured by the metric model that simply estimate the mean of the ordinal variable. This is even more relevant when the underluing variance of the ordinal variables are not homogeneous. Furthermore they presented some situations where the metric model could be wrong in the opposite direction, finding an effect with the wrong sign (type-s error). 
+
+Finally, they also demonstrated that even in the best condition where e.g. comparing two groups the variance are equal, the ordinal model is more powerful than the metric model given the underestimation of the true effect size from the latter.
+
+> Some authors have argued that, despite the ordinal character of individual Likert items, averaged ordinal items can have an emergent property of an interval scale and so it is appropriate to apply metric methods to the averaged values (e.g., Carifio & Perla, 2007, 2008).
+
+vedi come gestire questo
+
+anche questo è importante
+> Ordered-probit models typically assume that the thresholds (θ k) are the same across all groups because the thresholds are theoretically linked to the response measure, not to the predictor value. For example, when asked, “How happy are you?” with response options ‘1’ = very unhappy, ‘2’ = mildly unhappy, ‘3’ = neutral, ‘4’ = mildly happy, ‘5’ = very happy,” the latent thresholds between ordinal levels are assumed to be implicit in the phrasing of the question, regardless of other aspects of the respondent or situation. In other words, the thresholds are assumed to be part of the measurement procedure, not dependent on the value of the predictor or covariate. This can be technically referred to as a type of measurement invariance.
+
+Da citare come paper iniziale sui modelli [@McCullagh1980-cw].
+
+questo per la tassonomia dei diversi modelli ordinali [@Tutz2022-dg]
+
+da vedere magari per una critica tipo Gomila sul binary model [@Robitzsch2020-la]
+
+## Demonstrating the proportional odds assumption
+
+Let's simulate the effect of a binary predictor on ordinal scale 1-5:
+
+```{r}
+#| echo: true
+b1 <- log(3) # log odds ratio
+n <- 1e4
+x <- rep(c("a", "b"), each = n/2)
+dat <- data.frame(x = x)
+probs <- rep(1/5, 5) # for the group "a", uniform probabilities
+dat <- sim_ord_latent(~x, b1, probs = probs, data = dat, link = "logit")
+fit <- clm(y ~ x, data = dat, link = "logit")
+pr <- predict(fit, data.frame(x = unique(x)))$fit
+pr
+```
+Basically the proportional odds suggest that:
+
+$$
+\text log(\frac{P(y \leq 1)}{P(y > 1)})
+$$
+Is the same regardless the level of the $x$ predictor. Thus:
+
+$$
+\text{log}\left(\frac{\frac{P(y \leq 1|x_0)}{P(y > 1|x_0)}}{\frac{P(y \leq 2|x_0)}{P(y > 2|x_0)}}\right) = \text{log}\left(\frac{\frac{P(y \leq 1|x_1)}{P(y > 1|x_1)}}{\frac{P(y \leq 2|x_1)}{P(y > 2|x_1)}}\right)
+$$
+
+```{r}
+#| echo: true
+a_or1vs2345 <- filor::odds(pr[1, 1]) # 1 vs 2 3 4 5
+a_or12vs345 <- filor::odds(sum(pr[1, 1:2])) # 1 vs 2 3 4 5
+
+b_or1vs2345 <- filor::odds(pr[2, 1]) # 1 vs 2 3 4 5
+b_or12vs345 <- filor::odds(sum(pr[2, 1:2])) # 1 vs 2 3 4 5
+
+c(xa = log(a_or1vs2345 / a_or12vs345), xb = log(b_or1vs2345 / b_or12vs345))
+```
+
+## Logit vs Probit model
+
+When fitting an ordinal regression the two mostly used link functions are the *probit* and *logit*. From the distribution point of view the two functions are very similar. The *probit* model is based on a cumulative Gaussian distribution while the *logit* model is based on a logistic distribution. Figure \@ref(fig:logit-vs-probit) depict the two cumulative distributions.
+
+```{r logit-vs-probit, fig.cap="Logit vs Probit"}
+par(mfrow = c(1,2))
+
+# density
+
+curve(dnorm(x), -5, 5, lwd = 2, ylab = "Density", main = "Probability Density", cex.lab = 1.2, cex.axes = 1.2)
+curve(dlogis(x), -5, 5, lwd = 2, col = "firebrick", add = TRUE)
+
+# cdf
+
+curve(pnorm(x), ylim = c(0, 1), xlim = c(-5, 5), y = "Probability", lwd = 2, main = "Cumulative Probability",
+      cex.lab = 1.2, cex.axes = 1.2)
+curve(plogis(x), ylim = c(0, 1), xlim = c(-5, 5), y = "Probability", col = "firebrick", lwd = 2, add = TRUE)
+```
+
+Given the different underlying distribution, the parameters have a different interpretation under the two models. The probit model assume a latent standard normal distribution with and $\sigma = 1$. The logit model assume a logistic distribution with $\sigma^2 = \pi^2/3$. Thus regression coefficients $\beta$ represents the increase in standard deviations units. The interpretation in terms of latent distribution is particularly useful for the probit model where $\beta$s can be interpreted in a Cohen's $d$ like manner. Furthermore, there is the possibility to directly map parameters from signal detection theory [@Stanislaw1999-jr; @Green1966-gy] into an ordinal probit regression. In practical terms, the thresholds are the criterion cut-offs and the $\beta_1$ is the d$'$ parameter [@DeCarlo1998-ay; @Knoblauch2012-to].
+
+
+## Simulating data
+
+There are mainly two ways to simulate data. The first method concerns simulating starting from the latent formulation of the ordinal model. Basically we can simulate the underlying latent distribution and then fixing the thresholds converting the latent continuous variable into the observed ordinal variable.
+
+```{r}
+library(distributional)
+library(ggdist)
+library(cowplot)
+
+probs <- rep(1/5, 5)
+ths <- probs_to_th(probs)
+
+lat <- data.frame(x = c(0, 1),
+                  m = c(0, 2),
+                  s = c(1, 1))
+
+lat$dist <- dist_normal(lat$m, lat$s)
+
+latent_plot <- lat |> 
+  ggplot(aes(x = x, y = m, dist = dist)) +
+  stat_halfeye(aes(fill = after_stat(factor(findInterval(y, ths))))) +
+  ylim(c(-4, 6)) +
+  geom_hline(yintercept = probs_to_th(probs)) +
+  theme(legend.position = "none")
+
+probs_plot <- get_probs(~x, 2, probs, lat) |> 
+  pivot_longer(starts_with("y")) |> 
+  ggplot(aes(y = factor(x), x = value, fill = name)) +
+  geom_col(position = position_dodge())
+
+plot_grid(latent_plot, probs_plot)
+```
+
+
+
+\newpage
+
+# References
+
+::: {#refs custom-style="Bibliography"}
+:::
