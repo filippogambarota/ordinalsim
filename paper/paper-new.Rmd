@@ -168,6 +168,7 @@ There are mainly two ways to simulate data. The first method concerns simulating
 library(distributional)
 library(ggdist)
 library(cowplot)
+library(tidyverse)
 
 probs <- rep(1/5, 5)
 ths <- probs_to_th(probs)
@@ -179,21 +180,21 @@ lat <- data.frame(x = c(0, 1),
 lat$dist <- dist_normal(lat$m, lat$s)
 
 latent_plot <- lat |> 
-  ggplot(aes(x = x, y = m, dist = dist)) +
+  ggplot(aes(x = factor(x), y = m, dist = dist)) +
   stat_halfeye(aes(fill = after_stat(factor(findInterval(y, ths))))) +
   ylim(c(-4, 6)) +
   geom_hline(yintercept = probs_to_th(probs)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  xlab("X")
 
-probs_plot <- get_probs(~x, 2, probs, lat) |> 
+probs_plot <- get_probs(~x, 2, probs, lat, append = TRUE) |> 
   pivot_longer(starts_with("y")) |> 
-  ggplot(aes(y = factor(x), x = value, fill = name)) +
-  geom_col(position = position_dodge())
+  ggplot(aes(x = factor(x), y = value, fill = name)) +
+  geom_col(position = position_dodge()) +
+  xlab("X")
 
 plot_grid(latent_plot, probs_plot)
 ```
-
-
 
 \newpage
 

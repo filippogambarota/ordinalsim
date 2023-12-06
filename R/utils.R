@@ -105,20 +105,23 @@ show_th <- function(th = NULL, probs = NULL, link = c("logit", "probit"),
 }
 
 get_link <- function(link = c("logit", "probit")){
+  link <- match.arg(link)
   if(link == "logit"){
     pfun <- plogis
     dfun <- dlogis
     qfun <- qlogis
+    rfun <- rlogis
     dfun_n <- "dlogis(x)"
     pfun_n <- "plogis(x)"
   }else{
     pfun <- pnorm
     dfun <- dnorm
     qfun <- qnorm
+    rfun <- rnorm
     dfun_n <- "dnorm(x)"
     pfun_n <- "pnorm(x)"
   }
-  list(pfun = pfun, dfun = dfun, qfun = qfun,
+  list(rfun = rfun, pfun = pfun, dfun = dfun, qfun = qfun,
        dfun_n = dfun_n, pfun_n = pfun_n)
 }
 
@@ -129,12 +132,7 @@ sim_ord_latent <- function(formula,
                            ynames = NULL, 
                            data, 
                            link = c("logit", "probit")){
-  link <- match.arg(link)
-  if(link == "logit"){
-    rdata <- rlogis
-  }else{
-    rdata <- rnorm
-  }
+  lf <- get_link(link)
   if(is.null(th)){
     th <- probs_to_th(probs, link = link)
   }
@@ -142,7 +140,7 @@ sim_ord_latent <- function(formula,
   k <- length(probs) # number of options
   n <- nrow(data)
   X <- model.matrix(formula, data = data)[, 2] # remove intercept
-  ystar <- rdata(n, B %*% X)
+  ystar <- lf$rfun(n, B %*% X)
   y <- findInterval(ystar, th)
   if(is.null(names(probs)) & is.null(ynames)){
     ynames <- 1:k
@@ -151,22 +149,26 @@ sim_ord_latent <- function(formula,
   return(data)
 }
 
-get_probs <- function(formula, B, probs0, data, append = FALSE, link = c("logit", "probit")){
-  link <- match.arg(link)
-  ths <- probs_to_th(probs0, link)
-  X <- model.matrix(formula, data = data)
-  lp <- c(B %*% X[, -1])
-  p <- lapply(lp, function(l) {
-    ps <- diff(pnorm(c(-Inf, ths, Inf), l))
-    names(ps) <- paste0("y", 1:length(ps))
-    t(data.frame(ps))
-  })
-  p <- do.call(rbind, p)
-  if(append){
-    out <- cbind(data, p)
-  }else{
-    out <- p
+get_probs <- function(formula, 
+                      B, 
+                      probs0, 
+                      data, 
+                      link = c("logit", "probit"),
+                      ynames = NULL,
+                      append = FALSE){
+  if(is.null(ynames)){
+    ynames <- paste0("y", 1:length(probs0))
   }
-  rownames(out) <- NULL
-  out
+  lf <- get_link(link)
+  ths <- c(-Inf, probs_to_th(probs0, link = link), Inf)
+  X <- model.matrix(formula, data = data)[, -1]
+  X <- matrix(X)
+  P <- lapply(ths, function(t) c(plogis(t - X %*% B)))
+  P <- data.frame(P)
+  P <- data.frame(t(apply(P, 1, diff)))
+  names(P) <- ynames
+  if(append){
+    P <- cbind(data, P)
+  }
+  return(P)
 }

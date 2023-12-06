@@ -131,7 +131,7 @@
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
 \usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break#1\hfill\break}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
@@ -314,9 +314,9 @@ Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 \end{Shaded}
 
 \begin{verbatim}
-##            1         2         3         4         5
-## 1 0.18711805 0.2021825 0.2062092 0.2020689 0.2024214
-## 2 0.07132155 0.1040579 0.1540144 0.2385607 0.4320454
+##           1         2         3         4         5
+## 1 0.2050465 0.1955326 0.2042902 0.1954256 0.1997052
+## 2 0.0773533 0.1010989 0.1537990 0.2334472 0.4343016
 \end{verbatim}
 
 Basically the proportional odds suggest that:
@@ -344,7 +344,7 @@ Is the same regardless the level of the \(x\) predictor. Thus:
 
 \begin{verbatim}
 ##        xa        xb 
-## -1.018593 -1.018593
+## -0.951994 -0.951994
 \end{verbatim}
 
 \subsection{Logit vs Probit model}\label{logit-vs-probit-model}
