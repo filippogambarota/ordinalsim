@@ -131,7 +131,7 @@
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
 \usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLBlock}[1]{\hfill\break#1\hfill\break}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
@@ -314,9 +314,9 @@ Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 \end{Shaded}
 
 \begin{verbatim}
-##           1         2         3         4         5
-## 1 0.2050465 0.1955326 0.2042902 0.1954256 0.1997052
-## 2 0.0773533 0.1010989 0.1537990 0.2334472 0.4343016
+##            1         2         3         4         5
+## 1 0.19466136 0.1980089 0.2047539 0.2030399 0.1995360
+## 2 0.07435021 0.1025037 0.1534161 0.2411113 0.4286187
 \end{verbatim}
 
 Basically the proportional odds suggest that:
@@ -343,8 +343,8 @@ Is the same regardless the level of the \(x\) predictor. Thus:
 \end{Shaded}
 
 \begin{verbatim}
-##        xa        xb 
-## -0.951994 -0.951994
+##         xa         xb 
+## -0.9838998 -0.9838998
 \end{verbatim}
 
 \subsection{Logit vs Probit model}\label{logit-vs-probit-model}
@@ -366,13 +366,104 @@ Given the different underlying distribution, the parameters have a different int
 
 There are mainly two ways to simulate data. The first method concerns simulating starting from the latent formulation of the ordinal model. Basically we can simulate the underlying latent distribution and then fixing the thresholds converting the latent continuous variable into the observed ordinal variable.
 
+\subsection{Scale Effects}\label{scale-effects}
+
+The default ordinal regression model assume that the variance of th underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test (see Delacre, Lakens, \& Leys, 2017). In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included.
+
+\subsection{Visualizing effects}\label{visualizing-effects}
+
+Before starting with the actual simulation it is useful to plot the predicted probabilities of the response variable \(y\) as a function of the predictors. The \texttt{cat\_latent\_plot()} and the \texttt{num\_latent\_plot()} functions are able to visualize the effect of a single categorical or numerical predictor. Specifying the mean and standard deviations of the latent variable in each condition (for the categorical version) or the \(\beta\) (for the numerical version) the function compute the expected probability for each level of the ordinal variable \(y\) and visualize the result. In this way the \(\beta\) can be choose in a meaningful way.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cat\_latent\_plot }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(}\AttributeTok{m =} \DecValTok{0}\NormalTok{, }
+                            \AttributeTok{s =} \DecValTok{1}\NormalTok{, }
+                            \AttributeTok{th =} \ConstantTok{NULL}\NormalTok{, }
+                            \AttributeTok{probs =} \ConstantTok{NULL}\NormalTok{, }
+                            \AttributeTok{link =} \FunctionTok{c}\NormalTok{(}\StringTok{"logit"}\NormalTok{, }\StringTok{"probit"}\NormalTok{))\{}
+\NormalTok{  lf }\OtherTok{\textless{}{-}} \FunctionTok{get\_link}\NormalTok{(link)}
+\NormalTok{  x }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"g"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(m))}
+\NormalTok{  lat }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+    \AttributeTok{x =}\NormalTok{ x,}
+    \AttributeTok{m =}\NormalTok{ m,}
+    \AttributeTok{s =}\NormalTok{ s}
+\NormalTok{  )}
+  
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(th))\{}
+\NormalTok{    th }\OtherTok{\textless{}{-}} \FunctionTok{probs\_to\_th}\NormalTok{(probs, link)}
+\NormalTok{  \}}
+  
+\NormalTok{  thl }\OtherTok{\textless{}{-}}\NormalTok{ latex2exp}\SpecialCharTok{::}\FunctionTok{TeX}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{alpha\_\{\%s\}$"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(th)))}
+  
+  \ControlFlowTok{if}\NormalTok{(link }\SpecialCharTok{==} \StringTok{"logit"}\NormalTok{)\{}
+\NormalTok{    dfun }\OtherTok{\textless{}{-}}\NormalTok{ distributional}\SpecialCharTok{::}\NormalTok{dist\_logistic}
+\NormalTok{    s }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{vlogit}\NormalTok{(s))}
+\NormalTok{    title }\OtherTok{\textless{}{-}} \StringTok{"Logistic Distribution"}
+\NormalTok{  \}}\ControlFlowTok{else}\NormalTok{\{}
+\NormalTok{    dfun }\OtherTok{\textless{}{-}}\NormalTok{ distributional}\SpecialCharTok{::}\NormalTok{dist\_normal}
+\NormalTok{    s }\OtherTok{\textless{}{-}}\NormalTok{ lat}\SpecialCharTok{$}\NormalTok{s}
+\NormalTok{    title }\OtherTok{\textless{}{-}} \StringTok{"Normal Distribution"}
+\NormalTok{  \}}
+\NormalTok{  lat}\SpecialCharTok{$}\NormalTok{dist }\OtherTok{\textless{}{-}} \FunctionTok{dfun}\NormalTok{(lat}\SpecialCharTok{$}\NormalTok{m, lat}\SpecialCharTok{$}\NormalTok{s)}
+\NormalTok{  range\_y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{min}\NormalTok{(lat}\SpecialCharTok{$}\NormalTok{m) }\SpecialCharTok{{-}} \FunctionTok{max}\NormalTok{(s) }\SpecialCharTok{*} \DecValTok{5}\NormalTok{, }\FunctionTok{max}\NormalTok{(lat}\SpecialCharTok{$}\NormalTok{m) }\SpecialCharTok{+} \FunctionTok{max}\NormalTok{(s) }\SpecialCharTok{*} \DecValTok{5}\NormalTok{)}
+  \FunctionTok{ggplot}\NormalTok{(lat,}
+         \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{factor}\NormalTok{(x), }\AttributeTok{y =}\NormalTok{ m, }\AttributeTok{dist =}\NormalTok{ dist)) }\SpecialCharTok{+}
+\NormalTok{    ggdist}\SpecialCharTok{::}\FunctionTok{stat\_halfeye}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =} \FunctionTok{after\_stat}\NormalTok{(}\FunctionTok{factor}\NormalTok{(}\FunctionTok{findInterval}\NormalTok{(y, th) }\SpecialCharTok{+} \DecValTok{1}\NormalTok{))),}
+                 \AttributeTok{alpha =} \FloatTok{0.85}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{ylim}\NormalTok{(range\_y) }\SpecialCharTok{+}
+    \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =}\NormalTok{ th, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{col =} \StringTok{"black"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{factor}\NormalTok{(x), }\AttributeTok{y =}\NormalTok{ m, }\AttributeTok{group =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{annotate}\NormalTok{(}\StringTok{"label"}\NormalTok{, }\AttributeTok{x =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{y =}\NormalTok{ th, }\AttributeTok{label =}\NormalTok{ thl, }\AttributeTok{size =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme\_minimal}\NormalTok{(}\DecValTok{15}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+          \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+          \AttributeTok{axis.title.x =} \FunctionTok{element\_blank}\NormalTok{()) }\SpecialCharTok{+}
+    \FunctionTok{ylab}\NormalTok{(latex2exp}\SpecialCharTok{::}\FunctionTok{TeX}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{mu"}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{ggtitle}\NormalTok{(title)}
+\NormalTok{\}}
+\NormalTok{num\_latent\_plot }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, }
+\NormalTok{                            b1, }
+                            \AttributeTok{th =} \ConstantTok{NULL}\NormalTok{, }
+                            \AttributeTok{probs =} \ConstantTok{NULL}\NormalTok{,}
+                            \AttributeTok{link =} \FunctionTok{c}\NormalTok{(}\StringTok{"logit"}\NormalTok{, }\StringTok{"probit"}\NormalTok{), }
+                            \AttributeTok{nsample =} \FloatTok{1e3}\NormalTok{, }
+                            \AttributeTok{size =} \DecValTok{20}\NormalTok{)\{}
+\NormalTok{  lf }\OtherTok{\textless{}{-}} \FunctionTok{get\_link}\NormalTok{(link)}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(th))\{}
+\NormalTok{    th }\OtherTok{\textless{}{-}} \FunctionTok{probs\_to\_th}\NormalTok{(probs, link)}
+\NormalTok{  \}}
+\NormalTok{  data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =} \FunctionTok{seq}\NormalTok{(}\FunctionTok{min}\NormalTok{(x), }\FunctionTok{max}\NormalTok{(x), }\AttributeTok{length.out =}\NormalTok{ nsample))}
+\NormalTok{  data }\OtherTok{\textless{}{-}} \FunctionTok{get\_probs}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{x, b1, probs, data, link, }\AttributeTok{append =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  datal }\OtherTok{\textless{}{-}}\NormalTok{ tidyr}\SpecialCharTok{::}\FunctionTok{pivot\_longer}\NormalTok{(data, }\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"y"}\NormalTok{), }\AttributeTok{names\_to =} \StringTok{"y"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"value"}\NormalTok{)}
+  \FunctionTok{ggplot}\NormalTok{(datal, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ value, }\AttributeTok{color =}\NormalTok{ y)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_line}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme\_minimal}\NormalTok{(size) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+          \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{()) }\SpecialCharTok{+}
+    \FunctionTok{ylab}\NormalTok{(}\StringTok{"Probability"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{ggtitle}\NormalTok{(latex2exp}\SpecialCharTok{::}\FunctionTok{TeX}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{beta\_1 = \%s$"}\NormalTok{, b1)))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+For example, the Figure \ref{fig:ex-categorical} depicts the effect of a categorical predictor on a 5-level \(y\) assuming uniform probabilities for the reference level and a mean difference on a standardized Normal distribution of 1. The Figure \ref{fig:ex-numerical} depicts the effect of a continuous predictor \(x\) sampled from a standard Normal distribution assuming a \(\beta = 1\).
+
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/unnamed-chunk-3-1} 
+{\centering \includegraphics{paper-new_files/figure-latex/ex-categorical-1} 
 
 }
 
-\caption{ }\label{fig:unnamed-chunk-3}
+\caption{Example categorical}\label{fig:ex-categorical}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics{paper-new_files/figure-latex/ex-numerical-1} 
+
+}
+
+\caption{Example numerical}\label{fig:ex-numerical}
 \end{figure}
 
 \newpage
@@ -386,6 +477,9 @@ Cliff, N. (2016). \emph{Ordinal methods for behavioral data analysis}. London, E
 
 \bibitem[\citeproctext]{ref-DeCarlo1998-ay}
 DeCarlo, L. T. (1998). Signal detection theory and generalized linear models. \emph{Psychological Methods}, \emph{3}, 186--205. \url{https://doi.org/10.1037/1082-989X.3.2.186}
+
+\bibitem[\citeproctext]{ref-Delacre2017-qy}
+Delacre, M., Lakens, D., \& Leys, C. (2017). Why psychologists should by default use welch's \emph{t}-test instead of student's \emph{t}-test. \emph{International Review of Social Psychology}, \emph{30}, 92. \url{https://doi.org/10.5334/irsp.82}
 
 \bibitem[\citeproctext]{ref-Green1966-gy}
 Green, D. M., Swets, J. A., \& Others. (1966). \emph{Signal detection theory and psychophysics} (Vol. 1, pp. xi, 455--xi, 455). Oxford, England: Wiley New York.

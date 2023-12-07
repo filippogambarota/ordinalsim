@@ -125,27 +125,32 @@ get_link <- function(link = c("logit", "probit")){
        dfun_n = dfun_n, pfun_n = pfun_n)
 }
 
-sim_ord_latent <- function(formula, 
-                           B, 
+sim_ord_latent <- function(formula,
+                           sigma = NULL,
+                           By,
+                           Bsigma = NULL,
                            probs = NULL, 
                            th = NULL, 
-                           ynames = NULL, 
                            data, 
                            link = c("logit", "probit")){
   lf <- get_link(link)
   if(is.null(th)){
     th <- probs_to_th(probs, link = link)
   }
-  probs <- th_to_probs(th)
+  probs <- th_to_probs(th, link = link)
   k <- length(probs) # number of options
   n <- nrow(data)
-  X <- model.matrix(formula, data = data)[, 2] # remove intercept
-  ystar <- lf$rfun(n, B %*% X)
-  y <- findInterval(ystar, th)
-  if(is.null(names(probs)) & is.null(ynames)){
-    ynames <- 1:k
+  Xy <- model.matrix(formula, data = data)[, -1, drop = FALSE] # remove intercept
+  lpy <- c(Xy %*% By)
+  if(is.null(sigma)){
+    ystar <- lf$rfun(n, lpy)
+  }else{
+    Xsigma <- model.matrix(sigma, data = data)[, -1, drop = FALSE] # remove intercept
+    ystar <- lf$rfun(n, lpy, exp(c(Xsigma %*% Bsigma)))
   }
-  data$y <- factor(y, labels = ynames)
+  y <- findInterval(ystar, th) + 1 # to start from 1
+  data$y <- factor(y)
+  data$y <- ordered(data$y)
   return(data)
 }
 
@@ -163,7 +168,9 @@ get_probs <- function(formula,
   ths <- c(-Inf, probs_to_th(probs0, link = link), Inf)
   X <- model.matrix(formula, data = data)[, -1]
   X <- matrix(X)
-  P <- lapply(ths, function(t) c(plogis(t - X %*% B)))
+  # notice the minus sign t - X %*% B thus an increase in x
+  # is an increase in p
+  P <- lapply(ths, function(t) c(lf$pfun(t - X %*% B)))
   P <- data.frame(P)
   P <- data.frame(t(apply(P, 1, diff)))
   names(P) <- ynames
@@ -171,4 +178,118 @@ get_probs <- function(formula,
     P <- cbind(data, P)
   }
   return(P)
+}
+
+cat_latent_plot <- function(m = 0, 
+                            s = 1, 
+                            th = NULL, 
+                            probs = NULL, 
+                            link = c("logit", "probit"),
+                            plot = c("probs", "latent", "both")){
+  plot <- match.arg(plot)
+  lf <- get_link(link)
+  x <- paste0("g", 1:length(m))
+  lat <- data.frame(
+    x = x,
+    m = m,
+    s = s
+  )
+  
+  if(is.null(th)){
+    th <- probs_to_th(probs, link)
+  }
+  
+  thl <- latex2exp::TeX(sprintf("$\\alpha_{%s}$", 1:length(th)))
+  
+  if(link == "logit"){
+    dfun <- distributional::dist_logistic
+    s <- sqrt(vlogit(s))
+    title <- "Logistic Distribution"
+  }else{
+    dfun <- distributional::dist_normal
+    s <- lat$s
+    title <- "Normal Distribution"
+  }
+  lat$dist <- dfun(lat$m, lat$s)
+  range_y <- c(min(lat$m) - max(s) * 5, max(lat$m) + max(s) * 5)
+
+  lat_plot <- ggplot(lat,
+         aes(x = factor(x), y = m, dist = dist)) +
+    ggdist::stat_halfeye(aes(fill = after_stat(factor(findInterval(y, th) + 1))),
+                 alpha = 0.85) +
+    ylim(range_y) +
+    geom_hline(yintercept = th, linetype = "dashed", col = "black", alpha = 0.7) +
+    geom_line(aes(x = factor(x), y = m, group = 1)) +
+    annotate("label", x = 0.7, y = th, label = thl, size = 5) +
+    theme_minimal(15) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          axis.title.x = element_blank()) +
+    ylab(latex2exp::TeX("\\mu")) +
+    ggtitle(title)
+  
+  
+  th <- c(-Inf, th, Inf)
+  lat_ms <- lat[, c("m", "s")]
+  ps <- apply(lat_ms, 1, function(x) data.frame(t(diff(lf$pfun(th, x[1], x[2])))), simplify = FALSE)
+  ps <- do.call(rbind, ps)
+  names(ps) <- paste0("y", 1:ncol(ps))
+  latl <- cbind(lat, ps)
+  latl <- pivot_longer(latl, starts_with("y"), names_to = "y", values_to = "value")
+  probs_plot <- ggplot(latl, aes(x = factor(x), y = value, fill = y)) +
+    geom_col(position = position_dodge()) +
+    theme_minimal(15) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          axis.title.x = element_blank()) +
+    ylab("Probability")
+  if(plot == "probs"){
+    probs_plot
+  }else if(plot == "latent"){
+    lat_plot
+  }else{
+    legend_b <- get_legend(
+      probs_plot
+    )
+    plts <- plot_grid(
+      lat_plot + theme(legend.position = "none"),
+      probs_plot + theme(legend.position = "none")
+    )
+    plot_grid(plts, legend_b, ncol = 1, rel_heights = c(1, .1))
+  }
+}
+
+num_latent_plot <- function(x, 
+                            b1, 
+                            th = NULL, 
+                            probs = NULL,
+                            link = c("logit", "probit"), 
+                            nsample = 1e3, 
+                            size = 20){
+  lf <- get_link(link)
+  if(is.null(th)){
+    th <- probs_to_th(probs, link)
+  }
+  data <- data.frame(x = seq(min(x), max(x), length.out = nsample))
+  data <- get_probs(~x, b1, probs, data, link, append = TRUE)
+  datal <- tidyr::pivot_longer(data, starts_with("y"), names_to = "y", values_to = "value")
+  ggplot(datal, aes(x = x, y = value, color = y)) +
+    geom_line() +
+    theme_minimal(size) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank()) +
+    ylab("Probability") +
+    ggtitle(latex2exp::TeX(sprintf("$\\beta_1 = %s$", b1)))
+}
+
+vlogit <- function(scale){
+  (scale^2 * pi^2)/3
+}
+
+codds <- function(p){
+  co <- cumsum(p)/(1 - cumsum(p))
+  co <- co[-length(co)]
+  nn <- Reduce(paste0, 1:(length(p) - 1), accumulate = TRUE)
+  names(co) <- paste0("o", nn)
+  co
 }

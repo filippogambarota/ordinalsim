@@ -61,10 +61,26 @@ knitr::opts_chunk$set(echo = FALSE,
 ```{r packages, include = FALSE}
 library(tidyverse)
 library(ordinal)
+library(here)
 devtools::load_all()
 ```
 
+```{r funs, include = FALSE}
+funs <- filor::get_funs(here("R", "utils.R"))
+```
+
 # Introduction
+
+## Risolvere un pochino la nomenclatura
+
+https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf
+
+> The name, cumulative link models is adopted from Agresti (2002), but the model class has
+been referred to by several other names in the literature, such as ordered logit models and
+ordered probit models (Greene and Hensher 2010) for the logit and probit link functions. The
+cumulative link model with a logit link is widely known as the proportional odds model due
+to McCullagh (1980) and with a complementary log-log link, the model is sometimes referred
+to as the proportional hazards model for grouped survival times.
 
 Da citare in qualche modo @Kemp2021-dj
 
@@ -100,7 +116,20 @@ questo per la tassonomia dei diversi modelli ordinali [@Tutz2022-dg]
 
 da vedere magari per una critica tipo Gomila sul binary model [@Robitzsch2020-la]
 
+## Odds ratios and cumulative odds ratios
+
+- https://online.stat.psu.edu/stat504/lesson/4/4.1
+
+In this section we introduce the main concept to understand the effects of a logit model.
+
 ## Demonstrating the proportional odds assumption
+
+basically given that the effect of $\beta$ is constant the odds ratio is independent from the thresholds $\alpha_j$ [@Liu2023-bp]. In the current paper we are simulating data using a single set of $\beta$s thus the proportional odds assumption is true. @Liu2023-bp reviewed the available methods to test this assumption.
+
+- https://hbiostat.org/ordinal/impactpo.pdf blog su proportional odds, mi pare di capire che non sia così problematica come assunzione
+
+sarebbe da capire quali sono i rischi di assumere questo ed eventualmente se simulare non proportional odds è troppo complicato.
+
 
 Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 
@@ -138,6 +167,78 @@ b_or12vs345 <- filor::odds(sum(pr[2, 1:2])) # 1 vs 2 3 4 5
 c(xa = log(a_or1vs2345 / a_or12vs345), xb = log(b_or1vs2345 / b_or12vs345))
 ```
 
+Proportional odds can be also visualized by plotting the cumulative probabilities of $y$, in terms of $g(P(y \leq j))$ (where $g()$ is the logit link function) as a function of the predictor $x$. If the proportional odds assumptions holds the slopes are parallel (also known as parallel regression assumption). The Figure \@ref(fig:poa-plot-example) depicts the assumption of proportional odds in the probability and logit space.
+
+```{r poa-plot-example, fig.cap="POA assumption"}
+k <- 5 # number of levels for y
+grid <- data.frame(x = seq(0, 1, 0.1)) # numeric predictor
+probs <- get_probs(~x, 5, rep(1/k, k), data = grid, link = "logit") # probabilities
+cprobs <- apply(probs, 1, cumsum, simplify = FALSE)
+cprobs <- data.frame(do.call(rbind, cprobs))
+names(cprobs) <- sprintf("y<=%s", 1:k)
+cprobs <- cprobs[, -ncol(cprobs)] # remove the last
+grid <- cbind(grid, cprobs)
+
+grid <- grid |> 
+  pivot_longer(starts_with("y")) |> 
+  mutate(lp = qlogis(value))
+
+poa_probs_plot <- grid |> 
+  ggplot(aes(x = x, y = value, color = name)) +
+  geom_line() +
+  theme_minimal(15) +
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        axis.title.y = element_blank()) +
+  ggtitle("Probability")
+
+poa_lp_plot <- grid |> 
+  ggplot(aes(x = x, y = lp, color = name)) +
+  geom_line() +
+  theme_minimal(15) +
+  theme(axis.title.y = element_blank()) +
+  ggtitle("Linear Predictor")
+
+bl <- cowplot::get_legend(
+  poa_probs_plot
+)
+
+poa_plot <- cowplot::plot_grid(
+  poa_probs_plot + theme(legend.position = "none"),
+  poa_lp_plot + theme(legend.position = "none")
+)
+
+cowplot::plot_grid(poa_plot, bl, ncol = 1, rel_heights = c(0.9, 0.1))
+```
+
+@Harrell-2015-no proposed a very intuitive plot to assess the proportional odds assumption and eventually the degree of deviation from the ideal case. Basically predictor is plotted against the logit of the cumulative probability. Distances between pairs of symbols should be similar across levels of the predictors. Numerical predictors can be binned before plotting the corresponding logit. Figure \@ref(fig:harrel-poa-plot) depicts an example with simulated data satisfying the proportional odds assumption.
+
+```{r harrel-poa-plot, fig.cap="Harrel Poa Plot"}
+k <- 5 # number of levels for y
+grid <- data.frame(x = seq(0, 1, 0.1)) # numeric predictor
+probs <- get_probs(~x, 5, rep(1/k, k), data = grid, link = "logit") # probabilities
+cprobs <- apply(probs, 1, cumsum, simplify = FALSE)
+cprobs <- data.frame(do.call(rbind, cprobs))
+names(cprobs) <- sprintf("y<=%s", 1:k)
+cprobs <- cprobs[, -ncol(cprobs)] # remove the last
+grid <- cbind(grid, cprobs)
+
+grid <- grid |> 
+  pivot_longer(starts_with("y")) |> 
+  mutate(lp = qlogis(value))
+
+grid |> 
+  ggplot(aes(x = lp, y = x)) +
+  geom_point(aes(color = name, 
+                 shape = name),
+             size = 3) +
+  theme_minimal(20) +
+  xlab("Logit") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+```
+
+
 ## Logit vs Probit model
 
 When fitting an ordinal regression the two mostly used link functions are the *probit* and *logit*. From the distribution point of view the two functions are very similar. The *probit* model is based on a cumulative Gaussian distribution while the *logit* model is based on a logistic distribution. Figure \@ref(fig:logit-vs-probit) depict the two cumulative distributions.
@@ -164,37 +265,33 @@ Given the different underlying distribution, the parameters have a different int
 
 There are mainly two ways to simulate data. The first method concerns simulating starting from the latent formulation of the ordinal model. Basically we can simulate the underlying latent distribution and then fixing the thresholds converting the latent continuous variable into the observed ordinal variable.
 
-```{r}
-library(distributional)
-library(ggdist)
-library(cowplot)
-library(tidyverse)
+## Scale Effects
 
-probs <- rep(1/5, 5)
-ths <- probs_to_th(probs)
+The default ordinal regression model assume that the variance of th underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test [see @Delacre2017-qy]. In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. Figure \@ref(fig:example-unequal-variance) depict an example of a comparison between two groups where the two underlyning latent distributions have unequal variance.
 
-lat <- data.frame(x = c(0, 1),
-                  m = c(0, 2),
-                  s = c(1, 1))
 
-lat$dist <- dist_normal(lat$m, lat$s)
 
-latent_plot <- lat |> 
-  ggplot(aes(x = factor(x), y = m, dist = dist)) +
-  stat_halfeye(aes(fill = after_stat(factor(findInterval(y, ths))))) +
-  ylim(c(-4, 6)) +
-  geom_hline(yintercept = probs_to_th(probs)) +
-  theme(legend.position = "none") +
-  xlab("X")
+## Visualizing effects
 
-probs_plot <- get_probs(~x, 2, probs, lat, append = TRUE) |> 
-  pivot_longer(starts_with("y")) |> 
-  ggplot(aes(x = factor(x), y = value, fill = name)) +
-  geom_col(position = position_dodge()) +
-  xlab("X")
+Before starting with the actual simulation it is useful to plot the predicted probabilities of the response variable $y$ as a function of the predictors. The `cat_latent_plot()` and the `num_latent_plot()` functions are able to visualize the effect of a single categorical or numerical predictor. Specifying the mean and standard deviations of the latent variable in each condition (for the categorical version) or the $\beta$ (for the numerical version) the function compute the expected probability for each level of the ordinal variable $y$ and visualize the result. In this way the $\beta$ can be choose in a meaningful way.
 
-plot_grid(latent_plot, probs_plot)
+```{r, echo=FALSE, results='asis'}
+filor::print_fun(c(funs$cat_latent_plot, funs$num_latent_plot))
 ```
+
+For example, the Figure \@ref(fig:ex-categorical) depicts the effect of a categorical predictor on a 5-level $y$ assuming uniform probabilities for the reference level and a mean difference on a standardized Normal distribution of 1. The Figure \@ref(fig:ex-numerical) depicts the effect of a continuous predictor $x$ sampled from a standard Normal distribution assuming a $\beta = 1$.
+
+```{r ex-categorical, fig.cap="Example categorical", fig.width=8, fig.height=8}
+cat_latent_plot(m = c(0, 1), s = 1, probs = rep(1/5, 5), link = "probit")
+```
+
+```{r ex-numerical, fig.cap="Example numerical", fig.width=8, fig.height=8}
+num_latent_plot(x = rnorm(100), b1 = 1, probs = c(0.4, 0.2, 0.2, 0.05, 0.05), link = "probit")
+```
+
+## Disclaimer about the functions
+
+The current paper proposed a simplified way with some functions to generate ordinal data. For more complex simulations such as simulating correlated ordinal data the `simstudy` package [https://kgoldfeld.github.io/simstudy/articles/ordinal.html](https://kgoldfeld.github.io/simstudy/articles/ordinal.html) proposed a very comprehensive set of data simulation function also for ordinal data.
 
 \newpage
 
