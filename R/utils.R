@@ -18,8 +18,8 @@ probs_to_th <- function(probs, link = c("logit", "probit")){
   }else{
     lfun <- qnorm
   }
-  th <- lfun(Reduce(sum, probs, accumulate = TRUE))
-  th[-length(th)]
+  cprobs <- cumsum(probs)
+  lfun(cprobs[-length(cprobs)])
 }
 
 # get_probs <- function(formula, 
@@ -151,6 +151,7 @@ sim_ord_latent <- function(formula,
   y <- findInterval(ystar, th) + 1 # to start from 1
   data$y <- factor(y)
   data$y <- ordered(data$y)
+  data$ys <- ystar
   return(data)
 }
 
@@ -292,4 +293,14 @@ codds <- function(p){
   nn <- Reduce(paste0, 1:(length(p) - 1), accumulate = TRUE)
   names(co) <- paste0("o", nn)
   co
+}
+
+dummy_ord <- function(y){
+  if(!is.numeric(y)) y <- as.integer(y)
+  yc <- sort(unique(y))
+  dummy <- lapply(yc, function(t) ifelse(y <= t, 1, 0))
+  nn1 <- Reduce(paste0, yc, accumulate = TRUE)
+  nn2 <- Reduce(paste0, yc, accumulate = TRUE, right = TRUE)
+  names(dummy) <- sprintf("y%svs%s", nn1[-length(nn1)], nn2[-1])
+  data.frame(dummy[-length(dummy)])
 }

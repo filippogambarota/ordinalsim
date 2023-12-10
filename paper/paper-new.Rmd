@@ -116,6 +116,35 @@ questo per la tassonomia dei diversi modelli ordinali [@Tutz2022-dg]
 
 da vedere magari per una critica tipo Gomila sul binary model [@Robitzsch2020-la]
 
+## Metriv vs ordinal models
+
+- the main difference is that the metric model assign a number to each label of the discrete variable assuming that the distance is the same. [@Liddell2018-wu]
+
+## lm on latent vs ordinal
+
+as suggested https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf, running a lm on the latent variables gives similar parameter as the clm. Of course, we are able to do this with real data given that the ordinal variable is the observed version of an unobserved latent variable. But in simulation this is useful to understand what the cumulative model is doing.
+
+```{r}
+dat <- data.frame(
+  x1 = rnorm(1e5),
+  x2 = rnorm(1e5)
+)
+
+dat <- sim_ord_latent(~x1 + x2, By = c(1, 0.5), probs = rep(1/5, 5), link = "probit", data = dat)
+
+fit <- lm(ys ~ x1 + x2, data = dat)
+summary(fit)
+
+clm(y ~ x1 + x2, data = dat, link = "probit")
+coef(fit)/sigma(fit)
+
+```
+
+## Kruscke parametrization
+
+@Liddell2018-wu and @Kruschke2015-re proposed an alternative parametrization to understand the model parameters. They used a probit model where thresholds and regression parameters are estimated on the scale of the ordinal variable compared to standard ordinal regression where they refers to the quantile of the latent variables for the threshold and z score or odds ratio for the regression coefficients. They implemented the model in Jags and provided some equations and R functions to convert from the standard parametrization to the proposed one.
+
+
 ## Odds ratios and cumulative odds ratios
 
 - https://online.stat.psu.edu/stat504/lesson/4/4.1
@@ -140,7 +169,7 @@ n <- 1e4
 x <- rep(c("a", "b"), each = n/2)
 dat <- data.frame(x = x)
 probs <- rep(1/5, 5) # for the group "a", uniform probabilities
-dat <- sim_ord_latent(~x, b1, probs = probs, data = dat, link = "logit")
+dat <- sim_ord_latent(~x, By = b1, probs = probs, data = dat, link = "logit")
 fit <- clm(y ~ x, data = dat, link = "logit")
 pr <- predict(fit, data.frame(x = unique(x)))$fit
 pr
@@ -238,6 +267,30 @@ grid |>
         legend.title = element_blank())
 ```
 
+From a statistical point of view, the proportional odds assumption can be assessed by fitting $k - 1$ binomial regressions and checking if the estimated $\beta$ is similar between regressions. The regressions are estimated by creating $k - 1$ dummy variables from the ordinal $y$. The code below show that simulating data with the proportional odds create $k - 1$ binomial regression with similar $\beta$s.
+
+```{r}
+#| echo: true
+k <- 4
+n <- 1e5
+dat <- data.frame(
+  x = runif(n)
+)
+
+dat <- sim_ord_latent(~x, By = 5, probs = rep(1/k, k), data = dat, link = "logit")
+
+# create dummy variables
+
+dat$y1vs234 <- ifelse(dat$y <= 1, 1, 0)
+dat$y12vs34 <- ifelse(dat$y <= 2, 1, 0)
+dat$y123vs4 <- ifelse(dat$y <= 3, 1, 0)
+
+fit1vs234 <- glm(y1vs234 ~ x, data = dat, family = binomial(link = "logit"))
+fit12vs34 <- glm(y12vs34 ~ x, data = dat, family = binomial(link = "logit"))
+fit123vs4 <- glm(y123vs4 ~ x, data = dat, family = binomial(link = "logit"))
+
+car::compareCoefs(fit123vs4, fit12vs34, fit1vs234)
+```
 
 ## Logit vs Probit model
 
@@ -259,6 +312,11 @@ curve(plogis(x), ylim = c(0, 1), xlim = c(-5, 5), y = "Probability", col = "fire
 ```
 
 Given the different underlying distribution, the parameters have a different interpretation under the two models. The probit model assume a latent standard normal distribution with and $\sigma = 1$. The logit model assume a logistic distribution with $\sigma^2 = \pi^2/3$. Thus regression coefficients $\beta$ represents the increase in standard deviations units. The interpretation in terms of latent distribution is particularly useful for the probit model where $\beta$s can be interpreted in a Cohen's $d$ like manner. Furthermore, there is the possibility to directly map parameters from signal detection theory [@Stanislaw1999-jr; @Green1966-gy] into an ordinal probit regression. In practical terms, the thresholds are the criterion cut-offs and the $\beta_1$ is the d$'$ parameter [@DeCarlo1998-ay; @Knoblauch2012-to].
+
+The latent formulation of the ordinal regression model allow to think in standard linear regression terms for choosing and interpreting model parameters before converting into the probability space. Both the standard Normal and the logistic distribution are defined with a location ($\mu$) and a scale ($s$) parameter. For the Normal distribution, $\mu$ is the mean and scale is the variance ($\sigma^2$). For the logistic distribution the variance is $\sigma^2=\frac{s^2\pi^2}{3}$. Thus fixing $\mu$ and $\sigma^2 = 1$ (the default), the two distributions are similar with the logistic having more variance. For this reason, the latent formulation for parameter intepretation is particularly useful for the probit model because the $\beta$ is directly interpreted in standard deviaton units that by default are fixed to 1. With a binary predictor $x$, $\beta$ is the shift of the latent distribution increasing $x$ by one unit. This can be directly interpreted as a standardized mean difference effect size (e.g., Cohen's $d$). This is the same for the logistic distribution but a unit increase in $x$ shift the latent distribution by $\sigma = \sqrt{\frac{s^2 \pi^2}{3}} = \frac{s\pi}{\sqrt{3}}$.^[In the case of a standard logistic distribution ($s^2 = 1$), the standard deviation is $\frac{\pi}{\sqrt{3}}$].
+
+
+
 
 
 ## Simulating data

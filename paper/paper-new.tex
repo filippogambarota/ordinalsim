@@ -131,7 +131,7 @@
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
 \usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break#1\hfill\break}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
@@ -256,6 +256,19 @@ Abstract here
 
 \section{Introduction}\label{introduction}
 
+\subsection{Risolvere un pochino la nomenclatura}\label{risolvere-un-pochino-la-nomenclatura}
+
+\url{https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf}
+
+\begin{quote}
+The name, cumulative link models is adopted from Agresti (2002), but the model class has
+been referred to by several other names in the literature, such as ordered logit models and
+ordered probit models (Greene and Hensher 2010) for the logit and probit link functions. The
+cumulative link model with a logit link is widely known as the proportional odds model due
+to McCullagh (1980) and with a complementary log-log link, the model is sometimes referred
+to as the proportional hazards model for grouped survival times.
+\end{quote}
+
 Da citare in qualche modo Kemp and Grace (2021)
 
 \begin{quote}
@@ -295,7 +308,86 @@ questo per la tassonomia dei diversi modelli ordinali (Tutz, 2022)
 
 da vedere magari per una critica tipo Gomila sul binary model (Robitzsch, 2020)
 
+\subsection{Metriv vs ordinal models}\label{metriv-vs-ordinal-models}
+
+\begin{itemize}
+\tightlist
+\item
+  the main difference is that the metric model assign a number to each label of the discrete variable assuming that the distance is the same. (Liddell \& Kruschke, 2018)
+\end{itemize}
+
+\subsection{lm on latent vs ordinal}\label{lm-on-latent-vs-ordinal}
+
+as suggested \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf}, running a lm on the latent variables gives similar parameter as the clm. Of course, we are able to do this with real data given that the ordinal variable is the observed version of an unobserved latent variable. But in simulation this is useful to understand what the cumulative model is doing.
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = ys ~ x1 + x2, data = dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -4.0126 -0.6777 -0.0003  0.6754  4.1015 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) -0.003164   0.003161  -1.001    0.317    
+## x1           1.005849   0.003146 319.749   <2e-16 ***
+## x2           0.498501   0.003156 157.971   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.9996 on 99997 degrees of freedom
+## Multiple R-squared:  0.5589, Adjusted R-squared:  0.5589 
+## F-statistic: 6.335e+04 on 2 and 99997 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## formula: y ~ x1 + x2
+## data:    dat
+## 
+##  link   threshold nobs  logLik     AIC       niter max.grad cond.H 
+##  probit flexible  1e+05 -122018.81 244049.62 5(0)  9.59e-08 9.1e+00
+## 
+## Coefficients:
+##     x1     x2 
+## 1.0064 0.4993 
+## 
+## Threshold coefficients:
+##     1|2     2|3     3|4     4|5 
+## -0.8347 -0.2504  0.2529  0.8444
+\end{verbatim}
+
+\begin{verbatim}
+##  (Intercept)           x1           x2 
+## -0.003165429  1.006273800  0.498711694
+\end{verbatim}
+
+\subsection{Kruscke parametrization}\label{kruscke-parametrization}
+
+Liddell and Kruschke (2018) and Kruschke (2015) proposed an alternative parametrization to understand the model parameters. They used a probit model where thresholds and regression parameters are estimated on the scale of the ordinal variable compared to standard ordinal regression where they refers to the quantile of the latent variables for the threshold and z score or odds ratio for the regression coefficients. They implemented the model in Jags and provided some equations and R functions to convert from the standard parametrization to the proposed one.
+
+\subsection{Odds ratios and cumulative odds ratios}\label{odds-ratios-and-cumulative-odds-ratios}
+
+\begin{itemize}
+\tightlist
+\item
+  \url{https://online.stat.psu.edu/stat504/lesson/4/4.1}
+\end{itemize}
+
+In this section we introduce the main concept to understand the effects of a logit model.
+
 \subsection{Demonstrating the proportional odds assumption}\label{demonstrating-the-proportional-odds-assumption}
+
+basically given that the effect of \(\beta\) is constant the odds ratio is independent from the thresholds \(\alpha_j\) (Liu, He, Tu, \& Tang, 2023). In the current paper we are simulating data using a single set of \(\beta\)s thus the proportional odds assumption is true. Liu et al. (2023) reviewed the available methods to test this assumption.
+
+\begin{itemize}
+\tightlist
+\item
+  \url{https://hbiostat.org/ordinal/impactpo.pdf} blog su proportional odds, mi pare di capire che non sia così problematica come assunzione
+\end{itemize}
+
+sarebbe da capire quali sono i rischi di assumere questo ed eventualmente se simulare non proportional odds è troppo complicato.
 
 Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 
@@ -306,7 +398,7 @@ Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 \NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{), }\AttributeTok{each =}\NormalTok{ n}\SpecialCharTok{/}\DecValTok{2}\NormalTok{)}
 \NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x)}
 \NormalTok{probs }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\DecValTok{5}\NormalTok{, }\DecValTok{5}\NormalTok{) }\CommentTok{\# for the group "a", uniform probabilities}
-\NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{sim\_ord\_latent}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{x, b1, }\AttributeTok{probs =}\NormalTok{ probs, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{link =} \StringTok{"logit"}\NormalTok{)}
+\NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{sim\_ord\_latent}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{x, }\AttributeTok{By =}\NormalTok{ b1, }\AttributeTok{probs =}\NormalTok{ probs, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{link =} \StringTok{"logit"}\NormalTok{)}
 \NormalTok{fit }\OtherTok{\textless{}{-}} \FunctionTok{clm}\NormalTok{(y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{link =} \StringTok{"logit"}\NormalTok{)}
 \NormalTok{pr }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit, }\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =} \FunctionTok{unique}\NormalTok{(x)))}\SpecialCharTok{$}\NormalTok{fit}
 \NormalTok{pr}
@@ -315,8 +407,8 @@ Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 
 \begin{verbatim}
 ##            1         2         3         4         5
-## 1 0.19466136 0.1980089 0.2047539 0.2030399 0.1995360
-## 2 0.07435021 0.1025037 0.1534161 0.2411113 0.4286187
+## 1 0.19720971 0.2039506 0.2009355 0.1973976 0.2005066
+## 2 0.07341871 0.1042636 0.1503074 0.2345890 0.4374213
 \end{verbatim}
 
 Basically the proportional odds suggest that:
@@ -343,8 +435,71 @@ Is the same regardless the level of the \(x\) predictor. Thus:
 \end{Shaded}
 
 \begin{verbatim}
-##         xa         xb 
-## -0.9838998 -0.9838998
+##        xa        xb 
+## -1.003193 -1.003193
+\end{verbatim}
+
+Proportional odds can be also visualized by plotting the cumulative probabilities of \(y\), in terms of \(g(P(y \leq j))\) (where \(g()\) is the logit link function) as a function of the predictor \(x\). If the proportional odds assumptions holds the slopes are parallel (also known as parallel regression assumption). The Figure \ref{fig:poa-plot-example} depicts the assumption of proportional odds in the probability and logit space.
+
+\begin{figure}
+
+{\centering \includegraphics{paper-new_files/figure-latex/poa-plot-example-1} 
+
+}
+
+\caption{POA assumption}\label{fig:poa-plot-example}
+\end{figure}
+
+Harrell (2015) proposed a very intuitive plot to assess the proportional odds assumption and eventually the degree of deviation from the ideal case. Basically predictor is plotted against the logit of the cumulative probability. Distances between pairs of symbols should be similar across levels of the predictors. Numerical predictors can be binned before plotting the corresponding logit. Figure \ref{fig:harrel-poa-plot} depicts an example with simulated data satisfying the proportional odds assumption.
+
+\begin{figure}
+
+{\centering \includegraphics{paper-new_files/figure-latex/harrel-poa-plot-1} 
+
+}
+
+\caption{Harrel Poa Plot}\label{fig:harrel-poa-plot}
+\end{figure}
+
+From a statistical point of view, the proportional odds assumption can be assessed by fitting \(k - 1\) binomial regressions and checking if the estimated \(\beta\) is similar between regressions. The regressions are estimated by creating \(k - 1\) dummy variables from the ordinal \(y\). The code below show that simulating data with the proportional odds create \(k - 1\) binomial regression with similar \(\beta\)s.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{k }\OtherTok{\textless{}{-}} \DecValTok{4}
+\NormalTok{n }\OtherTok{\textless{}{-}} \FloatTok{1e5}
+\NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{x =} \FunctionTok{runif}\NormalTok{(n)}
+\NormalTok{)}
+
+\NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{sim\_ord\_latent}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{x, }\AttributeTok{By =} \DecValTok{5}\NormalTok{, }\AttributeTok{probs =} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\NormalTok{k, k), }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{link =} \StringTok{"logit"}\NormalTok{)}
+
+\CommentTok{\# create dummy variables}
+
+\NormalTok{dat}\SpecialCharTok{$}\NormalTok{y1vs234 }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{y }\SpecialCharTok{\textless{}=} \DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{dat}\SpecialCharTok{$}\NormalTok{y12vs34 }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{y }\SpecialCharTok{\textless{}=} \DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{dat}\SpecialCharTok{$}\NormalTok{y123vs4 }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{y }\SpecialCharTok{\textless{}=} \DecValTok{3}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+
+\NormalTok{fit1vs234 }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(y1vs234 }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(}\AttributeTok{link =} \StringTok{"logit"}\NormalTok{))}
+\NormalTok{fit12vs34 }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(y12vs34 }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(}\AttributeTok{link =} \StringTok{"logit"}\NormalTok{))}
+\NormalTok{fit123vs4 }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(y123vs4 }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(}\AttributeTok{link =} \StringTok{"logit"}\NormalTok{))}
+
+\NormalTok{car}\SpecialCharTok{::}\FunctionTok{compareCoefs}\NormalTok{(fit123vs4, fit12vs34, fit1vs234)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Calls:
+## 1: glm(formula = y123vs4 ~ x, family = binomial(link = "logit"), data = dat)
+## 2: glm(formula = y12vs34 ~ x, family = binomial(link = "logit"), data = dat)
+## 3: glm(formula = y1vs234 ~ x, family = binomial(link = "logit"), data = dat)
+## 
+##             Model 1 Model 2 Model 3
+## (Intercept)  1.1117  0.0148 -1.1014
+## SE           0.0151  0.0163  0.0216
+##                                    
+## x           -5.0263 -5.0329 -4.9763
+## SE           0.0365  0.0486  0.0732
+## 
 \end{verbatim}
 
 \subsection{Logit vs Probit model}\label{logit-vs-probit-model}
@@ -362,13 +517,15 @@ When fitting an ordinal regression the two mostly used link functions are the \e
 
 Given the different underlying distribution, the parameters have a different interpretation under the two models. The probit model assume a latent standard normal distribution with and \(\sigma = 1\). The logit model assume a logistic distribution with \(\sigma^2 = \pi^2/3\). Thus regression coefficients \(\beta\) represents the increase in standard deviations units. The interpretation in terms of latent distribution is particularly useful for the probit model where \(\beta\)s can be interpreted in a Cohen's \(d\) like manner. Furthermore, there is the possibility to directly map parameters from signal detection theory (Green, Swets, \& Others, 1966; Stanislaw \& Todorov, 1999) into an ordinal probit regression. In practical terms, the thresholds are the criterion cut-offs and the \(\beta_1\) is the d\('\) parameter (DeCarlo, 1998; Knoblauch \& Maloney, 2012).
 
+The latent formulation of the ordinal regression model allow to think in standard linear regression terms for choosing and interpreting model parameters before converting into the probability space. Both the standard Normal and the logistic distribution are defined with a location (\(\mu\)) and a scale (\(s\)) parameter. For the Normal distribution, \(\mu\) is the mean and scale is the variance (\(\sigma^2\)). For the logistic distribution the variance is \(\sigma^2=\frac{s^2\pi^2}{3}\). Thus fixing \(\mu\) and \(\sigma^2 = 1\) (the default), the two distributions are similar with the logistic having more variance. For this reason, the latent formulation for parameter intepretation is particularly useful for the probit model because the \(\beta\) is directly interpreted in standard deviaton units that by default are fixed to 1. With a binary predictor \(x\), \(\beta\) is the shift of the latent distribution increasing \(x\) by one unit. This can be directly interpreted as a standardized mean difference effect size (e.g., Cohen's \(d\)). This is the same for the logistic distribution but a unit increase in \(x\) shift the latent distribution by \(\sigma = \sqrt{\frac{s^2 \pi^2}{3}} = \frac{s\pi}{\sqrt{3}}\).\footnote{In the case of a standard logistic distribution (\(s^2 = 1\)), the standard deviation is \(\frac{\pi}{\sqrt{3}}\)}.
+
 \subsection{Simulating data}\label{simulating-data}
 
 There are mainly two ways to simulate data. The first method concerns simulating starting from the latent formulation of the ordinal model. Basically we can simulate the underlying latent distribution and then fixing the thresholds converting the latent continuous variable into the observed ordinal variable.
 
 \subsection{Scale Effects}\label{scale-effects}
 
-The default ordinal regression model assume that the variance of th underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test (see Delacre, Lakens, \& Leys, 2017). In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included.
+The default ordinal regression model assume that the variance of th underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test (see Delacre, Lakens, \& Leys, 2017). In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. Figure \ref{fig:example-unequal-variance} depict an example of a comparison between two groups where the two underlyning latent distributions have unequal variance.
 
 \subsection{Visualizing effects}\label{visualizing-effects}
 
@@ -380,7 +537,9 @@ Before starting with the actual simulation it is useful to plot the predicted pr
                             \AttributeTok{s =} \DecValTok{1}\NormalTok{, }
                             \AttributeTok{th =} \ConstantTok{NULL}\NormalTok{, }
                             \AttributeTok{probs =} \ConstantTok{NULL}\NormalTok{, }
-                            \AttributeTok{link =} \FunctionTok{c}\NormalTok{(}\StringTok{"logit"}\NormalTok{, }\StringTok{"probit"}\NormalTok{))\{}
+                            \AttributeTok{link =} \FunctionTok{c}\NormalTok{(}\StringTok{"logit"}\NormalTok{, }\StringTok{"probit"}\NormalTok{),}
+                            \AttributeTok{plot =} \FunctionTok{c}\NormalTok{(}\StringTok{"probs"}\NormalTok{, }\StringTok{"latent"}\NormalTok{, }\StringTok{"both"}\NormalTok{))\{}
+\NormalTok{  plot }\OtherTok{\textless{}{-}} \FunctionTok{match.arg}\NormalTok{(plot)}
 \NormalTok{  lf }\OtherTok{\textless{}{-}} \FunctionTok{get\_link}\NormalTok{(link)}
 \NormalTok{  x }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"g"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(m))}
 \NormalTok{  lat }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
@@ -406,7 +565,8 @@ Before starting with the actual simulation it is useful to plot the predicted pr
 \NormalTok{  \}}
 \NormalTok{  lat}\SpecialCharTok{$}\NormalTok{dist }\OtherTok{\textless{}{-}} \FunctionTok{dfun}\NormalTok{(lat}\SpecialCharTok{$}\NormalTok{m, lat}\SpecialCharTok{$}\NormalTok{s)}
 \NormalTok{  range\_y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{min}\NormalTok{(lat}\SpecialCharTok{$}\NormalTok{m) }\SpecialCharTok{{-}} \FunctionTok{max}\NormalTok{(s) }\SpecialCharTok{*} \DecValTok{5}\NormalTok{, }\FunctionTok{max}\NormalTok{(lat}\SpecialCharTok{$}\NormalTok{m) }\SpecialCharTok{+} \FunctionTok{max}\NormalTok{(s) }\SpecialCharTok{*} \DecValTok{5}\NormalTok{)}
-  \FunctionTok{ggplot}\NormalTok{(lat,}
+
+\NormalTok{  lat\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(lat,}
          \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{factor}\NormalTok{(x), }\AttributeTok{y =}\NormalTok{ m, }\AttributeTok{dist =}\NormalTok{ dist)) }\SpecialCharTok{+}
 \NormalTok{    ggdist}\SpecialCharTok{::}\FunctionTok{stat\_halfeye}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =} \FunctionTok{after\_stat}\NormalTok{(}\FunctionTok{factor}\NormalTok{(}\FunctionTok{findInterval}\NormalTok{(y, th) }\SpecialCharTok{+} \DecValTok{1}\NormalTok{))),}
                  \AttributeTok{alpha =} \FloatTok{0.85}\NormalTok{) }\SpecialCharTok{+}
@@ -420,6 +580,36 @@ Before starting with the actual simulation it is useful to plot the predicted pr
           \AttributeTok{axis.title.x =} \FunctionTok{element\_blank}\NormalTok{()) }\SpecialCharTok{+}
     \FunctionTok{ylab}\NormalTok{(latex2exp}\SpecialCharTok{::}\FunctionTok{TeX}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{mu"}\NormalTok{)) }\SpecialCharTok{+}
     \FunctionTok{ggtitle}\NormalTok{(title)}
+  
+  
+\NormalTok{  th }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\ConstantTok{Inf}\NormalTok{, th, }\ConstantTok{Inf}\NormalTok{)}
+\NormalTok{  lat\_ms }\OtherTok{\textless{}{-}}\NormalTok{ lat[, }\FunctionTok{c}\NormalTok{(}\StringTok{"m"}\NormalTok{, }\StringTok{"s"}\NormalTok{)]}
+\NormalTok{  ps }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(lat\_ms, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{data.frame}\NormalTok{(}\FunctionTok{t}\NormalTok{(}\FunctionTok{diff}\NormalTok{(lf}\SpecialCharTok{$}\FunctionTok{pfun}\NormalTok{(th, x[}\DecValTok{1}\NormalTok{], x[}\DecValTok{2}\NormalTok{])))), }\AttributeTok{simplify =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{  ps }\OtherTok{\textless{}{-}} \FunctionTok{do.call}\NormalTok{(rbind, ps)}
+  \FunctionTok{names}\NormalTok{(ps) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"y"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\FunctionTok{ncol}\NormalTok{(ps))}
+\NormalTok{  latl }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(lat, ps)}
+\NormalTok{  latl }\OtherTok{\textless{}{-}} \FunctionTok{pivot\_longer}\NormalTok{(latl, }\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"y"}\NormalTok{), }\AttributeTok{names\_to =} \StringTok{"y"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"value"}\NormalTok{)}
+\NormalTok{  probs\_plot }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(latl, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{factor}\NormalTok{(x), }\AttributeTok{y =}\NormalTok{ value, }\AttributeTok{fill =}\NormalTok{ y)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{position =} \FunctionTok{position\_dodge}\NormalTok{()) }\SpecialCharTok{+}
+    \FunctionTok{theme\_minimal}\NormalTok{(}\DecValTok{15}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+          \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+          \AttributeTok{axis.title.x =} \FunctionTok{element\_blank}\NormalTok{()) }\SpecialCharTok{+}
+    \FunctionTok{ylab}\NormalTok{(}\StringTok{"Probability"}\NormalTok{)}
+  \ControlFlowTok{if}\NormalTok{(plot }\SpecialCharTok{==} \StringTok{"probs"}\NormalTok{)\{}
+\NormalTok{    probs\_plot}
+\NormalTok{  \}}\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{(plot }\SpecialCharTok{==} \StringTok{"latent"}\NormalTok{)\{}
+\NormalTok{    lat\_plot}
+\NormalTok{  \}}\ControlFlowTok{else}\NormalTok{\{}
+\NormalTok{    legend\_b }\OtherTok{\textless{}{-}} \FunctionTok{get\_legend}\NormalTok{(}
+\NormalTok{      probs\_plot}
+\NormalTok{    )}
+\NormalTok{    plts }\OtherTok{\textless{}{-}} \FunctionTok{plot\_grid}\NormalTok{(}
+\NormalTok{      lat\_plot }\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{),}
+\NormalTok{      probs\_plot }\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
+\NormalTok{    )}
+    \FunctionTok{plot\_grid}\NormalTok{(plts, legend\_b, }\AttributeTok{ncol =} \DecValTok{1}\NormalTok{, }\AttributeTok{rel\_heights =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, .}\DecValTok{1}\NormalTok{))}
+\NormalTok{  \}}
 \NormalTok{\}}
 \NormalTok{num\_latent\_plot }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, }
 \NormalTok{                            b1, }
@@ -466,6 +656,10 @@ For example, the Figure \ref{fig:ex-categorical} depicts the effect of a categor
 \caption{Example numerical}\label{fig:ex-numerical}
 \end{figure}
 
+\subsection{Disclaimer about the functions}\label{disclaimer-about-the-functions}
+
+The current paper proposed a simplified way with some functions to generate ordinal data. For more complex simulations such as simulating correlated ordinal data the \texttt{simstudy} package \url{https://kgoldfeld.github.io/simstudy/articles/ordinal.html} proposed a very comprehensive set of data simulation function also for ordinal data.
+
 \newpage
 
 \section{References}\label{references}
@@ -484,14 +678,23 @@ Delacre, M., Lakens, D., \& Leys, C. (2017). Why psychologists should by default
 \bibitem[\citeproctext]{ref-Green1966-gy}
 Green, D. M., Swets, J. A., \& Others. (1966). \emph{Signal detection theory and psychophysics} (Vol. 1, pp. xi, 455--xi, 455). Oxford, England: Wiley New York.
 
+\bibitem[\citeproctext]{ref-Harrell-2015-no}
+Harrell, F. E. (2015). \emph{Regression modeling strategies}. Cham: Springer International Publishing. \url{https://doi.org/10.1007/978-3-319-19425-7}
+
 \bibitem[\citeproctext]{ref-Kemp2021-dj}
 Kemp, S., \& Grace, R. C. (2021). Using ordinal scales in psychology. \emph{Methods in Psychology (Online)}, \emph{5}, 100054. \url{https://doi.org/10.1016/j.metip.2021.100054}
 
 \bibitem[\citeproctext]{ref-Knoblauch2012-to}
 Knoblauch, K., \& Maloney, L. T. (2012). \emph{Modeling psychophysical data in r}. New York, NY: Springer New York. \url{https://doi.org/10.1007/978-1-4614-4475-6}
 
+\bibitem[\citeproctext]{ref-Kruschke2015-re}
+Kruschke, J. K. (2015). \emph{Doing bayesian data analysis}. \url{https://doi.org/10.1016/c2012-0-00477-2}
+
 \bibitem[\citeproctext]{ref-Liddell2018-wu}
 Liddell, T. M., \& Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong? \emph{Journal of Experimental Social Psychology}, \emph{79}, 328--348. \url{https://doi.org/10.1016/j.jesp.2018.08.009}
+
+\bibitem[\citeproctext]{ref-Liu2023-bp}
+Liu, A., He, H., Tu, X. M., \& Tang, W. (2023). On testing proportional odds assumptions for proportional odds models. \emph{General Psychiatry}, \emph{36}, e101048. \url{https://doi.org/10.1136/gpsych-2023-101048}
 
 \bibitem[\citeproctext]{ref-McCullagh1980-cw}
 McCullagh, P. (1980). Regression models for ordinal data. \emph{Journal of the Royal Statistical Society}, \emph{42}, 109--127. \url{https://doi.org/10.1111/j.2517-6161.1980.tb01109.x}
