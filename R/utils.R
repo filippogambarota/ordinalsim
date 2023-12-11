@@ -1,58 +1,16 @@
 th_to_probs <- function(th, link = c("logit", "probit"), ...){
-  link <- match.arg(link)
-  if(link == "logit"){
-    lfun <- plogis
-  }else{
-    lfun <- pnorm
-  }
+  lf <- get_link(link)
   ths <- c(-Inf, unname(th), Inf)
-  cprobs <- lfun(ths, ...)
+  cprobs <- lf$pfun(ths, ...)
   probs <- diff(cprobs)
   return(probs)
 }
 
-probs_to_th <- function(probs, link = c("logit", "probit")){
-  link <- match.arg(link)
-  if(link == "logit"){
-    lfun <- qlogis
-  }else{
-    lfun <- qnorm
-  }
+probs_to_th <- function(probs, link = c("logit", "probit"), ...){
+  lf <- get_link(link)
   cprobs <- cumsum(probs)
-  lfun(cprobs[-length(cprobs)])
+  lf$qfun(cprobs[-length(cprobs)], ...)
 }
-
-# get_probs <- function(formula, 
-#                       B, 
-#                       probs = NULL, 
-#                       th = NULL, 
-#                       ynames = NULL, 
-#                       data, 
-#                       get_lp = FALSE, 
-#                       link = c("logit", "probit")){
-#   link <- match.arg(link)
-#   X <- model.matrix(formula, data = data)
-#   if(is.null(th)){
-#     th <- probs_to_th(probs, link = "probit")
-#   }
-#   probs <- th_to_probs(th, "probit")
-#   
-#   pnorm(as.vector(B %*% X[, -1]), mean = as.vector(B %*% X[, -1]))
-#   
-#   
-#   
-#   
-#   
-#   
-#   lp <- lapply(ths, function(x) as.vector(pnorm(X %*% c(x, B))))
-#   lp <- data.frame(lp)
-#   probs <- data.frame(t(diff(t(lp))))
-#   
-#   
-#   
-#   
-#   return(probs)
-# }
 
 get_y <- function(data = NULL, P, ordered = TRUE){
   y <- apply(P, 1, function(x) sample(names(P), 1, replace = TRUE, prob = x))
@@ -125,33 +83,44 @@ get_link <- function(link = c("logit", "probit")){
        dfun_n = dfun_n, pfun_n = pfun_n)
 }
 
-sim_ord_latent <- function(formula,
-                           sigma = NULL,
+sim_ord_latent <- function(location,
+                           scale = NULL,
                            By,
-                           Bsigma = NULL,
+                           Bscale = NULL,
                            probs = NULL, 
-                           th = NULL, 
+                           alphas = NULL, 
                            data, 
                            link = c("logit", "probit")){
+  
+  # get all the correct functions according to the link
   lf <- get_link(link)
-  if(is.null(th)){
-    th <- probs_to_th(probs, link = link)
+  if(is.null(alphas)){
+    # calculate thresholds if not provided
+    alphas <- probs_to_th(probs, link = link)
   }
-  probs <- th_to_probs(th, link = link)
-  k <- length(probs) # number of options
-  n <- nrow(data)
-  Xy <- model.matrix(formula, data = data)[, -1, drop = FALSE] # remove intercept
-  lpy <- c(Xy %*% By)
-  if(is.null(sigma)){
-    ystar <- lf$rfun(n, lpy)
-  }else{
-    Xsigma <- model.matrix(sigma, data = data)[, -1, drop = FALSE] # remove intercept
-    ystar <- lf$rfun(n, lpy, exp(c(Xsigma %*% Bsigma)))
+  k <- length(alphas) + 1 # number of ordinal outcomes
+  n <- nrow(data) # number of observations
+  
+  # model matrix for the location effect
+  Xy <- model.matrix(location, data = data)[, -1, drop = FALSE] # remove intercept
+  lpy <- c(Xy %*% By) # linear predictor for the location
+  lps <- 0 # default scale effect 0, exp(0) = 1 (the default scale)
+  
+  # check predictors on the scale parameter
+  if(!is.null(scale)){
+    # model matrix for the scale effect
+    Xsigma <- model.matrix(scale, data = data)[, -1, drop = FALSE] # remove intercept
+    lps <- c(Xsigma %*% Bscale) # linear predictor for the scale
   }
-  y <- findInterval(ystar, th) + 1 # to start from 1
-  data$y <- factor(y)
-  data$y <- ordered(data$y)
-  data$ys <- ystar
+  
+  # latent variable with appropriate error function
+  ystar <- lf$rfun(n, lpy, exp(lps))
+  
+  # cut according to thresholds
+  y <- findInterval(ystar, alphas) + 1 # to start from 1
+  
+  data$y <- ordered(y) # to ordered factor
+  data$ys <- ystar # save also the latent
   return(data)
 }
 
@@ -187,6 +156,7 @@ cat_latent_plot <- function(m = 0,
                             probs = NULL, 
                             link = c("logit", "probit"),
                             plot = c("probs", "latent", "both")){
+  require(ggplot2)
   plot <- match.arg(plot)
   lf <- get_link(link)
   x <- paste0("g", 1:length(m))
@@ -236,7 +206,7 @@ cat_latent_plot <- function(m = 0,
   ps <- do.call(rbind, ps)
   names(ps) <- paste0("y", 1:ncol(ps))
   latl <- cbind(lat, ps)
-  latl <- pivot_longer(latl, starts_with("y"), names_to = "y", values_to = "value")
+  latl <- tidyr::pivot_longer(latl, starts_with("y"), names_to = "y", values_to = "value")
   probs_plot <- ggplot(latl, aes(x = factor(x), y = value, fill = y)) +
     geom_col(position = position_dodge()) +
     theme_minimal(15) +
@@ -249,14 +219,14 @@ cat_latent_plot <- function(m = 0,
   }else if(plot == "latent"){
     lat_plot
   }else{
-    legend_b <- get_legend(
+    legend_b <- cowplot::get_legend(
       probs_plot
     )
-    plts <- plot_grid(
+    plts <- cowplot::plot_grid(
       lat_plot + theme(legend.position = "none"),
       probs_plot + theme(legend.position = "none")
     )
-    plot_grid(plts, legend_b, ncol = 1, rel_heights = c(1, .1))
+    cowplot::plot_grid(plts, legend_b, ncol = 1, rel_heights = c(1, .1))
   }
 }
 
@@ -303,4 +273,20 @@ dummy_ord <- function(y){
   nn2 <- Reduce(paste0, yc, accumulate = TRUE, right = TRUE)
   names(dummy) <- sprintf("y%svs%s", nn1[-length(nn1)], nn2[-1])
   data.frame(dummy[-length(dummy)])
+}
+
+clm_to_ord <- function(fit){
+  th <- unname(fit$alpha) # estimated thresholds
+  coefs <- fit$coefficients
+  coefs <- unname(coefs[(length(th) + 1):length(coefs)])
+  k <- length(th) + 1 # number of levels for y
+  y <- 1:k # ordinal values
+  stdm <- 0 # latent mean
+  stds <- 1 # latent sigma
+  th_y <- scales::rescale(th, to = c(y[1] + 0.5, y[k] - 0.5))
+  lats <- (th_y[2] - th_y[k - 2]) / (th[2] - th[k - 2]) # real latent sigma
+  b0 <- th_y[1] - th[1] * lats
+  betas <- lats * coefs
+  out <- list(sigma = lats, b0 = b0, beta = betas, alpha = th_y)
+  return(out)
 }
