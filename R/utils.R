@@ -1,4 +1,100 @@
-th_to_probs <- function(th, link = c("logit", "probit"), ...){
+show_alpha <- function(prob = NULL, 
+                       alpha = NULL, 
+                       link = c("logit", "probit")){
+  require(ggplot2)
+  require(cowplot)
+  require(ggtext)
+  
+  if(is.null(prob) & is.null(alpha)){
+    stop("alpha or prob must be specified!")
+  }
+  
+  lf <- get_link(link)
+  
+  if(link == "logit"){
+    xlim <- c(-7, 7)
+    dist <- distributional::dist_logistic
+  }else{
+    xlim <- c(-5, 5)
+    dist <- distributional::dist_normal
+  }
+  
+  if(is.null(prob)){
+    prob <- alpha_to_prob(alpha, link)
+  }else{
+    alpha <- prob_to_alpha(prob, link)
+  }
+  
+  k <- length(prob)
+  D <- data.frame(l = 0, s = 1)
+  D$dist <- dist(D$l, D$s)
+  
+  alpha_n <- th_names(k)
+  
+  dplot <- ggplot(D) +
+    ggdist::stat_slab(aes(dist = dist,
+                          fill = factor(after_stat(findInterval(x, alpha) + 1))),
+                      orientation = "horizontal",
+                      alpha = 0.8) +
+    xlim(xlim) +
+    theme_minimal(15) +
+    theme(legend.title = element_blank(),
+          legend.position = "bottom",
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank()) +
+    geom_vline(xintercept = alpha,
+               alpha = 0.5) +
+    ggtext::geom_richtext(data = data.frame(alpha, alpha_n),
+                          aes(x = alpha, 
+                              y = 1, 
+                              label = alpha_n), 
+                          angle = 90,
+                          hjust = 0.5)
+  
+  y_n <- sprintf("P(Y = %s)", 1:k)
+  y_cp <- lf$pfun(c(-Inf, alpha, Inf))
+  y_p <- 0.5 * (y_cp[1:(length(y_cp) - 1)] + y_cp[2:length(y_cp)])
+  
+  pplot <- ggplot() +
+    stat_function(geom = "line", fun = lf$pfun) +
+    xlim(xlim) +
+    geom_segment(aes(x = alpha, y = 0, xend = alpha, yend = lf$pfun(alpha))) +
+    geom_segment(aes(x = -Inf, y = lf$pfun(alpha), xend = alpha, yend = lf$pfun(alpha))) +
+    ggtext::geom_richtext(aes(x = alpha, y = 0, label = alpha_n), angle = 90, hjust = 0) +
+    annotate("label", x = -Inf, y = y_p, label = 1:k, hjust = -0.5) +
+    theme_minimal(15) +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank())
+  
+  pp <- data.frame(
+    y = 1:k,
+    y_n = y_n,
+    p = diff(y_cp)
+  )
+  
+  hplot <- ggplot(pp, aes(x = y_n, fill = factor(y), y = p)) +
+    geom_col(width = 0.6) +
+    ylab("Probability") +
+    theme_minimal(15) +
+    theme(legend.position = "none",
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_blank()) +
+    ylim(c(0, 1))
+  
+  bl <- get_legend(dplot)
+  
+  
+  top <- plot_grid(dplot + theme(legend.position = "none"), 
+                   pplot)
+  bottom <- plot_grid(NULL, hplot, NULL, nrow = 1, ncol = 3, rel_widths = c(0.3, 0.4, 0.3))
+  pgrid <- plot_grid(top, bottom, nrow = 2)  
+  plot_grid(pgrid, bl, nrow = 2, rel_heights = c(0.9, 0.1))
+  
+}
+
+
+alpha_to_prob <- function(th, link = c("logit", "probit"), ...){
   lf <- get_link(link)
   ths <- c(-Inf, unname(th), Inf)
   cprobs <- lf$pfun(ths, ...)
@@ -6,61 +102,12 @@ th_to_probs <- function(th, link = c("logit", "probit"), ...){
   return(probs)
 }
 
-probs_to_th <- function(probs, link = c("logit", "probit"), ...){
+prob_to_alpha <- function(probs, link = c("logit", "probit"), ...){
   lf <- get_link(link)
   cprobs <- cumsum(probs)
   lf$qfun(cprobs[-length(cprobs)], ...)
 }
 
-get_y <- function(data = NULL, P, ordered = TRUE){
-  y <- apply(P, 1, function(x) sample(names(P), 1, replace = TRUE, prob = x))
-  y <- factor(y, levels = names(P), ordered = TRUE)
-  if(!is.null(data)){
-    cbind(data, y)
-  }else{
-    y
-  }
-}
-
-show_th <- function(th = NULL, probs = NULL, link = c("logit", "probit"),
-                    cnames = NULL){
-  link <- match.arg(link)
-  if(!is.null(th) & !is.null(probs)){
-    stop("Only one between th and probs need to be supplied")
-  }
-  
-  fn <- get_link(link)
-  
-  if(is.null(th)){
-    th <- probs_to_th(probs, link = link)
-  }
-  if(is.null(probs)){
-    probs <- th_to_probs(th, link = link)
-  }
-  
-  if(is.null(cnames)){
-    cnames <- 1:length(probs)
-  }
-  
-  if(sum(probs) != 1L){
-    stop("The vector of probabilities must sum to 1")
-  }
-  
-  par(mfrow = c(1,3))
-  curve(fn$dfun(x), -5, 5, main = "Latent Distribution",
-        ylab = fn$dfun_n)
-  abline(v = th)
-  
-  curve(fn$pfun(x), -4, 4, main = "Cumulative Probabilities",
-        ylab = fn$pfun_n)
-  segments(th, 0, th, fn$pfun(th))
-  
-  barplot(probs, ylim = c(0, 1), main = "Expected Probabilities",
-          col = RColorBrewer::brewer.pal(n = length(probs), name = "RdBu"),
-          names = cnames)
-  
-  par(mfrow = c(1,1))
-}
 
 get_link <- function(link = c("logit", "probit")){
   link <- match.arg(link)
@@ -96,7 +143,7 @@ sim_ord_latent <- function(location,
   lf <- get_link(link)
   if(is.null(alphas)){
     # calculate thresholds if not provided
-    alphas <- probs_to_th(probs, link = link)
+    alphas <- prob_to_alpha(probs, link = link)
   }
   k <- length(alphas) + 1 # number of ordinal outcomes
   n <- nrow(data) # number of observations
@@ -135,7 +182,7 @@ get_probs <- function(formula,
     ynames <- paste0("y", 1:length(probs0))
   }
   lf <- get_link(link)
-  ths <- c(-Inf, probs_to_th(probs0, link = link), Inf)
+  ths <- c(-Inf, prob_to_alpha(probs0, link = link), Inf)
   X <- model.matrix(formula, data = data)[, -1]
   X <- matrix(X)
   # notice the minus sign t - X %*% B thus an increase in x
@@ -167,7 +214,7 @@ cat_latent_plot <- function(m = 0,
   )
   
   if(is.null(th)){
-    th <- probs_to_th(probs, link)
+    th <- prob_to_alpha(probs, link)
   }
   
   thl <- latex2exp::TeX(sprintf("$\\alpha_{%s}$", 1:length(th)))
@@ -239,7 +286,7 @@ num_latent_plot <- function(x,
                             size = 20){
   lf <- get_link(link)
   if(is.null(th)){
-    th <- probs_to_th(probs, link)
+    th <- prob_to_alpha(probs, link)
   }
   data <- data.frame(x = seq(min(x), max(x), length.out = nsample))
   data <- get_probs(~x, b1, probs, data, link, append = TRUE)
@@ -253,7 +300,7 @@ num_latent_plot <- function(x,
     ggtitle(latex2exp::TeX(sprintf("$\\beta_1 = %s$", b1)))
 }
 
-vlogit <- function(scale){
+vlogit <- function(scale = 1){
   (scale^2 * pi^2)/3
 }
 
