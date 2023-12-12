@@ -131,7 +131,7 @@
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
 \usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break#1\hfill\break}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
@@ -367,19 +367,19 @@ as suggested \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf}, running a
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -4.5222 -0.6765  0.0000  0.6741  4.3425 
+## -4.0357 -0.6735 -0.0024  0.6761  4.0977 
 ## 
 ## Coefficients:
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.001086   0.003159   0.344    0.731    
-## x1          0.998374   0.003167 315.209   <2e-16 ***
-## x2          0.502929   0.003163 159.004   <2e-16 ***
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.0004437  0.0031671    0.14    0.889    
+## x1          0.9995687  0.0031605  316.27   <2e-16 ***
+## x2          0.5046426  0.0031633  159.53   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 0.9989 on 99997 degrees of freedom
-## Multiple R-squared:  0.5549, Adjusted R-squared:  0.5549 
-## F-statistic: 6.233e+04 on 2 and 99997 DF,  p-value: < 2.2e-16
+## Residual standard error: 1.002 on 99997 degrees of freedom
+## Multiple R-squared:  0.5577, Adjusted R-squared:  0.5576 
+## F-statistic: 6.303e+04 on 2 and 99997 DF,  p-value: < 2.2e-16
 \end{verbatim}
 
 \begin{verbatim}
@@ -387,20 +387,20 @@ as suggested \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf}, running a
 ## data:    dat
 ## 
 ##  link   threshold nobs  logLik     AIC       niter max.grad cond.H 
-##  probit flexible  1e+05 -122644.47 245300.95 5(0)  4.75e-08 9.0e+00
+##  probit flexible  1e+05 -121998.29 244008.57 5(0)  6.33e-08 9.1e+00
 ## 
 ## Coefficients:
 ##     x1     x2 
-## 0.9974 0.5013 
+## 1.0025 0.5039 
 ## 
 ## Threshold coefficients:
 ##     1|2     2|3     3|4     4|5 
-## -0.8473 -0.2529  0.2551  0.8449
+## -0.8418 -0.2514  0.2543  0.8413
 \end{verbatim}
 
 \begin{verbatim}
-## (Intercept)          x1          x2 
-## 0.001086866 0.999502295 0.503497031
+##  (Intercept)           x1           x2 
+## 0.0004430131 0.9980388055 0.5038702203
 \end{verbatim}
 
 \subsection{Kruscke parametrization}\label{kruscke-parametrization}
@@ -447,16 +447,16 @@ Using the function proposed by Kruschke (2015) (metti ref ad osf) and the equati
 
 \begin{verbatim}
 ## $sigma
-## [1] 1.79423
+## [1] 1.776447
 ## 
 ## $b0
-## [1] 2.999998
+## [1] 2.999548
 ## 
 ## $beta
-## [1] 1.786346
+## [1] 1.777515
 ## 
 ## $alpha
-## [1] 1.500000 2.543349 3.447639 4.500000
+## [1] 1.500000 2.549889 3.449757 4.500000
 \end{verbatim}
 
 \subsection{Gelman parametrization}\label{gelman-parametrization}
@@ -503,8 +503,8 @@ Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 
 \begin{verbatim}
 ##            1         2         3         4         5
-## 1 0.19881313 0.1989910 0.1974955 0.1998745 0.2048259
-## 2 0.07912516 0.1070303 0.1513017 0.2359672 0.4265757
+## 1 0.20301120 0.1911931 0.1969380 0.2054224 0.2034352
+## 2 0.07967757 0.1014347 0.1483835 0.2414729 0.4290314
 \end{verbatim}
 
 Basically the proportional odds suggest that:
@@ -532,7 +532,7 @@ Is the same regardless the level of the \(x\) predictor. Thus:
 
 \begin{verbatim}
 ##         xa         xb 
-## -0.9791059 -0.9791059
+## -0.9379058 -0.9379058
 \end{verbatim}
 
 Proportional odds can be also visualized by plotting the cumulative probabilities of \(y\), in terms of \(g(P(y \leq j))\) (where \(g()\) is the logit link function) as a function of the predictor \(x\). If the proportional odds assumptions holds the slopes are parallel (also known as parallel regression assumption). The Figure \ref{fig:poa-plot-example} depicts the assumption of proportional odds in the probability and logit space.
@@ -589,12 +589,12 @@ From a statistical point of view, the proportional odds assumption can be assess
 ## 2: glm(formula = y12vs34 ~ x, family = binomial(link = "logit"), data = dat)
 ## 3: glm(formula = y1vs234 ~ x, family = binomial(link = "logit"), data = dat)
 ## 
-##               Model 1   Model 2   Model 3
-## (Intercept)  1.098911 -0.000607 -1.096559
-## SE           0.015143  0.016352  0.021668
-##                                          
-## x             -5.0004   -4.9958   -5.0132
-## SE             0.0364    0.0484    0.0736
+##             Model 1 Model 2 Model 3
+## (Intercept)  1.0844 -0.0176 -1.1199
+## SE           0.0151  0.0163  0.0216
+##                                    
+## x           -4.9826 -4.9374 -4.9444
+## SE           0.0364  0.0481  0.0733
 ## 
 \end{verbatim}
 
@@ -673,15 +673,15 @@ Now we can apply the inverse of the link function \(g^{-1} = \Phi^{-1}\) to calc
 
 \begin{verbatim}
 ##    p_y1  p_y2  p_y3  p_y4
-## 1  0.57 0.232 0.134 0.063
-## 2 0.128 0.194 0.262 0.415
-## 3   0.1 0.172 0.255 0.472
-## 4 0.043 0.105 0.207 0.645
+## 1 0.481 0.254 0.169 0.096
+## 2 0.092 0.165 0.252 0.491
+## 3 0.098  0.17 0.254 0.478
+## 4 0.426 0.261  0.19 0.122
 ## 5   ...   ...   ...   ...
-## 6 0.381 0.264 0.207 0.147
-## 7 0.459 0.257 0.177 0.106
-## 8 0.332 0.263 0.225  0.18
-## 9 0.439  0.26 0.185 0.116
+## 6  0.11  0.18 0.258 0.452
+## 7 0.315 0.261 0.231 0.193
+## 8 0.108 0.179 0.258 0.456
+## 9 0.065 0.136 0.234 0.565
 \end{verbatim}
 
 We can plot the expected effect of \(\beta_1\) on the \(k\) probabilities using the \texttt{num\_latent\_plot()} function (see Figure \ref{fig:sim-with-probs-lat-plot}). Finally we sample using the \texttt{sample()} function using the calculated probabilities.
@@ -696,6 +696,17 @@ We can plot the expected effect of \(\beta_1\) on the \(k\) probabilities using 
 \end{figure}
 
 To check the simulation result we can increase the number of observations, fit the model using the \texttt{ordinal::clm()} function and assess the recovery of simulated parameters.
+
+\begin{longtable}{llrrrrr}
+\toprule
+coef.type & term & estimate & std.error & statistic & p.value & row \\ 
+\midrule
+\$\$\textbackslash{}alpha\$\$ & 1|2 & -0.680 (*-0.674*) & $0.004$ & $-152.618$ & $0.000$ & $1.000$ \\ 
+ & 2|3 & -0.005 (*0.000*) & $0.004$ & $-1.179$ & $0.238$ & $2.000$ \\ 
+ & 3|4 & 0.666 (*0.674*) & $0.004$ & $149.925$ & $0.000$ & $3.000$ \\ 
+\$\$\textbackslash{}mu\$\$ & x & 0.495 (*0.500*) & $0.004$ & $132.696$ & $0.000$ & $1.000$ \\ 
+\bottomrule
+\end{longtable}
 
 \subsubsection{simulating using latent distribution}\label{simulating-using-latent-distribution}
 
@@ -720,12 +731,23 @@ The Figure (put crossref) depict the simulated \(Y^{*}\) and the corresponding o
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/unnamed-chunk-18-1} 
+{\centering \includegraphics{paper-new_files/figure-latex/unnamed-chunk-17-1} 
 
 }
 
-\caption{ }\label{fig:unnamed-chunk-18}
+\caption{ }\label{fig:unnamed-chunk-17}
 \end{figure}
+
+\begin{longtable}{llrrrrr}
+\toprule
+coef.type & term & estimate & std.error & statistic & p.value & row \\ 
+\midrule
+\$\$\textbackslash{}alpha\$\$ & 1|2 & -0.681 (*-0.674*) & $0.004$ & $-152.568$ & $0.000$ & $1.000$ \\ 
+ & 2|3 & -0.007 (*0.000*) & $0.004$ & $-1.708$ & $0.088$ & $2.000$ \\ 
+ & 3|4 & 0.664 (*0.674*) & $0.004$ & $149.541$ & $0.000$ & $3.000$ \\ 
+\$\$\textbackslash{}mu\$\$ & x & 0.498 (*0.500*) & $0.004$ & $133.483$ & $0.000$ & $1.000$ \\ 
+\bottomrule
+\end{longtable}
 
 The simulation using the latent formulation of the model is implemented in the \texttt{sim\_ord\_latent()} function.
 
@@ -744,7 +766,7 @@ The simulation using the latent formulation of the model is implemented in the \
 \NormalTok{  lf }\OtherTok{\textless{}{-}} \FunctionTok{get\_link}\NormalTok{(link)}
   \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(alphas))\{}
     \CommentTok{\# calculate thresholds if not provided}
-\NormalTok{    alphas }\OtherTok{\textless{}{-}} \FunctionTok{probs\_to\_th}\NormalTok{(probs, }\AttributeTok{link =}\NormalTok{ link)}
+\NormalTok{    alphas }\OtherTok{\textless{}{-}} \FunctionTok{prob\_to\_alpha}\NormalTok{(probs, }\AttributeTok{link =}\NormalTok{ link)}
 \NormalTok{  \}}
 \NormalTok{  k }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(alphas) }\SpecialCharTok{+} \DecValTok{1} \CommentTok{\# number of ordinal outcomes}
 \NormalTok{  n }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(data) }\CommentTok{\# number of observations}
@@ -825,7 +847,7 @@ Before starting with the actual simulation it is useful to plot the predicted pr
 \NormalTok{  )}
   
   \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(th))\{}
-\NormalTok{    th }\OtherTok{\textless{}{-}} \FunctionTok{probs\_to\_th}\NormalTok{(probs, link)}
+\NormalTok{    th }\OtherTok{\textless{}{-}} \FunctionTok{prob\_to\_alpha}\NormalTok{(probs, link)}
 \NormalTok{  \}}
   
 \NormalTok{  thl }\OtherTok{\textless{}{-}}\NormalTok{ latex2exp}\SpecialCharTok{::}\FunctionTok{TeX}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{alpha\_\{\%s\}$"}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(th)))}
@@ -896,7 +918,7 @@ Before starting with the actual simulation it is useful to plot the predicted pr
                             \AttributeTok{size =} \DecValTok{20}\NormalTok{)\{}
 \NormalTok{  lf }\OtherTok{\textless{}{-}} \FunctionTok{get\_link}\NormalTok{(link)}
   \ControlFlowTok{if}\NormalTok{(}\FunctionTok{is.null}\NormalTok{(th))\{}
-\NormalTok{    th }\OtherTok{\textless{}{-}} \FunctionTok{probs\_to\_th}\NormalTok{(probs, link)}
+\NormalTok{    th }\OtherTok{\textless{}{-}} \FunctionTok{prob\_to\_alpha}\NormalTok{(probs, link)}
 \NormalTok{  \}}
 \NormalTok{  data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =} \FunctionTok{seq}\NormalTok{(}\FunctionTok{min}\NormalTok{(x), }\FunctionTok{max}\NormalTok{(x), }\AttributeTok{length.out =}\NormalTok{ nsample))}
 \NormalTok{  data }\OtherTok{\textless{}{-}} \FunctionTok{get\_probs}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{x, b1, probs, data, link, }\AttributeTok{append =} \ConstantTok{TRUE}\NormalTok{)}

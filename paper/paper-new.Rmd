@@ -48,6 +48,8 @@ classoption       : "man"
 output: 
   papaja::apa6_pdf:
     latex_engine: xelatex
+    header_includes:
+      - \usepackage{booktabs, caption, longtable, colortbl, array, hhline}
 ---
 
 ```{r setup, include = FALSE}
@@ -62,6 +64,7 @@ knitr::opts_chunk$set(echo = FALSE,
 library(tidyverse)
 library(ordinal)
 library(here)
+library(flextable)
 devtools::load_all()
 ```
 
@@ -133,7 +136,7 @@ to McCullagh (1980) and with a complementary log-log link, the model is sometime
 to as the proportional hazards model for grouped survival times.
 
 Da citare in qualche modo @Kemp2021-dj
-
+    
 > “As a matter of fact, most of the scales used widely and effectively by psychologists are ordinal scales. In the strictest propriety the ordinary statistics involving means and standard deviations ought not to be used with these scales, for these statistics imply a knowledge of something more than the relative rank-order of data. On the other hand for this ‘illegal’ statisticizing there can be invoked a kind of pragmatic sanction: In numerous instances it leads to fruitful results.” (Stevens, 1946, p. 679.)
 
 > It is straightforward to construct ordinal scales that do not involve rank ordering. For example, one can take the first element encountered and arbitrarily assign it the number 100. If the next element encountered is smaller it is given a smaller arbitrary number, 53 say. If the third element is between these two, it can be given the number 86, and so on. If this construction method is used, the difference between the elements assigned the numbers 70 and 80 will not in any important sense be equal to the difference between the elements assigned 90 and 100, and the intervals between the numbers are not really interpretable. Note, too, that monotonic transformations of the scale essentially leave the mea- sure unaffected.
@@ -464,7 +467,7 @@ k <- 4  # number of options (1)
 n <- 1e5 # number of observations (1)
 b1 <- 0.5 # beta1, the shift in the latent distribution (2)
 probs0 <- rep(1/k, k) # probabilities when x = 0 (3)
-alphas <- probs_to_th(probs0, link = "probit") # get true thresholds from probabilities (3)
+alphas <- prob_to_alpha(probs0, link = "probit") # get true thresholds from probabilities (3)
 dat <- data.frame(x = rnorm(n)) # create dataframe
 lp <- lapply(alphas, function(a) a - b1 * dat$x) # k - 1 linear predictors (4)
 names(lp) <- sprintf("g[p(y <= %s)]", 1:(k - 1)) # giving appropriate names
@@ -477,7 +480,7 @@ The linear predictors can be seen in the Figure ref. The $g$ in this case is the
 lpt <- lp
 names(lpt) <- latex2exp::TeX(sprintf("$g[p(y \\leq %s)]$", 1:(k - 1)))
 datl <- cbind(dat, lpt)
-datl <- pivot_longer(datl, 2:ncol(datl), names_to = "cumy", values_to = "lp")
+datl <- tidyr::pivot_longer(datl, 2:ncol(datl), names_to = "cumy", values_to = "lp")
 
 ggplot(datl, aes(x = x, y = lp, color = cumy)) +
   facet_wrap(~cumy, labeller = label_parsed) +
@@ -519,11 +522,11 @@ dat$y <- ordered(dat$y) # make an ordered factor in R where 1 < 2 < 3 < 4
 fit <- clm(y ~ x, data = dat, link = "probit")
 ```
 
-```{r}
-#| eval: false
+```{r tab-sim-probs}
 truth <- c(alphas, b1)
 names(truth) <- c(names(fit$alpha), names(fit$beta))
-clm_table(fit, truth)
+clm_table(fit, truth = truth, caption = "caption") |> 
+  flextable_to_rmd()
 ```
 
 ### simulating using latent distribution
@@ -542,7 +545,7 @@ k <- 4  # number of options (1)
 n <- 1e5 # number of observations (1)
 b1 <- 0.5 # beta1, the shift in the latent distribution (2)
 probs0 <- rep(1/k, k) # probabilities when x = 0 (3)
-alphas <- probs_to_th(probs0, link = "probit") # get true thresholds from probabilities (3)
+alphas <- prob_to_alpha(probs0, link = "probit") # get true thresholds from probabilities (3)
 dat <- data.frame(x = rnorm(n)) # create dataframe
 dat$ystar <- b1 * dat$x + rnorm(n, 0, 1) # linear predictor (4)
 dat$y <- findInterval(dat$ystar, alphas) + 1 # cut the latent distribution (5). The + 1 because the first category is 0 by default.
@@ -571,8 +574,7 @@ dat$y <- ordered(dat$y) # make an ordered factor in R where 1 < 2 < 3 < 4
 fit <- clm(y ~ x, data = dat, link = "probit")
 ```
 
-```{r}
-#| eval: false
+```{r tab-sim-latent}
 truth <- c(alphas, b1)
 names(truth) <- c(names(fit$alpha), names(fit$beta))
 clm_table(fit, truth)
@@ -647,7 +649,7 @@ n <- 1e5 # number of observations (1)
 b1 <- 0.5 # beta1, the shift in the latent distribution (2)
 z1 <- log(2) # zeta1, the change in the scale
 probs0 <- rep(1/k, k) # probabilities when x = 0 (3)
-alphas <- probs_to_th(probs0, link = "probit") # get true thresholds from probabilities (3)
+alphas <- prob_to_alpha(probs0, link = "probit") # get true thresholds from probabilities (3)
 dat <- data.frame(x = rep(c(0, 1), each = n/2))
 dat <- sim_ord_latent(~x, scale = ~x, By = b1, Bscale = z1, probs = probs0, data = dat, link = "probit")
 fit <- clm(y ~ x, scale = ~ x, data = dat, link = "probit")
