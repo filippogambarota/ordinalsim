@@ -337,3 +337,15 @@ clm_to_ord <- function(fit){
   out <- list(sigma = lats, b0 = b0, beta = betas, alpha = th_y)
   return(out)
 }
+
+get_th <- function(b0, b1){
+  -(b0/b1)
+}
+
+get_slope <- function(b1){
+  1/b1
+}
+
+get_b0_from_th <- function(th, b1){
+  -b1 * th
+}

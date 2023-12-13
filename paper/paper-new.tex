@@ -131,7 +131,7 @@
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
 \usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLBlock}[1]{\hfill\break#1\hfill\break}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
@@ -256,49 +256,34 @@ Abstract here
 
 \section{Introduction}\label{introduction}
 
-\subsection{notation}\label{notation}
+Psychological research make an extensive use of ordinal data. One of the main reason is probably the usage of Likert scales (Likert, 1932). Ordinal data refers to a specific type of measurement scale (Stevens, 1946) where ordered numbers are assigned to a variable. Compared to nominal scale and as the name suggest the labels are ordered. Compared to interval or ratio scales there is no explicit assumption about the distance between labels. (rivedi questo). An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. Stevens (1946) and Kemp and Grace (2021) suggested that for ordinal variables is appropriate to calculate ranks-based statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation). This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels (Liddell \& Kruschke, 2018).
 
-\begin{itemize}
-\tightlist
-\item
-  idea di mettere \(F\) o qualcosa di simile per la pdf (\(\Phi\) e.g., per la normale)
-\item
-  \(Y^\star\) per la latente
-\item
-  \(k\) numero di livelli ordinali
-\item
-  \(\alpha\) per le soglie
-\end{itemize}
+In Psychology especially when using item-based measures (questionnaires, surveys, etc.) the common practice is using a normal linear regression that makes an explicit assumption about metric features of the response variable. Liddell and Kruschke (2018) reviewed the psychological literature using likert-based measures and reported how the majority of papers used metric-based statistical models. In the same work, Liddell and Kruschke (2018) showed extensive examples and simulations about the potential pitfalls of treating an ordinal variable as metric (but see Robitzsch, 2020 for an alternative perspective). They reported problems in terms of lack of power, inversion of the effects and distortion in estimating the effect size (rivedi meglio qui). (vedi se c'è qualche altro lavoro che fa vedere questa cosa). Some authors suggested that despite individual items being ordinal, averaging multiple items could solve the problem of applying metric models (e.g., Carifio \& Perla, 2007, 2008 metti queste citazioni). Liddell and Kruschke (2018) suggested that in some conditions even averaging multiple items and applying metric models could be problematic. Cliff (2016) suggest that most of the research questions in behavioral sciences can be considered as ordinal (\emph{is the score \(x\) higher than the score \(y\)}?) concerning variables where the most appropriate measurement scale is probably ordinal.
 
-per notazione \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf} e Bürkner and Vuorre (2019)
+qualcosa ancora qui
 
-per la parte di notazione e quella più formale anche DeCarlo (2010)
+\subsection{Ordinal regression models}\label{ordinal-regression-models}
 
-\subsection{cumulative vs others}\label{cumulative-vs-others}
+Despite the actual modeling proposal by Liddell and Kruschke (2018), there is a class of regression models taking into account the ordinal nature of the response variable without making metric assumptions. We can class this general class of models as \emph{ordinal regression}. The nomenclature of these models can be confusing mainly because there are several subclasses of models with different assumptions and structures (Gerhard Tutz, 2022). Gerhard Tutz (2022) and Bürkner and Vuorre (2019) provide a clear and updated taxonomy of ordinal regression models. We can identify three main classes: \emph{cumulative models} (McCullagh, 1980), \emph{sequential models} (Gerhard Tutz, 1990) and \emph{adjacent category models}. The cumulative is the mostly used model assuming the existence of a latent variable that when segmented using thresholds produces the observed ordinal variable. The psychological process underlying the response is clearly formalized in the signal detection theory framework where the respondent (vedi come sistemare). The sequential model as suggested by the name is appropriate when modelling sequential processes. Assuming to have 5 response options, the sequential model assume that responding 3 means already reaching the states 1 and 2. A clear example is proposed by Bürkner and Vuorre (2019) where the marriage duration in years is predicted as a function of some explanatory variables. For each level of the response variable there is a latent distribution where the step between a marriage year \(k = 1\) and the next years \(k > 1\) is modeled by the sequential regression. When comparing \(k\) with \(k > 1\), everything lower than \(k\) is assumed to be already reached (Gerhard Tutz \& Berger, 2020). The adjacent category model compare the category \(k\) with \(k + 1\) still assuming a latent distribution for each \(k\). As suggested by Gerhard Tutz (2022) the adjacent-category model can be seen as a series of binary binomial regressions taking into account the order of the categories. Bürkner and Vuorre (2019) suggested that adjacent-category model can be chosen for its mathematical convenience and there is no a clear empirical distinction as for the cumulative vs sequential model.
 
-\begin{itemize}
-\tightlist
-\item
-  cumulative quando una variabile continua latente viene tagliata in modo osservato. Le likert possono essere gestite in questo modo
-\end{itemize}
+In the current paper we put the focus on the cumulative model for several reasons. The first reason is that the latent formulation of the model is particularly convenient both for parameter interpretation and data simulation. The second reason is that several psychological variables can be formalized as a latent continuous construct that when measured is collected using ordinal items. Furthermore, also the signal detection theory framework models the decision process assuming a latent distribution for the signal and noise where thresholds are the response criteria (e.g., DeCarlo, 2010).
 
-from Bürkner and Vuorre (2019):
+\scriptsize
 
-\begin{quote}
-For many ordinal variables, the assumption of a single underlying continuous variable, as in cumulative models, may not be appropriate. If the response can be understood as being the result of a sequential pro- cess, such that a higher response category is possible only after all lower categories are achieved, the sequen- tial model proposed by Tutz (1990) is usually appropri- ate.
-\end{quote}
+\begin{figure}
 
-vedi se fare k-1 logistiche è più o meno la stessa cosa
+{\centering \includegraphics[width=1\linewidth]{img/fig-ordinal-models} 
 
-in realtà credo che l'adiaject category e sequential model comunque abbiamo la proportional odds assumption
+}
 
-come sottolinea Bürkner and Vuorre (2019) e Gerhard Tutz and Berger (2020) i sequential model sono adatti per un certo tipo di dati dove l'interesse è vedere l'impatto dei predittori sulla transizione ad un categoria \(r\) considerando che la categoria \(r - 1\) è stata raggiunta.
+\caption{Theoretical figure about ordinal models. Voglio fare una figura come questa in Bürkner and Vuorre (2019) ma con qualche modifica per fare vedere i tre modelli.}\label{fig:fig-ordinal-models}
+\end{figure}
 
-Bürkner and Vuorre (2019) suggest that while cumulative and sequentials models have a clear empirical distinction the adjiacent category model is usually used for computational advantages. The probability of passing from one category to the other is modeled as a function of predictors.
+\normalsize
 
-\subsection{Risolvere un pochino la nomenclatura}\label{risolvere-un-pochino-la-nomenclatura}
+\subsection{Model notation}\label{model-notation}
 
-\url{https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf}
+metti qualcosa sulla nomenclatura
 
 \begin{quote}
 The name, cumulative link models is adopted from Agresti (2002), but the model class has
@@ -309,56 +294,36 @@ to McCullagh (1980) and with a complementary log-log link, the model is sometime
 to as the proportional hazards model for grouped survival times.
 \end{quote}
 
-Da citare in qualche modo Kemp and Grace (2021)
+In this section we introduce some notations for the cumulative model that is used through the paper and in the R code. The notation is as consistent as possible with the main textbooks and with the \texttt{ordinal} R package used in the tutorial. We define \(Y_k\) as the observed ordinal response with \(1, 2, \dots,k\) options and \(Y^\star\) is the corresponding latent variable. The latent variable is segmented using \(k - 1\) thresholds \(\alpha_1, \alpha_2, \dots, \alpha_{k - 1}\). With \(g()\) we define the cumulative probability function assumed for the specific model. For example, when using a Gaussian distribution we are fitting a model with a \texttt{probit} link function thus \(f() = \Phi()\). With \(g^{-1}()\) we define the inverse of the cumulative probability function. The minus sign in \(\mathbf{X}\mathbf{\beta}\) is used to give the usual interpretation of standard regression models where an increase in \(\beta\) corresponds to an increase in the probability of higher categories of \(Y\) (metti il libro di agresti sui dati ordinali).
 
-\begin{quote}
-``As a matter of fact, most of the scales used widely and effectively by psychologists are ordinal scales. In the strictest propriety the ordinary statistics involving means and standard deviations ought not to be used with these scales, for these statistics imply a knowledge of something more than the relative rank-order of data. On the other hand for this `illegal' statisticizing there can be invoked a kind of pragmatic sanction: In numerous instances it leads to fruitful results.'' (Stevens, 1946, p.~679.)
-\end{quote}
+\begin{equation} 
+P(Y \leq k) = g(\alpha_k - \mathbf{X} \mathbf{\beta}), \;\;k = 1, 2, \dots, k
+\label{eq:prob-cum-model1}
+\end{equation}
 
-\begin{quote}
-It is straightforward to construct ordinal scales that do not involve rank ordering. For example, one can take the first element encountered and arbitrarily assign it the number 100. If the next element encountered is smaller it is given a smaller arbitrary number, 53 say. If the third element is between these two, it can be given the number 86, and so on. If this construction method is used, the difference between the elements assigned the numbers 70 and 80 will not in any important sense be equal to the difference between the elements assigned 90 and 100, and the intervals between the numbers are not really interpretable. Note, too, that monotonic transformations of the scale essentially leave the mea- sure unaffected.
-\end{quote}
+We can call the \(\mathbf{X}\mathbf{\beta}\) as the linear predictor \(\eta\). Equation (num) describe how the probability of a single outcome \(Y_k\).
 
-interessante come Cliff (2016) descriva che la maggiorparte dellle domande di ricerca in psicologia siano in riferimento alla location di un costrutto e possano essere gestite in modo ordinale
+\begin{equation} 
+P(Y = k) = g^{-1}(\alpha_k - \eta) -  g^{-1}(\alpha_{k - 1} - \eta)
+\label{eq:prob-cum-model2}
+\end{equation}
 
-The use of ordinal data is widespread in Psychology. Usually items from questionnaires are created using Likert scales where a certain psychological traits is measured using an intuitive scale with 3-5 or more anchor points. These measure cannot be considered \emph{metric} measure on interval or ratio scales {[}stevens{]} but the categories are ordered.
+The same model can be formalized using the latent formulation (see Equation). This is more similar to a standard linear regression.
 
-Other examples here
+\begin{equation} 
+Y^\star_i = \eta + \epsilon_i
+\label{eq:latent-model}
+\end{equation}
 
-Despite the usage of ordinal variables, statistical models made for these type of data are rarely used in Psychology. Liddell and Kruschke (2018) reported that the majority of published papers using likert-like measures used standard methods to analyze the data. In practical terms, they use \emph{metric} models where the response variable cannot be considered fully numeric (vedi se c'è un termine tipo scala a rapporti).
+Where \(\epsilon\) is the error part and comes from the distribution that is assumed from the latent model. For a \emph{probit} model, errors are sampled from a standard Gaussian distribution while for a \emph{logit} model from a standard logistic distribution. Then the observed ordinal value \(Y_i\) comes from \(Y^\star_i\) being between the thresholds \(\alpha_{k - 1} < Y^\star_i < \alpha_{k}\) with thresholds organized as \(- \infty \equiv \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k \equiv \infty\).
 
-altro sui modelli
-
-Theoretically, using a \emph{metric} for ordinal data is not appropriate but understanding the actual impact is not straightforward. Liddell and Kruschke (2018) did a comprehensive work about pitfalls of analzying ordinal data as metric. They showed that metric models produce higher type-1 and type-2 errors compared to the ordinal models. In particular, given the bounded nature of ordinal data, difference in the underlying latent distribution are not always captured by the metric model that simply estimate the mean of the ordinal variable. This is even more relevant when the underluing variance of the ordinal variables are not homogeneous. Furthermore they presented some situations where the metric model could be wrong in the opposite direction, finding an effect with the wrong sign (type-s error).
-
-Finally, they also demonstrated that even in the best condition where e.g.~comparing two groups the variance are equal, the ordinal model is more powerful than the metric model given the underestimation of the true effect size from the latter.
-
-\begin{quote}
-Some authors have argued that, despite the ordinal character of individual Likert items, averaged ordinal items can have an emergent property of an interval scale and so it is appropriate to apply metric methods to the averaged values (e.g., Carifio \& Perla, 2007, 2008).
-\end{quote}
-
-vedi come gestire questo
-
-anche questo è importante
-\textgreater{} Ordered-probit models typically assume that the thresholds (θ k) are the same across all groups because the thresholds are theoretically linked to the response measure, not to the predictor value. For example, when asked, ``How happy are you?'' with response options `1' = very unhappy, `2' = mildly unhappy, `3' = neutral, `4' = mildly happy, `5' = very happy,'' the latent thresholds between ordinal levels are assumed to be implicit in the phrasing of the question, regardless of other aspects of the respondent or situation. In other words, the thresholds are assumed to be part of the measurement procedure, not dependent on the value of the predictor or covariate. This can be technically referred to as a type of measurement invariance.
-
-Da citare come paper iniziale sui modelli (McCullagh, 1980).
-
-questo per la tassonomia dei diversi modelli ordinali (Gerhard Tutz, 2022)
-
-da vedere magari per una critica tipo Gomila sul binary model (Robitzsch, 2020)
-
-\subsection{Metriv vs ordinal models}\label{metriv-vs-ordinal-models}
-
-\begin{itemize}
-\tightlist
-\item
-  the main difference is that the metric model assign a number to each label of the discrete variable assuming that the distance is the same. (Liddell \& Kruschke, 2018)
-\end{itemize}
+In the basic version of the model, the thresholds \(\alpha\) are considered as fixed and do not vary as a function of predictors. The thresholds are part of the measurement procedure (Liddell \& Kruschke, 2018). In a more sophisticated version of the model called location-shift (Gerhard Tutz, 2022), both the location \(\mu\) and the thresholds \(\alpha\) can vary as a function of the predictors. In the following sections another version of the model called location-scale (Cox, 1995; Rigby \& Stasinopoulos, 2005; Gerhard Tutz, 2022) will be presented as a more flexible way to model latent distributions with heterogeneous variance (spiega meglio).
 
 \subsection{lm on latent vs ordinal}\label{lm-on-latent-vs-ordinal}
 
 as suggested \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf}, running a lm on the latent variables gives similar parameter as the clm. Of course, we are able to do this with real data given that the ordinal variable is the observed version of an unobserved latent variable. But in simulation this is useful to understand what the cumulative model is doing.
+
+\scriptsize
 
 \begin{verbatim}
 ## 
@@ -367,19 +332,19 @@ as suggested \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf}, running a
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -4.0357 -0.6735 -0.0024  0.6761  4.0977 
+## -4.4772 -0.6765 -0.0005  0.6742  4.0796 
 ## 
 ## Coefficients:
 ##              Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.0004437  0.0031671    0.14    0.889    
-## x1          0.9995687  0.0031605  316.27   <2e-16 ***
-## x2          0.5046426  0.0031633  159.53   <2e-16 ***
+## (Intercept) 0.0007926  0.0031780   0.249    0.803    
+## x1          1.0009911  0.0031859 314.192   <2e-16 ***
+## x2          0.4998991  0.0031800 157.203   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 1.002 on 99997 degrees of freedom
-## Multiple R-squared:  0.5577, Adjusted R-squared:  0.5576 
-## F-statistic: 6.303e+04 on 2 and 99997 DF,  p-value: < 2.2e-16
+## Residual standard error: 1.005 on 99997 degrees of freedom
+## Multiple R-squared:  0.5514, Adjusted R-squared:  0.5513 
+## F-statistic: 6.144e+04 on 2 and 99997 DF,  p-value: < 2.2e-16
 \end{verbatim}
 
 \begin{verbatim}
@@ -387,21 +352,23 @@ as suggested \url{https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf}, running a
 ## data:    dat
 ## 
 ##  link   threshold nobs  logLik     AIC       niter max.grad cond.H 
-##  probit flexible  1e+05 -121998.29 244008.57 5(0)  6.33e-08 9.1e+00
+##  probit flexible  1e+05 -122909.88 245831.76 5(0)  2.04e-07 9.1e+00
 ## 
 ## Coefficients:
 ##     x1     x2 
-## 1.0025 0.5039 
+## 0.9949 0.4965 
 ## 
 ## Threshold coefficients:
 ##     1|2     2|3     3|4     4|5 
-## -0.8418 -0.2514  0.2543  0.8413
+## -0.8360 -0.2568  0.2515  0.8421
 \end{verbatim}
 
 \begin{verbatim}
 ##  (Intercept)           x1           x2 
-## 0.0004430131 0.9980388055 0.5038702203
+## 0.0007886378 0.9960398259 0.4974264662
 \end{verbatim}
+
+\normalsize
 
 \subsection{Kruscke parametrization}\label{kruscke-parametrization}
 
@@ -412,6 +379,8 @@ The proposed model is fitted within a Bayesian framework using either Jags (cita
 Kurz (2023) explain how to convert a model fitted with the \texttt{brms} package (citation) (an R package for regression modeling using \emph{stan}) into the Kruschke (2015) parametrization.
 
 Using the function proposed by Kruschke (2015) (metti ref ad osf) and the equations presented in Kurz (2023) the \texttt{clm\_to\_ord()} function convert parameters fitted with the \texttt{clm} function into the corresponding parameters for the latent \(Y^\star\) variable considering the actual range of values (from 1 to \(k\)).
+
+\scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -433,6 +402,10 @@ Using the function proposed by Kruschke (2015) (metti ref ad osf) and the equati
 \end{Highlighting}
 \end{Shaded}
 
+\normalsize
+
+\scriptsize
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
@@ -447,35 +420,56 @@ Using the function proposed by Kruschke (2015) (metti ref ad osf) and the equati
 
 \begin{verbatim}
 ## $sigma
-## [1] 1.776447
+## [1] 1.78472
 ## 
 ## $b0
-## [1] 2.999548
+## [1] 2.993037
 ## 
 ## $beta
-## [1] 1.777515
+## [1] 1.797978
 ## 
 ## $alpha
-## [1] 1.500000 2.549889 3.449757 4.500000
+## [1] 1.500000 2.560652 3.446266 4.500000
 \end{verbatim}
+
+\normalsize
 
 \subsection{Gelman parametrization}\label{gelman-parametrization}
 
 rivedi questa parametrizzazione in Gelman, Hill, and Vehtari (2020)
 
-\subsection{Odds ratios and cumulative odds ratios}\label{odds-ratios-and-cumulative-odds-ratios}
+\scriptsize
 
-\begin{itemize}
-\tightlist
-\item
-  \url{https://online.stat.psu.edu/stat504/lesson/4/4.1}
-\end{itemize}
+\normalsize
 
-In this section we introduce the main concept to understand the effects of a logit model.
+\section{Interpreting parameters}\label{interpreting-parameters}
+
+\subsection{Odds and odds ratio}\label{odds-and-odds-ratio}
+
+una piccola spiegazione di odds e odds ratio
+
+\subsection{Proportional odds assumption}\label{proportional-odds-assumption}
+
+Following again the taxonomy by Gerhard Tutz (2022), each of the presented ordinal regression model has a basic version making the proportional odds assumption. There are more advanced versions of the model relaxing this assumption completely (\emph{non proportional odds} models) and partially (\emph{partial proportional odds} models) (rivedi se la nomenclatura va bene). The proportional odds assumption is a crucial point when intepreting model parameters. Can be formalized as in Equation (). Basically if we use the \emph{logit} link function \(g()\) the \(\beta\)s are interpreted as standard odds ratio in the logistic regression. Given that we have \(k > 2\) alternatives there is the need of \(k - 1\) equations (as reported in Equation ()). The porportional odds is assuming that the regression coefficients \(\beta\) are independent from the thresholds \(\alpha\) thus the effect is the same regardless of the \(Y\) level. Thus \(\beta_1 = \beta_2 \dots = \beta_{k - 1}\). The Figure () depicts the proportional odds assumption for the \(k - 1\) logistic curves both for probabilities and linear predictors \(\eta\).
+
+\scriptsize
+
+\begin{figure}
+
+{\centering \includegraphics{paper-new_files/figure-latex/fig-prop-odds-1} 
+
+}
+
+\caption{caption here}\label{fig:fig-prop-odds}
+\end{figure}
+
+\normalsize
+
+The proportional odds assumption is convenient because regardless the number of \(k\), the \(\beta_j\) (\(j\) being the number of regression coefficients) effect is assumed to be the same. The model is more parsimonious compared to estimating \(k - 1\) coefficients for each \(\beta_j\) as in the multinomial regression or the non-proportional version of the ordinal regression. Clearly this can be a strong assumption in some conditions. There are several methods to test the proportional odds assumption (see Liu, He, Tu, \& Tang, 2023 for an overview). Gerhard Tutz and Berger (2020) suggested that using alternative as the location-shift or location-scale models, the assumption can be made (improving model parsimony) but still having a more flexible modeling framework. In the next section, we provide more details about the location-scale model in terms of parameters interpretation and data simulation.
 
 \subsection{Demonstrating the proportional odds assumption}\label{demonstrating-the-proportional-odds-assumption}
 
-basically given that the effect of \(\beta\) is constant the odds ratio is independent from the thresholds \(\alpha_j\) (Liu, He, Tu, \& Tang, 2023). In the current paper we are simulating data using a single set of \(\beta\)s thus the proportional odds assumption is true. Liu et al. (2023) reviewed the available methods to test this assumption.
+basically given that the effect of \(\beta\) is constant the odds ratio is independent from the thresholds \(\alpha_j\) (Liu et al., 2023). In the current paper we are simulating data using a single set of \(\beta\)s thus the proportional odds assumption is true. Liu et al. (2023) reviewed the available methods to test this assumption.
 
 \begin{itemize}
 \tightlist
@@ -486,6 +480,8 @@ basically given that the effect of \(\beta\) is constant the odds ratio is indep
 sarebbe da capire quali sono i rischi di assumere questo ed eventualmente se simulare non proportional odds è troppo complicato.
 
 Let's simulate the effect of a binary predictor on ordinal scale 1-5:
+
+\scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -503,20 +499,24 @@ Let's simulate the effect of a binary predictor on ordinal scale 1-5:
 
 \begin{verbatim}
 ##            1         2         3         4         5
-## 1 0.20301120 0.1911931 0.1969380 0.2054224 0.2034352
-## 2 0.07967757 0.1014347 0.1483835 0.2414729 0.4290314
+## 1 0.20141151 0.2052163 0.2038036 0.1939345 0.1956341
+## 2 0.07031792 0.1001600 0.1492126 0.2324907 0.4478188
 \end{verbatim}
 
+\normalsize
 Basically the proportional odds suggest that:
 
 \[
 \text log(\frac{P(y \leq 1)}{P(y > 1)})
 \]
+
 Is the same regardless the level of the \(x\) predictor. Thus:
 
 \[
 \text{log}\left(\frac{\frac{P(y \leq 1|x_0)}{P(y > 1|x_0)}}{\frac{P(y \leq 2|x_0)}{P(y > 2|x_0)}}\right) = \text{log}\left(\frac{\frac{P(y \leq 1|x_1)}{P(y > 1|x_1)}}{\frac{P(y \leq 2|x_1)}{P(y > 2|x_1)}}\right)
 \]
+
+\scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -532,10 +532,14 @@ Is the same regardless the level of the \(x\) predictor. Thus:
 
 \begin{verbatim}
 ##         xa         xb 
-## -0.9379058 -0.9379058
+## -0.9995719 -0.9995719
 \end{verbatim}
 
+\normalsize
+
 Proportional odds can be also visualized by plotting the cumulative probabilities of \(y\), in terms of \(g(P(y \leq j))\) (where \(g()\) is the logit link function) as a function of the predictor \(x\). If the proportional odds assumptions holds the slopes are parallel (also known as parallel regression assumption). The Figure \ref{fig:poa-plot-example} depicts the assumption of proportional odds in the probability and logit space.
+
+\scriptsize
 
 \begin{figure}
 
@@ -546,7 +550,11 @@ Proportional odds can be also visualized by plotting the cumulative probabilitie
 \caption{POA assumption}\label{fig:poa-plot-example}
 \end{figure}
 
+\normalsize
+
 Harrell (2015) proposed a very intuitive plot to assess the proportional odds assumption and eventually the degree of deviation from the ideal case. Basically predictor is plotted against the logit of the cumulative probability. Distances between pairs of symbols should be similar across levels of the predictors. Numerical predictors can be binned before plotting the corresponding logit. Figure \ref{fig:harrel-poa-plot} depicts an example with simulated data satisfying the proportional odds assumption.
+
+\scriptsize
 
 \begin{figure}
 
@@ -557,7 +565,11 @@ Harrell (2015) proposed a very intuitive plot to assess the proportional odds as
 \caption{Harrel Poa Plot}\label{fig:harrel-poa-plot}
 \end{figure}
 
+\normalsize
+
 From a statistical point of view, the proportional odds assumption can be assessed by fitting \(k - 1\) binomial regressions and checking if the estimated \(\beta\) is similar between regressions. The regressions are estimated by creating \(k - 1\) dummy variables from the ordinal \(y\). The code below show that simulating data with the proportional odds create \(k - 1\) binomial regression with similar \(\beta\)s. In fact, fitting \(k - 1\) binomial regressions can be considered also an alternative to fitting an ordinal regression (see Gelman et al., 2020) with more flexibility in parameters (there will be \(k - 1\) regression coefficients instead of a single one) but losing the latent intepretation (magari qualcosa di più qui).
+
+\scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -590,19 +602,23 @@ From a statistical point of view, the proportional odds assumption can be assess
 ## 3: glm(formula = y1vs234 ~ x, family = binomial(link = "logit"), data = dat)
 ## 
 ##             Model 1 Model 2 Model 3
-## (Intercept)  1.0844 -0.0176 -1.1199
+## (Intercept)  1.1146  0.0128 -1.0869
 ## SE           0.0151  0.0163  0.0216
 ##                                    
-## x           -4.9826 -4.9374 -4.9444
-## SE           0.0364  0.0481  0.0733
+## x           -5.0266 -5.0021 -5.0291
+## SE           0.0365  0.0482  0.0736
 ## 
 \end{verbatim}
+
+\normalsize
 
 spiegare qui la differenza tra proportional and non proportional odds Gerhard Tutz and Berger (2020).
 
 \subsection{Logit vs Probit model}\label{logit-vs-probit-model}
 
 When fitting an ordinal regression the two mostly used link functions are the \emph{probit} and \emph{logit}. From the distribution point of view the two functions are very similar. The \emph{probit} model is based on a cumulative Gaussian distribution while the \emph{logit} model is based on a logistic distribution. Figure \ref{fig:logit-vs-probit} depict the two cumulative distributions.
+
+\scriptsize
 
 \begin{figure}
 
@@ -612,6 +628,8 @@ When fitting an ordinal regression the two mostly used link functions are the \e
 
 \caption{Logit vs Probit}\label{fig:logit-vs-probit}
 \end{figure}
+
+\normalsize
 
 Given the different underlying distribution, the parameters have a different interpretation under the two models. The probit model assume a latent standard normal distribution with and \(\sigma = 1\). The logit model assume a logistic distribution with \(\sigma^2 = \pi^2/3\). Thus regression coefficients \(\beta\) represents the increase in standard deviations units. The interpretation in terms of latent distribution is particularly useful for the probit model where \(\beta\)s can be interpreted in a Cohen's \(d\) like manner. Furthermore, there is the possibility to directly map parameters from signal detection theory (Green, Swets, \& Others, 1966; Stanislaw \& Todorov, 1999) into an ordinal probit regression. In practical terms, the thresholds are the criterion cut-offs and the \(\beta_1\) is the d\('\) parameter (DeCarlo, 1998; Knoblauch \& Maloney, 2012).
 
@@ -625,6 +643,8 @@ There are mainly two ways to simulate data. The first method concerns simulating
 
 The first method to simulate ordinal data as a function of predictors is by calculating the true probabilities \(g^{-1}(\eta)\) as a function of predictors and then sample from a multinomial distribution. This is similar to the general method to simulate data for a generalized linear model where the linear predictors \(\eta\) are calculated and data are generated from the corresponding probability distribution of the random component. The following code box simulate a \(n\) binary trials with a continuous predictor \(x\).
 
+\scriptsize
+
 \begin{figure}
 
 {\centering \includegraphics{paper-new_files/figure-latex/unnamed-chunk-9-1} 
@@ -633,6 +653,8 @@ The first method to simulate ordinal data as a function of predictors is by calc
 
 \caption{ }\label{fig:unnamed-chunk-9}
 \end{figure}
+
+\normalsize
 
 We can apply the same idea to an ordinal outcome but we need \(k - 1\) equations where \(k\) is the number of ordinal levels. Let's simulate a similar design with a continuous \(x\) predictor and \(k = 4\) options. We fix the baseline probabilities where \(x = 0\) as uniform thus \(p(y_1) = p(y_2) = ... p(y_k) = 1/k\). The general workflow for the simulation is:
 
@@ -658,7 +680,13 @@ We can apply the same idea to an ordinal outcome but we need \(k - 1\) equations
 (rivedi se fare con for)
 This can be easily implemented in R. We are using a \texttt{for} loop to improve the clarity of the workflow but using the \texttt{*apply} family of functions can improve the efficiency of the computations.
 
+\scriptsize
+
+\normalsize
+
 The linear predictors can be seen in the Figure ref. The \(g\) in this case is the cumulative \emph{probit} function \(\Phi\).
+
+\scriptsize
 
 \begin{figure}
 
@@ -669,22 +697,34 @@ The linear predictors can be seen in the Figure ref. The \(g\) in this case is t
 \caption{ }\label{fig:unnamed-chunk-11}
 \end{figure}
 
+\normalsize
+
 Now we can apply the inverse of the link function \(g^{-1} = \Phi^{-1}\) to calculate the corresponding cumulative probabilities.
+
+\scriptsize
+
+\normalsize
+
+\scriptsize
 
 \begin{verbatim}
 ##    p_y1  p_y2  p_y3  p_y4
-## 1 0.481 0.254 0.169 0.096
-## 2 0.092 0.165 0.252 0.491
-## 3 0.098  0.17 0.254 0.478
-## 4 0.426 0.261  0.19 0.122
+## 1 0.529 0.243  0.15 0.077
+## 2 0.242 0.248 0.252 0.258
+## 3 0.553 0.237 0.141 0.069
+## 4 0.166 0.218 0.264 0.352
 ## 5   ...   ...   ...   ...
-## 6  0.11  0.18 0.258 0.452
-## 7 0.315 0.261 0.231 0.193
-## 8 0.108 0.179 0.258 0.456
-## 9 0.065 0.136 0.234 0.565
+## 6  0.22 0.241 0.257 0.282
+## 7 0.357 0.264 0.216 0.163
+## 8 0.464 0.256 0.175 0.104
+## 9 0.173 0.221 0.263 0.342
 \end{verbatim}
 
+\normalsize
+
 We can plot the expected effect of \(\beta_1\) on the \(k\) probabilities using the \texttt{num\_latent\_plot()} function (see Figure \ref{fig:sim-with-probs-lat-plot}). Finally we sample using the \texttt{sample()} function using the calculated probabilities.
+
+\scriptsize
 
 \begin{figure}
 
@@ -695,18 +735,21 @@ We can plot the expected effect of \(\beta_1\) on the \(k\) probabilities using 
 \caption{sim-with-probs-lat-plot}\label{fig:sim-with-probs-lat-plot}
 \end{figure}
 
+\normalsize
+
+\scriptsize
+
+\normalsize
+
 To check the simulation result we can increase the number of observations, fit the model using the \texttt{ordinal::clm()} function and assess the recovery of simulated parameters.
 
-\begin{longtable}{llrrrrr}
-\toprule
-coef.type & term & estimate & std.error & statistic & p.value & row \\ 
-\midrule
-\$\$\textbackslash{}alpha\$\$ & 1|2 & -0.680 (*-0.674*) & $0.004$ & $-152.618$ & $0.000$ & $1.000$ \\ 
- & 2|3 & -0.005 (*0.000*) & $0.004$ & $-1.179$ & $0.238$ & $2.000$ \\ 
- & 3|4 & 0.666 (*0.674*) & $0.004$ & $149.925$ & $0.000$ & $3.000$ \\ 
-\$\$\textbackslash{}mu\$\$ & x & 0.495 (*0.500*) & $0.004$ & $132.696$ & $0.000$ & $1.000$ \\ 
-\bottomrule
-\end{longtable}
+\scriptsize
+
+\normalsize
+
+\scriptsize
+
+\normalsize
 
 \subsubsection{simulating using latent distribution}\label{simulating-using-latent-distribution}
 
@@ -727,7 +770,13 @@ An equivalent but more efficient way to simulate an ordinal outcome is using the
   Cut the latent variable into \(k\) areas using the thresholds \(\alpha\) and assign the corresponding ordinal value. This step simply checks if the latent value \(Y^{\star}_i\) is between two threshold values and assign the corresponding value. This can be done using the \texttt{cut()} or the \texttt{findInterval()} functions.
 \end{enumerate}
 
+\scriptsize
+
+\normalsize
+
 The Figure (put crossref) depict the simulated \(Y^{*}\) and the corresponding ordinal value. As for the previous simulation we can fit the model using \texttt{clm()} and check the estimated parameters.
+
+\scriptsize
 
 \begin{figure}
 
@@ -738,18 +787,19 @@ The Figure (put crossref) depict the simulated \(Y^{*}\) and the corresponding o
 \caption{ }\label{fig:unnamed-chunk-17}
 \end{figure}
 
-\begin{longtable}{llrrrrr}
-\toprule
-coef.type & term & estimate & std.error & statistic & p.value & row \\ 
-\midrule
-\$\$\textbackslash{}alpha\$\$ & 1|2 & -0.681 (*-0.674*) & $0.004$ & $-152.568$ & $0.000$ & $1.000$ \\ 
- & 2|3 & -0.007 (*0.000*) & $0.004$ & $-1.708$ & $0.088$ & $2.000$ \\ 
- & 3|4 & 0.664 (*0.674*) & $0.004$ & $149.541$ & $0.000$ & $3.000$ \\ 
-\$\$\textbackslash{}mu\$\$ & x & 0.498 (*0.500*) & $0.004$ & $133.483$ & $0.000$ & $1.000$ \\ 
-\bottomrule
-\end{longtable}
+\normalsize
+
+\scriptsize
+
+\normalsize
+
+\scriptsize
+
+\normalsize
 
 The simulation using the latent formulation of the model is implemented in the \texttt{sim\_ord\_latent()} function.
+
+\scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -796,6 +846,8 @@ The simulation using the latent formulation of the model is implemented in the \
 \end{Highlighting}
 \end{Shaded}
 
+\normalsize
+
 \subsection{Scale Effects}\label{scale-effects}
 
 The default ordinal regression model assume that the variance of th underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test (see Delacre, Lakens, \& Leys, 2017). In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. Figure \ref{fig:example-unequal-variance} depict an example of a comparison between two groups where the two underlyning latent distributions have unequal variance.
@@ -812,6 +864,10 @@ That is, s = 1/disc. Further, because disc must be strictly positive, it is by d
 
 un modo intuitivo per spiegare gli scale effects è di far capire la relazione tra slope e scale. La slope della funzione cumulative corrisponde alla varianza. Se la slope è piuù steep, la varianza sarà minore e la discrimizione maggiore (in \texttt{brms} si chiama desc)
 
+\scriptsize
+
+\normalsize
+
 si può citare anche questo Cox (1995) come riferimento per i modelli
 
 una distinzione tra location-shift and location-scale models G. Tutz and Berger (2017) dove i primi oltre ad un cambiamento di location prevedono un cambiamento di soglie mentre i secondi modellano la differenza di soglie come un cambiamento della scala (varianza) che quindi permette di aumetare o diminuire l'area associata ad un determinato intervallo.
@@ -822,11 +878,21 @@ sempre in G. Tutz and Berger (2017) propongono il location-scale/shift come una 
 
 The location-scale model can be simulated using the \texttt{sim\_ord\_latent()} function and providing the predictors for the scale parameters. Given the \texttt{log} link function, predictors are provided on the \texttt{log} scale. For example, we simulate the effect of a binary variable \(x\) representing two independent groups predicting the \(k = 5\) response. We simulate a \emph{location} effect of \(\beta_1 = 0.5\) (in \emph{probit} scale) and \(\zeta_1 = \text{log}(2) = 0.70\). The first group has a \(\sigma = 1\) and the second group has \(\sigma = 2\). Again we simulate that the baseline probabilities are uniform for the first group.
 
+\scriptsize
+
+\normalsize
+
 The table (put ref) reports the simulation results.
+
+\scriptsize
+
+\normalsize
 
 \subsection{Visualizing effects}\label{visualizing-effects}
 
 Before starting with the actual simulation it is useful to plot the predicted probabilities of the response variable \(y\) as a function of the predictors. The \texttt{cat\_latent\_plot()} and the \texttt{num\_latent\_plot()} functions are able to visualize the effect of a single categorical or numerical predictor. Specifying the mean and standard deviations of the latent variable in each condition (for the categorical version) or the \(\beta\) (for the numerical version) the function compute the expected probability for each level of the ordinal variable \(y\) and visualize the result. In this way the \(\beta\) can be choose in a meaningful way.
+
+\scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -934,7 +1000,11 @@ Before starting with the actual simulation it is useful to plot the predicted pr
 \end{Highlighting}
 \end{Shaded}
 
+\normalsize
+
 For example, the Figure \ref{fig:ex-categorical} depicts the effect of a categorical predictor on a 5-level \(y\) assuming uniform probabilities for the reference level and a mean difference on a standardized Normal distribution of 1. The Figure \ref{fig:ex-numerical} depicts the effect of a continuous predictor \(x\) sampled from a standard Normal distribution assuming a \(\beta = 1\).
+
+\scriptsize
 
 \begin{figure}
 
@@ -945,6 +1015,10 @@ For example, the Figure \ref{fig:ex-categorical} depicts the effect of a categor
 \caption{Example categorical}\label{fig:ex-categorical}
 \end{figure}
 
+\normalsize
+
+\scriptsize
+
 \begin{figure}
 
 {\centering \includegraphics{paper-new_files/figure-latex/ex-numerical-1} 
@@ -953,6 +1027,8 @@ For example, the Figure \ref{fig:ex-categorical} depicts the effect of a categor
 
 \caption{Example numerical}\label{fig:ex-numerical}
 \end{figure}
+
+\normalsize
 
 \subsection{Disclaimer about the functions}\label{disclaimer-about-the-functions}
 
@@ -1009,17 +1085,29 @@ Kurz, A. S. (2023). \emph{Doing bayesian data analysis in brms and the tidyverse
 \bibitem[\citeproctext]{ref-Liddell2018-wu}
 Liddell, T. M., \& Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong? \emph{Journal of Experimental Social Psychology}, \emph{79}, 328--348. \url{https://doi.org/10.1016/j.jesp.2018.08.009}
 
+\bibitem[\citeproctext]{ref-Likert1932-xw}
+Likert, R. (1932). A technique for the measurement of attitudes. \emph{Archives of Psychology}, \emph{22}, 55. Retrieved from \url{https://psycnet.apa.org/record/1933-01885-001}
+
 \bibitem[\citeproctext]{ref-Liu2023-bp}
 Liu, A., He, H., Tu, X. M., \& Tang, W. (2023). On testing proportional odds assumptions for proportional odds models. \emph{General Psychiatry}, \emph{36}, e101048. \url{https://doi.org/10.1136/gpsych-2023-101048}
 
 \bibitem[\citeproctext]{ref-McCullagh1980-cw}
 McCullagh, P. (1980). Regression models for ordinal data. \emph{Journal of the Royal Statistical Society}, \emph{42}, 109--127. \url{https://doi.org/10.1111/j.2517-6161.1980.tb01109.x}
 
+\bibitem[\citeproctext]{ref-Rigby2005-ko}
+Rigby, R. A., \& Stasinopoulos, D. M. (2005). Generalized additive models for location, scale and shape. \emph{Journal of the Royal Statistical Society. Series C, Applied Statistics}, \emph{54}, 507--554. \url{https://doi.org/10.1111/j.1467-9876.2005.00510.x}
+
 \bibitem[\citeproctext]{ref-Robitzsch2020-la}
 Robitzsch, A. (2020). Why ordinal variables can (almost) always be treated as continuous variables: Clarifying assumptions of robust continuous and ordinal factor analysis estimation methods. \emph{Frontiers in Education}, \emph{5}, 589965. \url{https://doi.org/10.3389/feduc.2020.589965}
 
 \bibitem[\citeproctext]{ref-Stanislaw1999-jr}
 Stanislaw, H., \& Todorov, N. (1999). Calculation of signal detection theory measures. \emph{Behavior Research Methods, Instruments, \& Computers: A Journal of the Psychonomic Society, Inc}, \emph{31}, 137--149. \url{https://doi.org/10.3758/bf03207704}
+
+\bibitem[\citeproctext]{ref-Stevens1946-te}
+Stevens, S. S. (1946). On the theory of scales of measurement. \emph{Science (New York, N.Y.)}, \emph{103}, 677--680. \url{https://doi.org/10.1126/science.103.2684.677}
+
+\bibitem[\citeproctext]{ref-Tutz1990-fe}
+Tutz, Gerhard. (1990). Sequential item response models with an ordered response. \emph{The British Journal of Mathematical and Statistical Psychology}, \emph{43}, 39--55. \url{https://doi.org/10.1111/j.2044-8317.1990.tb00925.x}
 
 \bibitem[\citeproctext]{ref-Tutz2022-dg}
 Tutz, Gerhard. (2022). Ordinal regression: A review and a taxonomy of models. \emph{Wiley Interdisciplinary Reviews. Computational Statistics}, \emph{14}. \url{https://doi.org/10.1002/wics.1545}
@@ -1031,6 +1119,10 @@ Tutz, G., \& Berger, M. (2017). Separating location and dispersion in ordinal re
 Tutz, Gerhard, \& Berger, M. (2020). Non proportional odds models are widely dispensable -- sparser modeling based on parametric and additive location-shift approaches. Retrieved from \url{http://arxiv.org/abs/2006.03914}
 
 \end{CSLReferences}
+
+
+
+
 
 
 \end{document}

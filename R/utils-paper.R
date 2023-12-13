@@ -64,3 +64,11 @@ clm_table_old <- function(fit, truth = NULL, caption = NULL){
 th_names <- function(k){
   sprintf("%s|%s", 1:(k-1), 2:k)
 }
+
+plot_grid_common_legend <- function(...){
+  plts <- list(...)
+  legend <- cowplot::get_legend(plts[[1]] + theme(legend.position = "bottom", legend.title = element_blank()))
+  plts <- lapply(plts, function(p) p + theme(legend.position = "none"))
+  grid <- cowplot::plot_grid(plotlist = plts)
+  cowplot::plot_grid(grid, legend, nrow = 2, rel_heights = c(0.9, 0.1))
+}
