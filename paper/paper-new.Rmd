@@ -49,7 +49,7 @@ output:
   papaja::apa6_pdf:
     latex_engine: xelatex
     header_includes:
-      - \usepackage{booktabs, caption, longtable, colortbl, array, hhline}
+      - \usepackage{booktabs, caption, longtable, colortbl, array, hhline, bm}
 ---
 
 ```{r setup, include = FALSE}
@@ -76,6 +76,7 @@ library(here)
 library(flextable)
 library(cowplot)
 library(viridis)
+library(ggeffects)
 devtools::load_all()
 ```
 
@@ -107,13 +108,6 @@ source(here("scripts", "figures.R"))
 rfigs <- readRDS(here("objects", "r-figs.rds"))
 ```
 
-```{r tables, include=FALSE}
-mtab <- function(data){
-  
-}
-```
-
-
 # Introduction
 
 Psychological research make an extensive use of ordinal data. One of the main reason is probably the usage of Likert scales [@Likert1932-xw]. Ordinal data refers to a specific type of measurement scale [@Stevens1946-te] where ordered numbers are assigned to a variable. Compared to nominal scale and as the name suggest the labels are ordered. Compared to interval or ratio scales there is no explicit assumption about the distance between labels. (rivedi questo). An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. @Stevens1946-te and @Kemp2021-dj suggested that for ordinal variables is appropriate to calculate ranks-based statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation). This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels [@Liddell2018-wu].
@@ -143,14 +137,14 @@ cumulative link model with a logit link is widely known as the proportional odds
 to McCullagh (1980) and with a complementary log-log link, the model is sometimes referred
 to as the proportional hazards model for grouped survival times.
 
-In this section we introduce some notations for the cumulative model that is used through the paper and in the R code. The notation is as consistent as possible with the main textbooks and with the `ordinal` R package used in the tutorial. We define $Y_k$ as the observed ordinal response with $1, 2, \dots,k$ options and $Y^\star$ is the corresponding latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \alpha_2, \dots, \alpha_{k - 1}$. With $g()$ we define the cumulative probability function assumed for the specific model. For example, when using a Gaussian distribution we are fitting a model with a `probit` link function thus $f() = \Phi()$. With $g^{-1}()$ we define the inverse of the cumulative probability function. The minus sign in $\mathbf{X}\mathbf{\beta}$ is used to give the usual interpretation of standard regression models where an increase in $\beta$ corresponds to an increase in the probability of higher categories of $Y$ (metti il libro di agresti sui dati ordinali).
+In this section we introduce some notations for the cumulative model that is used through the paper and in the R code. The notation is as consistent as possible with the main textbooks and with the `ordinal` R package used in the tutorial. We define $Y_k$ as the observed ordinal response with $1, 2, \dots,k$ options and $Y^\star$ is the corresponding latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \alpha_2, \dots, \alpha_{k - 1}$. With $g()$ we define the cumulative probability function assumed for the specific model. For example, when using a Gaussian distribution we are fitting a model with a `probit` link function thus $g() = \Phi()$. With $g^{-1}()$ we define the inverse of the cumulative probability function. The minus sign in $\mathbf{X} \beta$ is used to give the usual interpretation of standard regression models where an increase in $\beta$ corresponds to an increase in the probability of higher categories of $Y$ (metti il libro di agresti sui dati ordinali).
 
 \begin{equation} 
-P(Y \leq k) = g(\alpha_k - \mathbf{X} \mathbf{\beta}), \;\;k = 1, 2, \dots, k
+P(Y \leq k) = g(\alpha_k - \mathbf{X} \mathbf{\beta}), \;\;k = 1, \dots, k - 1
 (\#eq:prob-cum-model1)
 \end{equation}
 
-We can call the $\mathbf{X}\mathbf{\beta}$ as the linear predictor $\eta$. Equation (num) describe how the probability of a single outcome $Y_k$.
+We can call the $\mathbf{X} \beta$ as the linear predictor $\eta$. Equation (num) describe how the probability of a single outcome $Y_k$.
 
 \begin{equation} 
 P(Y = k) = g^{-1}(\alpha_k - \eta) -  g^{-1}(\alpha_{k - 1} - \eta)
@@ -166,97 +160,97 @@ Y^\star_i = \eta + \epsilon_i
 (\#eq:latent-model)
 \end{equation}
 
-Where $\epsilon$ is the error part and comes from the distribution that is assumed from the latent model. For a *probit* model, errors are sampled from a standard Gaussian distribution while for a *logit* model from a standard logistic distribution. Then the observed ordinal value $Y_i$ comes from $Y^\star_i$ being between the thresholds $\alpha_{k - 1} < Y^\star_i < \alpha_{k}$ with thresholds organized as $- \infty \equiv \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k \equiv \infty$. <!-- TODO rivedi questa -->
+Where $\epsilon$ is the error part and comes from the distribution that is assumed from the latent model. For a *probit* model, errors are sampled from a standard Gaussian distribution while for a *logit* model from a standard logistic distribution. Then the observed ordinal value $Y_i$ comes from $Y^\star_i$ being between the thresholds $\alpha_{k - 1} < Y^\star_i < \alpha_{k}$ with thresholds organized as $- \infty = \alpha_0 < \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k = \infty$. <!-- TODO rivedi questa -->
 
 In the basic version of the model, the thresholds $\alpha$ are considered as fixed and do not vary as a function of predictors. The thresholds are part of the measurement procedure [@Liddell2018-wu]. In a more sophisticated version of the model called location-shift [@Tutz2022-dg], both the location $\mu$ and the thresholds $\alpha$ can vary as a function of the predictors. In the following sections another version of the model called location-scale [@Tutz2022-dg; @Rigby2005-ko; @Cox1995-ur] will be presented as a more flexible way to model latent distributions with heterogeneous variance (spiega meglio).
 
-## lm on latent vs ordinal
+## Alternative parametrizations
 
-as suggested https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf, running a lm on the latent variables gives similar parameter as the clm. Of course, we are able to do this with real data given that the ordinal variable is the observed version of an unobserved latent variable. But in simulation this is useful to understand what the cumulative model is doing.
+Several parametrizations of the ordinal models have been proposed by different authors. @Liddell2018-wu and @Kruschke2015-re proposed a Bayesian probit model where the latent mean and standard deviations are estimated along with the threshold. The interesting part is that the thresholds are transformed to be on the scale of the variable (e.g, from 1 to 4 when $k = 4$) and not in terms of $z$ scores. @Kurz2023-zv explain how to convert a model fitted with the `brms` package (citation) (an R package for regression modeling using *stan*) into the Kruschke [-@Kruschke2015-re] parametrization. 
 
-```{r}
-dat <- data.frame(
-  x1 = rnorm(1e5),
-  x2 = rnorm(1e5)
-)
+@Gelman2020-tg proposed three alternative parametrizations focusing on different definition of the thresholds and.
 
-dat <- sim_ord_latent(~x1 + x2, By = c(1, 0.5), probs = rep(1/5, 5), link = "probit", data = dat)
+vedi qualcosa in più qui
 
-fit <- lm(ys ~ x1 + x2, data = dat)
+# Model fitting
+
+For fitting the cumulative models we used the `ordinal` package [@Christensen2019-cz]. Despite the presence of other possibilities the `ordinal` package provide the most complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R and default functions to calculate predictions, perform model comparison, extract relevant model information are implemented similarly to standard regression modelling.^[For a very complete overview of the ordinal package see @Christensen2019-cz and the Package documentation https://cran.r-project.org/web/packages/ordinal/ordinal.pdf].
+
+The function to fit the model is `clm()` and the model equation is specified using the R formula syntax `y ~ x` where `y` is the ordinal dependent variable and `x` is one or more predictors eventually including also the interactions. The package also implements mixed-effects models (see the `clmm()` function) including random intercepts and slopes but the topic is beyond the scope of the current tutorial.
+
+When fitting the model the crucial arguments are the `formula`, the `link` function and the `data`. More advanced arguments are the `nominal`, `scale` and `threshold`.
+
+- `formula`: the formula `y ~ x` with the dependent variable and predictors.
+- `link`: is the link function. In this tutorial we consider only the *logit* and *probit* link but other link functions are available.
+- `data`: is the dataset where with the variables included in the `formula`
+- `nominal`: formula with predictors where the proportional odds assumption (See Section ) is relaxed (i.e., partial or non proportional odds)
+- `scale`: formula with predictors for the scale (standard deviation) parameter. This argument allow to fit a scale-location model (see Section ). The main `formula` argument refers to predictors on the location parameter (i.e., the mean $\mu$).
+- `threshold`: different structures for estimating the thresholds. The default is `threshold = "flexible"` where $k - 1$ threshold (where $k$ is the number of ordinal levels for $Y$) are estimated.
+
+We can start by fitting a simple model, highlighting the crucial parameters where the detailed explanation will be expanded in the next sections. Table contains simulated data from $n = 100$ participants rating the agreement about a certain item with $k = 4$ ordered options. The participants are divided into two groups (predictor $x$). We can fit a cumulative link model with `clm()` function and check the model summary.
+
+```{r tab-dataset-example1}
+b1 <- log(3) # log odds ratio
+k <- 4
+n <- 100
+x <- rep(c("a", "b"), each = n/2)
+dat <- data.frame(x = x)
+probs <- rep(1/k, k) # for the group "a", uniform probabilities
+dat <- sim_ord_latent(~x, By = b1, prob = probs, data = dat, link = "logit")
+dat |> 
+  mutate(id = 1:n(), .before = x) |> 
+  select(-ys) |> 
+  filor::trim_df() |> 
+  mtab(type = "kable", caption = filor::get_caption())
+```
+
+```{r eda-example-1}
+funs <- list(mean = mean, median = median, sd = sd)
+lapply(funs, function(f) tapply(as.numeric(dat$y), dat$x, f))
+prop.table(table(dat$y, dat$x), margin = 2)
+```
+
+
+```{r model-example-1}
+fit <- clm(y ~ x, data = dat, link = "logit")
 summary(fit)
-
-clm(y ~ x1 + x2, data = dat, link = "probit")
-coef(fit)/sigma(fit)
 ```
 
-## Kruscke parametrization
-
-@Liddell2018-wu and @Kruschke2015-re proposed an alternative parametrization to understand the model parameters. They used a probit model where thresholds and regression parameters are estimated on the scale of the ordinal variable compared to standard ordinal regression where they refers to the quantile of the latent variables for the threshold and z score or odds ratio for the regression coefficients. They implemented the model in Jags and provided some equations and R functions to convert from the standard parametrization to the proposed one.
-
-The proposed model is fitted within a Bayesian framework using either Jags (citation) or Stan (citation). Kruskche proposed a simple method to convert the parameters fitted with a standard model within the proposed parametriazion. The main improvement regards mapping the values (for thresholds $\alpha_i$ and slopes $\beta$) from latent standard distribution (gaussian or logistic) into the scale of the $y$ ordinal value. The scale of the variable depend on the numeric labels assigned to ordered categories. There is an additional feature of the proposed parametrization where the first and the last thresholds are fixed respectively to $\alpha_1 + 0.5$ and $\alpha_k - 0.5$ where other thresholds are estimated.
-
-@Kurz2023-zv explain how to convert a model fitted with the `brms` package (citation) (an R package for regression modeling using *stan*) into the Kruschke [-@Kruschke2015-re] parametrization.
-
-Using the function proposed by @Kruschke2015-re (metti ref ad osf) and the equations presented in @Kurz2023-zv the `clm_to_ord()` function convert parameters fitted with the `clm` function into the corresponding parameters for the latent $Y^\star$ variable considering the actual range of values (from 1 to $k$).
-
-```{r, echo=FALSE, results='asis'}
-filor::print_fun(funs$clm_to_ord)
-```
-
-```{r}
-#| echo: true
-
-dat <- data.frame(
-  x = rnorm(1e5)
-)
-
-dat <- sim_ord_latent(~x, By = 1, probs = rep(1/5, 5), link = "probit", data = dat)
-fit <- clm(y ~ x, data = dat, link = "probit")
-clm_to_ord(fit)
-```
-
-## Gelman parametrization
-
-rivedi questa parametrizzazione in @Gelman2020-tg
-
-```{r}
-#| eval: false
-dat <- data.frame(x = runif(1e5, 0, 1))
-dat <- sim_ord_latent(~x, By = 2, probs = c(0.5, 0.2, 0.1, 0.1, 0.1), data = dat, link = "logit")
-fit_clm <- clm(y ~ x, data = dat, link = "logit")
-
-num_latent_plot(dat$x, 2, probs = c(0.5, 0.2, 0.1, 0.1, 0.1), link = "logit")
-
-summary(fit_clm)
-
-ths <- -(fit_clm$alpha/fit_clm$beta)
-betas <- 1/fit_clm$beta
-
-dat <- cbind(dat, dummy_ord(dat$y))
-
-fit <- glm(y1234vs5 ~ x, data = dat, family = binomial(link = "logit"))
-
-coefs <- coef(fit)
-
-x <- seq(0, 1, 0.01)
-
-plot(x, plogis(coefs[1] + coefs[2] * x), type = "l")
-
-
--(fit_clm$alpha/fit_clm$beta)
-1/fit_clm$beta
-
-```
+The two main sections of the model summary are the *Coefficients* section reporting the regression coefficients $\beta$ and the *Threshold* section reporting the $\alpha$ estimation. Given that $k = 4$ we have $k - 1 = 3$ thresholds and a single $\beta$ associated with the $x$ effect. As in standard regression models, when $x$ is a categorical predictor with $j$ level, we will estimate $j - 1$ regression coefficients where the intepretation depends on the contrast coding [for an overview about contrasts coding schemes see @Schad2020-ht]^[In R the default is the dummy coding where a factor of $j$ levels is converted into $j - 1$ dummy variables. By default, the first level of the factor is taken as the reference level and the $j - 1$ coefficients represent the comparison between the other levels and the reference.]
 
 # Interpreting parameters
 
-## Odds and odds ratio
+## *Logit Model*. Odds and odds ratio
 
-una piccola spiegazione di odds e odds ratio
+aggiungere cosa significano i parametri nella regressione
+
+The odds of a probability $p$ is defined as $\frac{p}{1 - p}$ thus the probability of success divided by the probability of failure. The odds takes value ranging from 0 to $\infty$. For example with a probability of $p = 0.8$ we have an odds of $4$, thus we have a 4 successes for each failure. The same as having $p = 0.2$ and an odds of $0.25$ means that for each $0.25$ successes we have a failure or that we have $4$ failures for each success. When comparing two groups or conditions we can compare the two odds calculating an odds ratio. The odds ratio is the mostly used statistics to compare groups or conditions on a binary outcome. An odds ratio of $4$ means that the odds of success at the numerator is 4 times higher than the odds of success at the denominator. The Figure \@ref(fig:fig-odds-example) shows the relationship between probabilities and odds. The logit transformation is about taking the logarithm of the odds creating a symmetric function ranging from $-\infty$ to $\infty$ with $p = 0.5$ as the midpoint because $\text{log}(\frac{0.5}{1 - 0.5}) = 0$. The standard logistic regression with two outcome model the logit transformed probability.
+
+```{r fig-odds-example, fig.cap=filor::get_caption()}
+p <- seq(0, 1, 0.001)
+
+dd <- data.frame(
+  p,
+  odds = filor::odds(p)
+)
+
+dd$lodds <- log(dd$odds)
+
+dd |> 
+  tidyr::pivot_longer(c(odds, lodds)) |> 
+  dplyr::mutate(name = ifelse(name == "odds", "Odds", "Log(Odds)")) |> 
+  ggplot(aes(x = p, y = value)) +
+  geom_line() +
+  facet_wrap(~name, scales = "free") +
+  theme(axis.title.y = element_blank()) +
+  xlab("Probability")
+```
+
+Odds and odds ratios are clearly defined with $k = 2$ outcomes. With an ordinal variable and a cumulative model we can use the cumulative odds ratio. With e.g. $k = 4$ outcomes we have $k - 1$ models determined by the cumulative probability in terms of $P(Y \leq 1), \dots, P(Y \leq k - 1)$.
 
 ## Proportional odds assumption
 
-Following again the taxonomy by @Tutz2022-dg, each of the presented ordinal regression model has a basic version making the  proportional odds assumption. There are more advanced versions of the model relaxing this assumption completely (*non proportional odds* models) and partially (*partial proportional odds* models) (rivedi se la nomenclatura va bene). The proportional odds assumption is a crucial point when intepreting model parameters. Can be formalized as in Equation (). Basically if we use the *logit* link function $g()$ the $\beta$s are interpreted as standard odds ratio in the logistic regression. Given that we have $k > 2$ alternatives there is the need of $k - 1$ equations (as reported in Equation ()). The porportional odds is assuming that the regression coefficients $\beta$ are independent from the thresholds $\alpha$ thus the effect is the same regardless of the $Y$ level. Thus $\beta_1 = \beta_2 \dots = \beta_{k - 1}$. The Figure () depicts the proportional odds assumption for the $k - 1$ logistic curves both for probabilities and linear predictors $\eta$.
+Following again the taxonomy by @Tutz2022-dg, each of the presented ordinal regression model has a basic version making the  proportional odds assumption. There are more advanced versions of the model relaxing this assumption completely (*non proportional odds* models) and partially (*partial proportional odds* models) (rivedi se la nomenclatura va bene). The proportional odds assumption is a crucial point when interpreting model parameters. Can be formalized as in Equation (). Basically if we use the *logit* link function $g()$ the $\beta$s are interpreted as standard odds ratio in the logistic regression. Given that we have $k > 2$ alternatives there is the need of $k - 1$ equations (as reported in Equation ()). The porportional odds is assuming that the regression coefficients $\beta$ are independent from the thresholds $\alpha$ thus the effect is the same regardless of the $Y$ level. Thus $\beta_1 = \beta_2 \dots = \beta_{k - 1}$. The Figure () depicts the proportional odds assumption for the $k - 1$ logistic curves both for probabilities and linear predictors $\eta$.
 
 ```{r fig-prop-odds, fig.cap=filor::get_caption()}
 rfigs$fig_prop_odds
@@ -264,174 +258,140 @@ rfigs$fig_prop_odds
 
 The proportional odds assumption is convenient because regardless the number of $k$, the $\beta_j$ ($j$ being the number of regression coefficients) effect is assumed to be the same. The model is more parsimonious compared to estimating $k - 1$ coefficients for each $\beta_j$ as in the multinomial regression or the non-proportional version of the ordinal regression. Clearly this can be a strong assumption in some conditions. There are several methods to test the proportional odds assumption [see @Liu2023-bp for an overview]. @Tutz2020-xq suggested that using alternative as the location-shift or location-scale models, the assumption can be made (improving model parsimony) but still having a more flexible modeling framework. In the next section, we provide more details about the location-scale model in terms of parameters interpretation and data simulation.
 
-To make a practical example, the dataset presented in Table contains simulated data from $n = 100$ participants rating the agreement about a certain item with $k = 4$ ordered options. The participants are divided into two groups (predictor $x$). We want to fit a cumulative ordinal model and check the proportional odds assumption.
+To make a practical example, we can use again the the dataset presented in Table. We can check the proportional odds by extrating fitted probabilities and manually computing the odds ratios.
 
 <!-- - https://hbiostat.org/ordinal/impactpo.pdf blog su proportional odds, mi pare di capire che non sia così problematica come assunzione -->
 
-```{r}
-b1 <- log(3) # log odds ratio
-k <- 4
-n <- 100
-x <- rep(c("a", "b"), each = n/2)
-dat <- data.frame(x = x)
-probs <- rep(1/k, k) # for the group "a", uniform probabilities
-dat <- sim_ord_latent(~x, By = b1, probs = probs, data = dat, link = "logit")
-fit <- clm(y ~ x, data = dat, link = "logit")
-pr <- predict(fit, data.frame(x = unique(x)))$fit
-```
+Equation \@ref(eq:prop-odds) formalize the proportional odds assumption. Basically the cumulative log odds ratio comparing $P(Y_k|x_0)$ with $P(Y_k|x_1)$ is the same regardless the specific $k$ or threshold $\alpha$.
 
-Basically the proportional odds suggest that:
+\begin{equation}
+\text{logit} (\frac{P(Y \leq 1 |x_1)}{P(Y \leq 1 |x_0)}) = \dots = \text{logit} (\frac{P(Y \leq k - 1 |x_1)}{P(Y \leq k -1 |x_0)})
+(\#eq:prop-odds)
+\end{equation}
 
-$$
-\text log(\frac{P(y \leq 1)}{P(y > 1)})
-$$
-
-Is the same regardless the level of the $x$ predictor. Thus:
-
-$$
-\text{log}\left(\frac{\frac{P(y \leq 1|x_0)}{P(y > 1|x_0)}}{\frac{P(y \leq 2|x_0)}{P(y > 2|x_0)}}\right) = \text{log}\left(\frac{\frac{P(y \leq 1|x_1)}{P(y > 1|x_1)}}{\frac{P(y \leq 2|x_1)}{P(y > 2|x_1)}}\right)
-$$
+This can be shown by fitting the model with `clm()` that by default assume the proportional odds and using the predicted probabilities to compute the odds ratios. In the following code we computed the odds ratio comparing $x_a$ and $x_b$ when $k \leq 1$ and $k \leq 2$. The log odds ratio is the same.
 
 ```{r}
 #| echo: true
-a_or1vs2345 <- filor::odds(pr[1, 1]) # 1 vs 2 3 4 5
-a_or12vs345 <- filor::odds(sum(pr[1, 1:2])) # 1 vs 2 3 4 5
 
-b_or1vs2345 <- filor::odds(pr[2, 1]) # 1 vs 2 3 4 5
-b_or12vs345 <- filor::odds(sum(pr[2, 1:2])) # 1 vs 2 3 4 5
+# fitting the model
+fit <- clm(y ~ x, data = dat, link = "logit")
+
+# extracting the predicted probabilities for the two groups
+pr <- predict(fit, data.frame(x = unique(x)))$fit
+
+odds <- function(p) p / (1 - p) # function to compute odds
+
+# group a
+a_or1vs2345 <- odds(pr[1, 1]) # 1 vs 2 3 4 5
+a_or12vs345 <- odds(sum(pr[1, 1:2])) # 1 vs 2 3 4 5
+
+# group b
+b_or1vs2345 <- odds(pr[2, 1]) # 1 vs 2 3 4 5
+b_or12vs345 <- odds(sum(pr[2, 1:2])) # 1 vs 2 3 4 5
 
 c(xa = log(a_or1vs2345 / a_or12vs345), xb = log(b_or1vs2345 / b_or12vs345))
 ```
 
-Proportional odds can be also visualized by plotting the cumulative probabilities of $y$, in terms of $g(P(y \leq j))$ (where $g()$ is the logit link function) as a function of the predictor $x$. If the proportional odds assumptions holds the slopes are parallel (also known as parallel regression assumption). The Figure \@ref(fig:poa-plot-example) depicts the assumption of proportional odds in the probability and logit space.
+Clearly, the odds ratio here is exactly the same because the model assume the proportional odds assumption putting this constraint on the predicted probabilities. The estimated $\beta$ for each $k - 1$ equation could differ and the amount of heterogeneity is actually a way to test the proportional odds with real data. In the supplementary materials we implemented an intuitive plot proposed by @Harrell-2015-no to visually assess the proportional odds assumption.
 
-```{r poa-plot-example, fig.cap="POA assumption"}
-k <- 5 # number of levels for y
-grid <- data.frame(x = seq(0, 1, 0.1)) # numeric predictor
-probs <- get_probs(~x, 5, rep(1/k, k), data = grid, link = "logit") # probabilities
-cprobs <- apply(probs, 1, cumsum, simplify = FALSE)
-cprobs <- data.frame(do.call(rbind, cprobs))
-names(cprobs) <- sprintf("y<=%s", 1:k)
-cprobs <- cprobs[, -ncol(cprobs)] # remove the last
-grid <- cbind(grid, cprobs)
+### Proportional odds and *probit* model
 
-grid <- grid |> 
-  pivot_longer(starts_with("y")) |> 
-  mutate(lp = qlogis(value))
+The proportional odds assumption is relevant only for the *logit* model because of the link function that put $\beta$ as log odds. However the concept of the proportional odds that is more generally called parallel slopes assumption is assumed also for the probit model. Equation \@ref(eq:probit-prop-odds) depict the parallel slopes assumption for a probit model. Basically the difference in $z$ for a unit increase in $x$ (i.e., the slope) is the same regardless the $Y$ level. This can be directly demonstrated in the same way as for the logit model. We use the same dataset presented in Table \@ref(tab:tab-prop-ord-ex) but fitting a probit model. The difference between the $z$ scores comparing the two groups calculated on the cumulative probability is the same regardless the $k - 1$ level.
 
-poa_probs_plot <- grid |> 
-  ggplot(aes(x = x, y = value, color = name)) +
-  geom_line() +
-  theme_minimal(15) +
-  theme(legend.position = "bottom",
-        legend.title = element_blank(),
-        axis.title.y = element_blank()) +
-  ggtitle("Probability")
-
-poa_lp_plot <- grid |> 
-  ggplot(aes(x = x, y = lp, color = name)) +
-  geom_line() +
-  theme_minimal(15) +
-  theme(axis.title.y = element_blank()) +
-  ggtitle("Linear Predictor")
-
-bl <- cowplot::get_legend(
-  poa_probs_plot
-)
-
-poa_plot <- cowplot::plot_grid(
-  poa_probs_plot + theme(legend.position = "none"),
-  poa_lp_plot + theme(legend.position = "none")
-)
-
-cowplot::plot_grid(poa_plot, bl, ncol = 1, rel_heights = c(0.9, 0.1))
-```
-
-@Harrell-2015-no proposed a very intuitive plot to assess the proportional odds assumption and eventually the degree of deviation from the ideal case. Basically predictor is plotted against the logit of the cumulative probability. Distances between pairs of symbols should be similar across levels of the predictors. Numerical predictors can be binned before plotting the corresponding logit. Figure \@ref(fig:harrel-poa-plot) depicts an example with simulated data satisfying the proportional odds assumption.
-
-```{r harrel-poa-plot, fig.cap="Harrel Poa Plot"}
-k <- 5 # number of levels for y
-grid <- data.frame(x = seq(0, 1, 0.1)) # numeric predictor
-probs <- get_probs(~x, 5, rep(1/k, k), data = grid, link = "logit") # probabilities
-cprobs <- apply(probs, 1, cumsum, simplify = FALSE)
-cprobs <- data.frame(do.call(rbind, cprobs))
-names(cprobs) <- sprintf("y<=%s", 1:k)
-cprobs <- cprobs[, -ncol(cprobs)] # remove the last
-grid <- cbind(grid, cprobs)
-
-grid <- grid |> 
-  pivot_longer(starts_with("y")) |> 
-  mutate(lp = qlogis(value))
-
-grid |> 
-  ggplot(aes(x = lp, y = x)) +
-  geom_point(aes(color = name, 
-                 shape = name),
-             size = 3) +
-  theme_minimal(20) +
-  xlab("Logit") +
-  theme(legend.position = "bottom",
-        legend.title = element_blank())
-```
-
-From a statistical point of view, the proportional odds assumption can be assessed by fitting $k - 1$ binomial regressions and checking if the estimated $\beta$ is similar between regressions. The regressions are estimated by creating $k - 1$ dummy variables from the ordinal $y$. The code below show that simulating data with the proportional odds create $k - 1$ binomial regression with similar $\beta$s. In fact, fitting $k - 1$ binomial regressions can be considered also an alternative to fitting an ordinal regression [see @Gelman2020-tg] with more flexibility in parameters (there will be $k - 1$ regression coefficients instead of a single one) but losing the latent intepretation (magari qualcosa di più qui).
+$$
+z_{x_1 - x_0} = \Phi(P \leq k|x_0) - \Phi(P \leq k|x_1) = \dots = \Phi(P \leq k - 1|x_0) - \Phi(P \leq k - 1|x_1)
+$$
 
 ```{r}
 #| echo: true
-k <- 4
-n <- 1e5
-dat <- data.frame(
-  x = runif(n)
+
+# fitting the model
+fit <- clm(y ~ x, data = dat, link = "probit")
+
+# extracting the predicted probabilities for the two groups
+pr <- predict(fit, data.frame(x = unique(x)))$fit
+
+# group a
+a_1vs2345 <- qnorm(pr[1, 1]) # 1 vs 2 3 4 5
+a_12vs345 <- qnorm(sum(pr[1, 1:2])) # 1 2 vs 3 4 5
+
+# group b
+b_1vs2345 <- qnorm(pr[2, 1]) # 1 vs 2 3 4 5
+b_12vs345 <- qnorm(sum(pr[2, 1:2])) # 1 2 vs 3 4 5
+
+c(xa = a_1vs2345 - a_12vs345, xb = b_1vs2345 - b_12vs345)
+```
+
+### Beyond the proportional odds
+
+qualcosa che spieghi come andare oltre e qualche proposta per testare l'assunzione.
+
+## *Probit Model* $z$ scores
+
+The alternative to fitting a cumulative logit model is using a standard normal distribution thus fitting a *probit* model. The main difference is that the latent distribution is now a Gaussian distribution with $\mu = 0$ and $\sigma^2 = 1$ and the link function is the cumulative gaussian distribution function $\Phi$ implemented in R with the `pnorm()` function. The inverse of the Gaussian cumulative distribution function is $\Phi^{-1}$ implemented in R with the `qnorm()` function. The logistic and normal distribution are very similar, with the logistic having more variance. Figure \@ref(fig:fig-logit-vs-probit) depicts the differences between the two distributions.
+
+```{r fig-logit-vs-probit, fig.cap=filor::get_caption()}
+dplot <- ggplot(data = NULL) +
+  stat_function(fun = dnorm, aes(color = "Normal"), lwd = 1) +
+  stat_function(fun = dlogis, aes(color = "Logistic"), lwd = 1) +
+  xlim(c(-7, 7))
+
+pplot <- ggplot(data = NULL) +
+  stat_function(fun = pnorm, aes(color = "Normal"), lwd = 1) +
+  stat_function(fun = plogis, aes(color = "Logistic"), lwd = 1) +
+  xlim(c(-7, 7))
+
+
+plot_grid_common_legend(
+  dplot, 
+  pplot + theme(axis.title.y = element_blank())
+)
+```
+
+The main difference regards the parameters interpretation. In the logit model the $\beta$ are the log odds ratio. For categorical variables they represents the increase in the log odds of moving from one level to the other while for numerical variables is the increase in the log odds for a unit increase in $x$. For the probit model, the $\beta$ is the increase in terms of $z$ scores for a unit increase in $x$. This is very convenient especially for categorical variables because parameters can be intepreted as a Cohen's $d$ like measure. Thinking about the latent distributions, the $\beta$ is the shift in the latent mean comparing two or more groups or the slope of latent scores as a function of a numeric $x$. The intepretation in terms of shifting the latent mean holds also for the logistic model. However, the standard deviation of the standard logistic regression is $\frac{\pi}{\sqrt{3}} \approx 1.81$^[Actually the variance of the logistic distribution is $\frac{s^2\pi^2}{3}$ and the standard deviation $\frac{s\pi}{\sqrt{3}}$ where $s$ is the scale of the distribution. For the standard logistic distribution $s = 1$ (as for the standard normal distribution). For the standard normal distribution $s^2 = \sigma^2 = 1$]. The $\beta$ for the logistic distribution can be interpreted as the location shift of the latent logistic distribution by $\frac{\pi}{\sqrt{3}}$ standard deviations. 
+
+Another advantage of the probit model is the possibility to directly map parameters from signal detection theory [@Stanislaw1999-jr; @Green1966-gy] into the model coefficients. In practical terms, the thresholds $\alpha$ are the criterion cut-offs and the $\beta_1$ is the d$'$ parameter [@DeCarlo1998-ay; @Knoblauch2012-to].
+
+qualcosa in più qui
+
+The Table \@ref(tab:tab-model-summary) summarise the presented cumulative models with the proposed link function and the corresponding R code.
+
+```{r tab-model-summary}
+#| eval: false
+models_table <- data.frame(
+       stringsAsFactors = FALSE,
+                  Model = c("Model", "Cumulative Logit", "Cumulative Probit"),
+          Link.Function = c("Equation",
+                            "$\\text{logit}(p) = \\text{log}(\\frac{p}{1-p})$",
+                            "$z = \\Phi(p)$"),
+          Link.Function = c("R Code", "`qlogis()`", "`qnorm()`"),
+  Inverse.Link.Function = c("Equation",
+                            "$\\frac{e^{\\text{logit}(p)}}{1 + e^{\\text{logit}(p)}}$","$\\Phi^{-1}(z)$"),
+  Inverse.Link.Function = c("R Code", "`plogis()`", "`pnorm()`")
 )
 
-dat <- sim_ord_latent(~x, By = 5, probs = rep(1/k, k), data = dat, link = "logit")
-
-# create dummy variables
-
-dat$y1vs234 <- ifelse(dat$y <= 1, 1, 0)
-dat$y12vs34 <- ifelse(dat$y <= 2, 1, 0)
-dat$y123vs4 <- ifelse(dat$y <= 3, 1, 0)
-
-fit1vs234 <- glm(y1vs234 ~ x, data = dat, family = binomial(link = "logit"))
-fit12vs34 <- glm(y12vs34 ~ x, data = dat, family = binomial(link = "logit"))
-fit123vs4 <- glm(y123vs4 ~ x, data = dat, family = binomial(link = "logit"))
-
-car::compareCoefs(fit123vs4, fit12vs34, fit1vs234)
+models_table[-1, ] |> 
+  flextable() |> 
+  set_header_labels(values = list(Model = "Model", 
+                                  Link.Function = "Equation",
+                                  Link.Function.1 = "R Code",
+                                  Inverse.Link.Function = "Equation",
+                                  Inverse.Link.Function.1 = "R Code")) |> 
+  add_header_row(values = c("", "Link Function", "Link Function", "Inverse Link Function", "Inverse Link Function")) |> 
+  merge_h(1, part = "header") |> 
+  theme_booktabs(bold_header = TRUE) |> 
+  align(part = "all", align = "center") |> 
+  set_caption(caption = filor::get_caption())
 ```
-
-
-spiegare qui la differenza tra proportional and non proportional odds @Tutz2020-xq.
-
-## Logit vs Probit model
-
-When fitting an ordinal regression the two mostly used link functions are the *probit* and *logit*. From the distribution point of view the two functions are very similar. The *probit* model is based on a cumulative Gaussian distribution while the *logit* model is based on a logistic distribution. Figure \@ref(fig:logit-vs-probit) depict the two cumulative distributions.
-
-```{r logit-vs-probit, fig.cap="Logit vs Probit"}
-par(mfrow = c(1,2))
-
-# density
-
-curve(dnorm(x), -5, 5, lwd = 2, ylab = "Density", main = "Probability Density", cex.lab = 1.2, cex.axes = 1.2)
-curve(dlogis(x), -5, 5, lwd = 2, col = "firebrick", add = TRUE)
-
-# cdf
-
-curve(pnorm(x), ylim = c(0, 1), xlim = c(-5, 5), y = "Probability", lwd = 2, main = "Cumulative Probability",
-      cex.lab = 1.2, cex.axes = 1.2)
-curve(plogis(x), ylim = c(0, 1), xlim = c(-5, 5), y = "Probability", col = "firebrick", lwd = 2, add = TRUE)
-```
-
-Given the different underlying distribution, the parameters have a different interpretation under the two models. The probit model assume a latent standard normal distribution with and $\sigma = 1$. The logit model assume a logistic distribution with $\sigma^2 = \pi^2/3$. Thus regression coefficients $\beta$ represents the increase in standard deviations units. The interpretation in terms of latent distribution is particularly useful for the probit model where $\beta$s can be interpreted in a Cohen's $d$ like manner. Furthermore, there is the possibility to directly map parameters from signal detection theory [@Stanislaw1999-jr; @Green1966-gy] into an ordinal probit regression. In practical terms, the thresholds are the criterion cut-offs and the $\beta_1$ is the d$'$ parameter [@DeCarlo1998-ay; @Knoblauch2012-to].
-
-The latent formulation of the ordinal regression model allow to think in standard linear regression terms for choosing and interpreting model parameters before converting into the probability space. Both the standard Normal and the logistic distribution are defined with a location ($\mu$) and a scale ($s$) parameter. For the Normal distribution, $\mu$ is the mean and scale is the variance ($\sigma^2$). For the logistic distribution the variance is $\sigma^2=\frac{s^2\pi^2}{3}$. Thus fixing $\mu$ and $\sigma^2 = 1$ (the default), the two distributions are similar with the logistic having more variance. For this reason, the latent formulation for parameter intepretation is particularly useful for the probit model because the $\beta$ is directly interpreted in standard deviaton units that by default are fixed to 1. With a binary predictor $x$, $\beta$ is the shift of the latent distribution increasing $x$ by one unit. This can be directly interpreted as a standardized mean difference effect size (e.g., Cohen's $d$). This is the same for the logistic distribution but a unit increase in $x$ shift the latent distribution by $\sigma = \sqrt{\frac{s^2 \pi^2}{3}} = \frac{s\pi}{\sqrt{3}}$.^[In the case of a standard logistic distribution ($s^2 = 1$), the standard deviation is $\frac{\pi}{\sqrt{3}}$].
 
 ## Simulating data
 
 There are mainly two ways to simulate data. The first method concerns simulating starting from the latent formulation of the ordinal model. Basically we can simulate the underlying latent distribution and then fixing the thresholds converting the latent continuous variable into the observed ordinal variable.
 
-### simulating using probabilities
+### Simulating from a multinomial distribution
 
-The first method to simulate ordinal data as a function of predictors is by calculating the true probabilities $g^{-1}(\eta)$ as a function of predictors and then sample from a multinomial distribution. This is similar to the general method to simulate data for a generalized linear model where the linear predictors $\eta$ are calculated and data are generated from the corresponding probability distribution of the random component. The following code box simulate a $n$ binary trials with a continuous predictor $x$.
+The first method to simulate ordinal data as a function of predictors is by calculating the true probabilities $g^{-1}(\eta)$ as a function of predictors and then sample from a multinomial distribution^[In R we are using the `sample()` function that simulate values from a *categorical* distribution. The *categorical* distribution is considered a special case of the multinomial distribution]. This is similar to the general method to simulate data for a generalized linear model where the linear predictors $\eta$ are calculated and data are generated from the corresponding probability distribution of the random component. The following code box simulate a $n$ binary trials with a continuous predictor $x$.
 
 ```{r}
 xl <- seq(0, 1, 0.1)
@@ -446,18 +406,17 @@ plot(unique(x), p, pch = 19)
 curve(plogis(x, -(b0/b1), 1/b1), add = TRUE, lwd = 2, col = "firebrick")
 ```
 
-We can apply the same idea to an ordinal outcome but we need $k - 1$ equations where $k$ is the number of ordinal levels. Let's simulate a similar design with a continuous $x$ predictor and $k = 4$ options. We fix the baseline probabilities where $x = 0$ as uniform thus $p(y_1) = p(y_2) = ... p(y_k) = 1/k$. The general workflow for the simulation is:
+Essentially the `lp` ($\eta_i$) vector contains true probability of success ($p_i|x_i = g^{-1}(\eta_i)$) for the $x_i$ level of the predictor. Then to introduce the random part of the model, we can use $p_i$ to generate binary values from a Binomial (in this specific case a Bernoulli) distribution. This create `y` that is the vector of 0-1 values generated using the true probabilities of success. The supplementary materials contains a more extensive example for simulating data for generalized linear models.
+
+We can apply the same idea to an ordinal outcome but we need $k - 1$ equations (compared to the previous example) where $k$ is the number of ordinal levels. Let's simulate a similar design with a continuous $x$ predictor and $k = 4$ options. We fix the baseline probabilities where $x = 0$ as uniform thus $p(y_1) = p(y_2) = ... p(y_k) = 1/k$. The proposed workflow for the simulation is:
 
 1. Define $n$ (number of observations) and $k$ (number of ordinal outcomes)
-2. Define the regression coefficients $\beta$s
+2. Define the regression coefficients $\beta$s.
 3. Define the baseline probabilities when $x = 0$. These probabilities can be converted to the corresponding thresholds $\alpha$ choosing the appropriate link function (*logit* or *probit*).
 4. Calculate the linear predictors $\eta$ using $k - 1$ equations combining the predictors $\mathbf{X}$ and regression coefficients $\mathbf{\beta}$.
 5. Apply the inverse of the link function $g^{-1}(\eta)$ on the linear predictor and calculate the cumulative probabilities $p(y \leq 1|x), p(y \leq 2|x), ... p(y \leq k - 1|x)$.
-6. Calculate for each observation the probability of the $k$ outcome as the difference between cumulative probabilities. $p(y = 1) = 0 - p(y <= 1), p(y = 2) = p(y <= 2) - p(y <= 1)$ (sistema qua). This is implemented in R by adding a columns of zeros and ones respectively at the beginning and end of the matrix of cumulative probabilities.
+6. Calculate for each observation the probability of the $k$ outcome as the difference between cumulative probabilities. For example, the probability of $P(y = 2) = P(y \leq 2) - P(y \leq 1)$. This is implemented in R by adding a columns of zeros and ones respectively at the beginning and end of the matrix of cumulative probabilities because the probability of the first $Y = 1$ level is the cumulative probability from $- \infty$ to the first threshold and the probability of $Y = k$ is obtained removing $P(Y \leq k - 1)$ from one.
 7. Sample $n$ outcomes from a multinomial distribution, choosing between $k$ alternatives with the calculated probabilities.
-
-(rivedi se fare con for)
-This can be easily implemented in R. We are using a `for` loop to improve the clarity of the workflow but using the `*apply` family of functions can improve the efficiency of the computations.
 
 ```{r}
 k <- 4  # number of options (1)
@@ -470,7 +429,7 @@ lp <- lapply(alphas, function(a) a - b1 * dat$x) # k - 1 linear predictors (4)
 names(lp) <- sprintf("g[p(y <= %s)]", 1:(k - 1)) # giving appropriate names
 ```
 
-The linear predictors can be seen in the Figure ref. The $g$ in this case is the cumulative *probit* function $\Phi$.
+The linear predictors ($\eta$) can be seen in the Figure ref. The $g$ in this case is the cumulative *probit* function $\Phi$.
 
 ```{r}
 #| echo: false
@@ -525,9 +484,9 @@ names(truth) <- c(names(fit$alpha), names(fit$beta))
 #clm_table(fit, truth = truth)
 ```
 
-### simulating using latent distribution
+### Simulating from the latent distribution
 
-An equivalent but more efficient way to simulate an ordinal outcome is using the latent formulation of the model. This require simulating a standard linear regression using the appropriate data generation function (*logistic* or *normal*) and the cutting the latent values according to the thresholds $\alpha$. The workflow is slighlty different compared to the previous paragraph:
+An equivalent but more efficient way to simulate an ordinal outcome is using the latent formulation of the model. This require simulating a standard linear regression using the appropriate data generation function (*logistic* or *normal*) and the cutting the latent values according to the thresholds $\alpha$. The workflow is slightly different compared to the previous approach.
 
 1. Define $n$ (number of observations) and $k$ (number of ordinal outcomes)
 2. Define the regression coefficients $\beta$
@@ -583,55 +542,91 @@ The simulation using the latent formulation of the model is implemented in the `
 filor::print_fun(funs$sim_ord_latent)
 ```
 
-## Scale Effects
+### Choosing parameters values
 
-The default ordinal regression model assume that the variance of th underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test [see @Delacre2017-qy]. In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. Figure \@ref(fig:example-unequal-variance) depict an example of a comparison between two groups where the two underlyning latent distributions have unequal variance.
+#### Thresholds $\alpha$
 
-spiegare qui che i location-scale models sono sostanzialmente un cambiamento delle soglie (e non dei beta) in funzione di predittori @Tutz2020-xq
-
-dire che gli scale effects possono essere visti come un'alterativa più parsimoniosa a modelli non-proportional odds @Christensen2019-cz
-
-se citi brms per modelli più complicati, ricordati di specificare che:
-
-> That is, s = 1/disc. Further, because disc must be strictly positive, it is by default modeled on the log scale.
-
-un modo intuitivo per spiegare gli scale effects è di far capire la relazione tra slope e scale. La slope della funzione cumulative corrisponde alla varianza. Se la slope è piuù steep, la varianza sarà minore e la discrimizione maggiore (in `brms` si chiama desc)
+The two proposed simulation workflows can be really flexible for simulating complex models with multiple predictors and interactions. The critical part of the simulation is setting appropriate and empirically meaningful parameters values. The thresholds are usually not the crucial part of the statistical inference and model interpretations. In fact, they can be considered as the intercept in standard linear models. In any case to set meaningful $\alpha$ values the best strategy is to convert them into the corresponding probabilities according to the link function. The thresholds are essentially quantiles of the latent distribution (logistic or normal) without a direct empirical interpretation. The distance between the thresholds determine the probabililty assigned to a specific $Y$ value. The function `show_alpha()` allow to produce a meaningful plot starting from the thresholds or the probabilities. For example, the Figure \@ref(fig:fig-show-th-example) depict the threshold/probabilities associated with a four-level ordinal variable.
 
 ```{r}
 #| eval: false
-library(distributional)
-library(ggdist)
-library(tidyverse)
-
-s <- c(0.5, 1, 2, 3)
-
-dat <- data.frame(
-  m = 0,
-  s = s
-)
-
-dat$dist <- dist_normal(dat$m, dat$s)
-
-par(mfrow = c(1, 2))
-curve(dnorm(x, m = dat$m[1], sd = dat$s[1]), -5, 5, lwd = 2)
-lapply(2:nrow(dat), function(i) curve(dnorm(x, dat$m[i], dat$s[i]), add = TRUE, col = i, lwd = 2))
-
-curve(pnorm(x, m = dat$m[1], sd = dat$s[1]), -5, 5, lwd = 2)
-lapply(2:nrow(dat), function(i) curve(pnorm(x, dat$m[i], dat$s[i]), add = TRUE, col = i, lwd = 2))
-
-# x <- seq(0, 1, 0.001)
-# p <- pnorm(qnorm(0.01) + 5 * x)
-# y <- rbinom(length(x), 1, p)
-# 
-# plot(x, p)
-# curve(pnorm(x, -(qnorm(0.01)/5), 1/5))
+show_alpha(prob = rep(1/4, 4), link = "probit", plot = c("latent", "probs"))
 ```
 
-si può citare anche questo @Cox1995-ur come riferimento per i modelli
+```{r fig-show-th-example}
+p1 <- show_alpha(prob = rep(1/4, 4), link = "probit", plot = c("latent", "probs"))
+p2 <- show_alpha(prob = c(0.5, 0.3, 0.1, 0.1), link = "probit", plot = c("latent", "probs"))
+p3 <- show_alpha(prob = c(0.1, 0.2, 0.5, 0.2), link = "probit", plot = c("latent", "probs"))
+plot_grid(p1 + rm_legend(), p2 + rm_legend(), p3, ncol = 1)
+```
 
-una distinzione tra location-shift and location-scale models @Tutz2017-de dove i primi oltre ad un cambiamento di location prevedono un cambiamento di soglie mentre i secondi modellano la differenza di soglie come un cambiamento della scala (varianza) che quindi permette di aumetare o diminuire l'area associata ad un determinato intervallo.
+Thus the thresholds can be fixed according to the desired probabilities distribution. For example, when simulating the difference between two groups on an ordinal variable, the threshold can be set thinking about the response distribution in the reference group. The `alpha_to_prob()` and `prob_to_alpha()` functions can be used to convert between probabilities and thresholds.
 
-sempre in @Tutz2017-de propongono il location-scale/shift come una via di mezzo tra il proportional odds ed il non proportional odds
+```{r}
+#| collapse: true
+# k = 4, thus k probabilities and k - 1 thresholds
+prob_to_alpha(prob = c(0.4, 0.1, 0.3, 0.2), link = "probit")
+alpha_to_prob(alpha = c(-2, 0, 1), link = "probit")
+```
+
+#### Regression coefficients $\beta$
+
+As reported in the sections above, the regression coefficients have a different interpretation according to the link function. Fortunately, both parameters have an intuitive interpretation given that they are directly expressed in a interpretable scale. For probit models we can think about standardized mean differences (e.g., Cohen's $d$) between categorical variables or standardized regression coefficient for a numerical predictor. For logit models we can fix the parameters thinking about the odds ratios. Meaningful odds ratios can be derived from previous literature, meta-analyses or converting to other effect sizes. For example, @Sanchez-Meca2003-ji proposed some equations to convert between odds ratios and Cohen's $d$. Using their approach, a Cohen's $d$ of 0.5 usually considered a plausible medium effect size corresponds to and odds ratio of $\approx 2.47$. Another more informative strategy is about plotting the predicted probabilities $g^{-1}(\eta)$ associated with certain regression coefficients. The `cat_latent_plot()` and `num_latent_plot()` functions can be used to see the impact of choosing a specific regression coefficients for respectively a categorical (Figures \@ref(fig:fig-example-cat-latent)) and numerical predictor (Figures \@ref(fig:fig-example-num-latent)).
+
+```{r fig-example-cat-latent, fig.cap=filor::get_caption()}
+#| echo: true
+cat_latent_plot(m = c(0, 0.5), s = 1, probs = rep(1/4, 4), link = "logit", plot = "both")
+```
+
+```{r fig-example-num-latent, fig.cap=filor::get_caption()}
+#| echo: true
+num_latent_plot(x = runif(100), b1 = 2, probs = c(0.6, 0.2, 0.1, 0.1), link = "probit")
+```
+
+## Scale Effects
+
+The default ordinal regression model assume that the variance of the underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming the homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test [see @Delacre2017-qy]. In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. The Equation (number here) expand the previous model including the linear predictor on the scale of the latent distribution.
+
+\begin{equation}
+g(P(Y \leq k)) = \frac{\alpha_k - X\beta}{e^{X\zeta}}
+\end{equation}
+
+\begin{equation} 
+Y^\star_i = \eta + \epsilon_i
+\epsilon_i \sim \mathcal{N}(0, e^{X\zeta})
+\end{equation}
+
+Where $X\zeta$ is the linear predictor $\eta$ for the scale of the distribution. By dafult for both the logit and probit model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function $\eta = \text{log}(X\zeta)$. Figure \@ref(fig:example-unequal-variance) depict an example of a comparison between two groups where the two underlying latent distributions have unequal variance. Ignoring the heterogeneity of variances could lead to underestimation of the effect size, reduced power and inflated type-1 error rate (qualche ref qui). Furtermore, as suggested by @Tutz2017-de location-scale models can be considered as a more parsimonius approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexbility. Furthemore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The Figure \@ref(fig:fig-scale-effect-example) depict the impact of having different scales between two groups on the ordinal probabilities.
+
+@Tutz2022-dg provide a very clear and intuitive explanation of what happen when including a scale effect and how to interpret the result. As suggested before, the scale-location model allow to independently predict changes in the location and the scale. While location shifts are simply interpreted as increasing/decreasing the latent $\mu$ or the odds of responding a certain category scale effects are not straightforward. As the scale increase (e.g., the variance increase) there is an higher probability mass on extreme categories. On the other side as the scale decrease, responses are more concentrated on single categories. The categories are determined by the location parameter. For example, if one group have a certain latent mean $\mu_1$ and a small scale $\sigma^2 = 1/3$ (thus one third compared to the standard version of the distribution), all responses will be focused on categories around the latent mean. On the other side, increasing the scale will increase the cumulative probabilities for all categories and for values that tends to infinity extreme categories are preferred. Clearly, the scale parameter can somehow be interpreted as the response style (concentrated or variable). This is conceptually similar but implemented and interpreted differently to shift-location models [@Tutz2022-dg; Tutz2020-xq] where thresholds are allowed to vary as a function of predictors. Both models tries to increase the flexibility of modelling the probability structure of the responses by adding extra paprameters to predict the probabilities of the ordinal responses.
+
+```{r}
+sigma_high <- cat_latent_plot(m = c(0, 0), 
+                s = c(1, 2), 
+                probs = rep(1/4, 4), 
+                link = "probit", 
+                plot = "both",
+                title = latex2exp::TeX("$\\sigma^2_{g_2} = 2$"))
+sigma_low <- cat_latent_plot(m = c(0, 0), 
+                s = c(1, 0.5), 
+                probs = rep(1/4, 4), 
+                link = "probit", 
+                plot = "both",
+                title = latex2exp::TeX("$\\sigma^2_{g_2} = 0.5$"))
+sigma_high_mu1 <- cat_latent_plot(m = c(0, 1), 
+                s = c(1, 2), 
+                probs = rep(1/4, 4), 
+                link = "probit", 
+                plot = "both",
+                title = latex2exp::TeX("$\\sigma^2_{g_2} = 2$, $\\mu_2 = 1$"))
+sigma_low_mu1 <- cat_latent_plot(m = c(0, 1), 
+                s = c(1, 0.5), 
+                probs = rep(1/4, 4), 
+                link = "probit", 
+                plot = "both",
+                title = latex2exp::TeX("$\\sigma^2_{g_2} = 0.5$, $\\mu_2 = 1$"))
+plot_grid(sigma_high, sigma_low, sigma_high_mu1, sigma_low_mu1)
+```
 
 ### Simulating scale effects
 
@@ -645,7 +640,7 @@ z1 <- log(2) # zeta1, the change in the scale
 probs0 <- rep(1/k, k) # probabilities when x = 0 (3)
 alphas <- prob_to_alpha(probs0, link = "probit") # get true thresholds from probabilities (3)
 dat <- data.frame(x = rep(c(0, 1), each = n/2))
-dat <- sim_ord_latent(~x, scale = ~x, By = b1, Bscale = z1, probs = probs0, data = dat, link = "probit")
+dat <- sim_ord_latent(~x, scale = ~x, By = b1, Bscale = z1, prob = probs0, data = dat, link = "probit")
 fit <- clm(y ~ x, scale = ~ x, data = dat, link = "probit")
 ```
 
@@ -658,22 +653,154 @@ names(truth) <- c(names(fit$alpha), names(fit$beta), names(fit$zeta))
 #clm_table(fit, truth)
 ```
 
-## Visualizing effects
+To better understand the impact of assuming (or simulating) a different latent scale we fit $k - 1$ binomial regressions and check the estimated coefficients. We are not simulating a specific beta for each outcome but simulating a scale effect is actually impacting the regression coefficients. When generating data for a binary outcome the linear predictor is composed by $\eta = \beta_0 + \beta_1x$. The threshold $\alpha$ and slope of the function can be estimated using $\alpha = -\frac{\beta_0}{\beta_1}$ and the slope is $\frac{1}{\beta_1}$ [@Knoblauch2012-to; @Faraggi2003-hm]. Under the proportional odds assumption, there is only a change in thresholds $\alpha$ this a shift in the sigmoid along the $x$ axis. When including a scale effect a change in the sigmoid is combined with a change in the slope.
 
-Before starting with the actual simulation it is useful to plot the predicted probabilities of the response variable $y$ as a function of the predictors. The `cat_latent_plot()` and the `num_latent_plot()` functions are able to visualize the effect of a single categorical or numerical predictor. Specifying the mean and standard deviations of the latent variable in each condition (for the categorical version) or the $\beta$ (for the numerical version) the function compute the expected probability for each level of the ordinal variable $y$ and visualize the result. In this way the $\beta$ can be choose in a meaningful way.
+```{r}
+set.seed(2023)
+k <- 4
+n <- 1e5
+b1 <- 3
+d1 <- log(2)
+dat <- data.frame(x = runif(n))
+dat <- sim_ord_latent(~x, ~x, By = b1, Bscale = d1, prob = rep(1/k, k), data = dat, link = "probit")
 
-```{r, echo=FALSE, results='asis'}
-filor::print_fun(c(funs$cat_latent_plot, funs$num_latent_plot))
+dat$y1vs234 <- ifelse(dat$y <= 1, 1, 0)
+dat$y12vs34 <- ifelse(dat$y <= 2, 1, 0)
+dat$y123vs4 <- ifelse(dat$y <= 3, 1, 0)
+
+dat$y <- ordered(dat$y)
+fit <- clm(y ~ x, scale = ~x, data = dat, link = "probit")
+
+fit1vs234 <- glm(y1vs234 ~ x, data = dat, family = binomial(link = "probit"))
+fit12vs34 <- glm(y12vs34 ~ x, data = dat, family = binomial(link = "probit"))
+fit123vs4 <- glm(y123vs4 ~ x, data = dat, family = binomial(link = "probit"))
+
+fits <- list(y1vs234 = fit1vs234, fit12vs34 = fit12vs34, fit123vs4 = fit123vs4)
+
+lapply(fits, function(x) coef(x)) |> 
+  bind_rows(.id = "model") |> 
+  mutate(xp = list(seq(0, 5, 0.01))) |> 
+  unnest(xp) |> 
+  ggplot(aes(x = xp, y = `(Intercept)` + x * xp)) +
+  geom_line(aes(color = model))
 ```
 
-For example, the Figure \@ref(fig:ex-categorical) depicts the effect of a categorical predictor on a 5-level $y$ assuming uniform probabilities for the reference level and a mean difference on a standardized Normal distribution of 1. The Figure \@ref(fig:ex-numerical) depicts the effect of a continuous predictor $x$ sampled from a standard Normal distribution assuming a $\beta = 1$.
 
-```{r ex-categorical, fig.cap="Example categorical", fig.width=8, fig.height=8}
-cat_latent_plot(m = c(0, 1), s = 1, probs = rep(1/5, 5), link = "probit")
+## 2x2 interaction
+
+A common research design could be a 2x2 factorial design. In this example we have 2 main effects and the interaction. Regardless the link function, we can focus the model equation on the linear predictor. Equation depicts the linear predictor for a 2x2 interaction. With a 2x2 design, a good strategy is to use sum to zero contrasts for the two factors. By default R use dummy coding but here we set the contrasts for $X_1$ and $X_2$ as $0.5$ and $-0.5$. In this way $\beta_1$ will be the main effect of $X_1$, $\beta_2$ the main effect of $X_2$ and $\beta_3$ the interaction (thus the difference of differences).
+
+$$
+g(P(Y \leq k))^{-1} = \alpha_k - \beta_1X_{1_i} + \beta_2X_{2_i} + \beta_3X_{1_i}X_{2_i}
+$$
+
+```{r}
+n <- 1e5
+dat <- expand.grid(x1 = c("a", "b"), x2 = c("c", "d"), n = 1:n)
+dat$x1 <- factor(dat$x1)
+dat$x2 <- factor(dat$x2)
+contrasts(dat$x1) <- c(0.5, -0.5)
+contrasts(dat$x2) <- c(0.5, -0.5)
+bprobs <- rep(1/5, 5)
+
+dat <- sim_ord_latent(~x1*x2, By = c(0, 1, 0.5), prob = bprobs, link = "probit", data = dat)
+fit <- clm(y ~ x1 * x2, data = dat, link = "probit")
+summary(fit)
 ```
 
-```{r ex-numerical, fig.cap="Example numerical", fig.width=8, fig.height=8}
-num_latent_plot(x = rnorm(100), b1 = 1, probs = c(0.4, 0.2, 0.2, 0.05, 0.05), link = "probit")
+The parameters intepretation is the same as introduced in the general case. The thresholds $\alpha$ are fixed the determines the probabilities $P(Y = k)$ when all predictors are zero. In this case by doing `alpha_to_prob(fit$alpha, link = "probit")` we should recover the `bprobs` vector. `x1` is the main effect thus the difference in $z$ scores between *a* and *b* averaging over `x2`. The same holds for `x2`. `x1:x2` is the difference of differences in $z$ scores thus $(ad - ac) - (bd - bc)$.
+
+To visualize the effects there is the `ggeffect::ggpredict()` function that compute the predictions according to the specified predictors combination. In this case we can plot the interaction using the estimated probability for each group and $Y$ response.
+
+```{r}
+# terms =  c("x1", "x2") means to plot the interaction
+plot(ggpredict(fit, terms = c("x1", "x2")))
+```
+
+## Numerical by factor interaction
+
+Another common scenario is to compute and interaction between a numerical variable $x$ and a factor $g$. For simplicity we simulate the factor with two levels and the numerical variable sampled from an uniform distribution $x \sim \mathcal{U}(0, 1)$. Again, the thresholds $\alpha$ represents the baseline probabilities when $x = 0$ and $g = 0$.
+
+```{r}
+n <- 1e5
+dat <- data.frame(x = runif(n),
+                  g = rep(c("a", "b"), each = n/2))
+dat$g <- factor(dat$g)
+contrasts(dat$g) <- c(0.5, -0.5)
+bprobs <- rep(1/5, 5)
+
+dat <- sim_ord_latent(~ x * g, By = c(0.3, 0.5, 0.5), prob = bprobs, link = "probit", data = dat)
+fit <- clm(y ~ x * g, data = dat, link = "probit")
+summary(fit)
+```
+
+Again, `x` is the slope of the numerical predictor averaging over `g` (given that `g` has been coded with sum to zero contrasts) thus the increase in $z$ scores for a unit increase in `x`. `g1` is the main effect of the factor evaluated when $x = 0$. To change the interpretation of `g1` a possibility is to center `x` differently (e.g., mean centering). The `x:g1` is the difference in slopes between the two groups. 
+
+Regardless of the model complexity, the `sim_ord_latent()` function can be expanded by including more predictors. Clearly, as the model complexity increase, choosing meaningful and empirically plausible parameters became more challenging.
+
+# Power Analysis
+
+In the previous sections we introduced how to simulate standard and scale-location cumulative models and how to fit the corresponding models using the `clm()` function from the `ordinal` package. In this section we introduce how to compute the power for some common scenarios. We present an example in a very general form that can be expanded for specific use cases. For example, by simulating a model fixing all effects to zero it is possibile to estimate the type-1 error rate or fixing the sample size and varying the effect size it is possible to do a sensitivity analysis focusing on the smallest effect size of interest (ref qui). The general workflow for a power simulation can be summarized as:
+
+1. Choose the research design, e.g., 2x2 factorial design
+2. Indentifify the specific effect to focus on. For example the interaction effect, a main effect or a specific contrast
+3. Write the model equation similarly to what presented in the previous sections and extract the model coefficients
+4. Choose one of the proposed strategy for simulating data and follows the corresponding steps
+5. Fit the model and extract the relevant statistics e.g., the p-value of the interaction
+6. Repeat the simulation a large number of times (e.g, 10000) and store the relevant values from each simulation
+7. Summarise the simulation results in the appropriate way. For example, the power of the interaction is the number of times the p-value for the interaction test is lower than the critical level divided by the number of simulations.
+
+To make a practical example, we simulate the power of a cumulative link model in detecting an effect of $d = 0.4$ (probit model) with $k = 6$ and $n = 40$ participants per group. We fix the baseline probabilities in the first group as uniform.
+
+descrizione migliore
+
+```{r}
+n <- 40
+k <- 6
+d <- 0.4
+nsim <- 1e3 # higher is better, just for example
+bprobs <- rep(1/k, k)
+alpha <- 0.05 # critical alpha
+
+p <- rep(NA, nsim) # preallocation for speed
+dat <- data.frame(group = rep(c("a", "b"), each = n))
+
+for(i in 1:nsim){
+  sim <- sim_ord_latent(~group, By = d, prob = bprobs, link = "probit", data = dat)
+  fit <- clm(y ~ group, data = sim, link = "probit")
+  p[i] <- summary(fit)$coefficients["groupb", "Pr(>|z|)"] # extract the pvalue
+}
+```
+
+Then to compute the power we can simply compute the proportion of p values lower than the critical level. This can be done in R as `mean(p <= alpha)` resulting in an estimated power of `r mean(p <= alpha)`. Clearly using only a single condition is not really informative thus we can vary the sample size across plausible values and check the corresponding power curve.
+
+```{r}
+#| cache: true
+n <- c(10, 40, 60, 100, 200)
+power <- rep(NA, length(n))
+
+for(i in 1:length(n)){
+  p <- rep(NA, 0) # preallocation for speed
+  dat <- data.frame(group = rep(c("a", "b"), each = n[i]))
+  for(j in 1:nsim){
+    sim <- sim_ord_latent(~group, By = d, prob = bprobs, link = "probit", data = dat)
+    fit <- clm(y ~ group, data = sim, link = "probit")
+    p[j] <- summary(fit)$coefficients["groupb", "Pr(>|z|)"] # extract the pvalue
+  }
+  power[i] <- mean(p <= alpha)
+}
+```
+
+```{r}
+power_df <- data.frame(power = power, n = n)
+
+ggplot(power_df, aes(x = n, y = power)) +
+  geom_point(size = 3) +
+  geom_line() +
+  ylim(c(0, 1)) +
+  ylab("Power") +
+  xlab("Sample Size (per group)") +
+  geom_hline(yintercept = 0.8, lty = "dashed", color = "firebrick")
 ```
 
 ## Disclaimer about the functions
@@ -690,3 +817,13 @@ The current paper proposed a simplified way with some functions to generate ordi
 (ref:fig-ordinal-models) Theoretical figure about ordinal models. Voglio fare una figura come questa in @Burkner2019-aw ma con qualche modifica per fare vedere i tre modelli.
 
 (ref:fig-prop-odds) caption here
+
+(ref:tab-prop-ord-ex) caption here
+
+(ref:fig-logit-vs-probit) caption here
+
+(ref:tab-model-summary) caption here
+
+(ref:fig-example-cat-latent) caption here
+
+(ref:fig-example-num-latent) caption here

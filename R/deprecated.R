@@ -8,6 +8,15 @@ get_y <- function(data = NULL, P, ordered = TRUE){
   }
 }
 
+codds <- function(p){
+  co <- cumsum(p)/(1 - cumsum(p))
+  co <- co[-length(co)]
+  nn <- Reduce(paste0, 1:(length(p) - 1), accumulate = TRUE)
+  names(co) <- paste0("o", nn)
+  co
+}
+
+
 show_th <- function(th = NULL, probs = NULL, link = c("logit", "probit"),
                     cnames = NULL){
   link <- match.arg(link)
@@ -46,4 +55,42 @@ show_th <- function(th = NULL, probs = NULL, link = c("logit", "probit"),
           names = cnames)
   
   par(mfrow = c(1,1))
+}
+
+dummy_ord <- function(y){
+  if(!is.numeric(y)) y <- as.integer(y)
+  yc <- sort(unique(y))
+  dummy <- lapply(yc, function(t) ifelse(y <= t, 1, 0))
+  nn1 <- Reduce(paste0, yc, accumulate = TRUE)
+  nn2 <- Reduce(paste0, yc, accumulate = TRUE, right = TRUE)
+  names(dummy) <- sprintf("y%svs%s", nn1[-length(nn1)], nn2[-1])
+  data.frame(dummy[-length(dummy)])
+}
+
+clm_to_ord <- function(fit){
+  th <- unname(fit$alpha) # estimated thresholds
+  coefs <- fit$coefficients
+  coefs <- unname(coefs[(length(th) + 1):length(coefs)])
+  k <- length(th) + 1 # number of levels for y
+  y <- 1:k # ordinal values
+  stdm <- 0 # latent mean
+  stds <- 1 # latent sigma
+  th_y <- scales::rescale(th, to = c(y[1] + 0.5, y[k] - 0.5))
+  lats <- (th_y[2] - th_y[k - 2]) / (th[2] - th[k - 2]) # real latent sigma
+  b0 <- th_y[1] - th[1] * lats
+  betas <- lats * coefs
+  out <- list(sigma = lats, b0 = b0, beta = betas, alpha = th_y)
+  return(out)
+}
+
+get_th <- function(b0, b1){
+  -(b0/b1)
+}
+
+get_slope <- function(b1){
+  1/b1
+}
+
+get_b0_from_th <- function(th, b1){
+  -b1 * th
 }

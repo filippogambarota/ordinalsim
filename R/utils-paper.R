@@ -65,10 +65,54 @@ th_names <- function(k){
   sprintf("%s|%s", 1:(k-1), 2:k)
 }
 
-plot_grid_common_legend <- function(...){
+plot_grid_common_legend <- function(..., nrow = NULL, ncol = NULL){
   plts <- list(...)
   legend <- cowplot::get_legend(plts[[1]] + theme(legend.position = "bottom", legend.title = element_blank()))
   plts <- lapply(plts, function(p) p + theme(legend.position = "none"))
   grid <- cowplot::plot_grid(plotlist = plts)
-  cowplot::plot_grid(grid, legend, nrow = 2, rel_heights = c(0.9, 0.1))
+  cowplot::plot_grid(grid, legend, nrow = nrow, ncol = ncol, rel_heights = c(0.9, 0.1))
+}
+
+mtab <- function(data, type = c("flextable", "kable", "apa"), caption = NULL, digits = 3){
+  type <- match.arg(type)
+  if(type == "flextable"){
+    qflex(data, caption, digits)
+  }else if(type == "kable"){
+    qkable(data, caption, digits)
+  }else{
+    qapa(data, caption)
+  }
+}
+
+qkable <- function(data, caption = NULL, digits = 3){
+  require(kableExtra)
+  data |> 
+    kable(booktabs = TRUE,
+          format = "latex",
+          align = "c",  
+          digits = digits, 
+          caption = caption) |> 
+    kable_styling(full_width = FALSE,
+                  position = "center")
+}
+
+qflex <- function(data, caption = NULL, digits = 3){
+  require(flextable)
+  data |> 
+    flextable() |> 
+    theme_booktabs(bold_header = TRUE) |> 
+    autofit() |> 
+    align(part = "all", align = "center") |> 
+    set_caption(caption = caption) |> 
+    colformat_double(digits = digits)
+}
+
+qapa <- function(data, caption){
+  require(papaja)
+  data |> 
+    apa_table(caption = caption)
+}
+
+rm_legend <- function(){
+  theme(legend.position = "none")
 }

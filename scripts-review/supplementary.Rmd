@@ -1,0 +1,184 @@
+---
+title: "Untitled"
+author: "Filippo Gambarota"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## lm on latent vs ordinal
+
+as suggested https://people.vcu.edu/~dbandyop/BIOS625/CLM_R.pdf, running a lm on the latent variables gives similar parameter as the clm. Of course, we are able to do this with real data given that the ordinal variable is the observed version of an unobserved latent variable. But in simulation this is useful to understand what the cumulative model is doing.
+
+```{r}
+dat <- data.frame(
+  x1 = rnorm(1e5),
+  x2 = rnorm(1e5)
+)
+
+dat <- sim_ord_latent(~x1 + x2, By = c(1, 0.5), probs = rep(1/5, 5), link = "probit", data = dat)
+
+fit <- lm(ys ~ x1 + x2, data = dat)
+summary(fit)
+
+clm(y ~ x1 + x2, data = dat, link = "probit")
+coef(fit)/sigma(fit)
+```
+
+
+The proposed model is fitted within a Bayesian framework using either Jags (citation) or Stan (citation). Kruskche proposed a simple method to convert the parameters fitted with a standard model within the proposed parametriazion. The main improvement regards mapping the values (for thresholds $\alpha_i$ and slopes $\beta$) from latent standard distribution (gaussian or logistic) into the scale of the $y$ ordinal value. The scale of the variable depend on the numeric labels assigned to ordered categories. There is an additional feature of the proposed parametrization where the first and the last thresholds are fixed respectively to $\alpha_1 + 0.5$ and $\alpha_k - 0.5$ where other thresholds are estimated.
+
+
+
+Using the function proposed by @Kruschke2015-re (metti ref ad osf) and the equations presented in @Kurz2023-zv the `clm_to_ord()` function convert parameters fitted with the `clm` function into the corresponding parameters for the latent $Y^\star$ variable considering the actual range of values (from 1 to $k$).
+
+```{r, echo=FALSE, results='asis'}
+filor::print_fun(funs$clm_to_ord)
+```
+
+```{r}
+#| echo: true
+
+dat <- data.frame(
+  x = rnorm(1e5)
+)
+
+dat <- sim_ord_latent(~x, By = 1, probs = rep(1/5, 5), link = "probit", data = dat)
+fit <- clm(y ~ x, data = dat, link = "probit")
+clm_to_ord(fit)
+```
+
+
+## Gelman parametrization
+
+rivedi questa parametrizzazione in @Gelman2020-tg
+
+```{r}
+#| eval: false
+dat <- data.frame(x = runif(1e5, 0, 1))
+dat <- sim_ord_latent(~x, By = 2, probs = c(0.5, 0.2, 0.1, 0.1, 0.1), data = dat, link = "logit")
+fit_clm <- clm(y ~ x, data = dat, link = "logit")
+
+num_latent_plot(dat$x, 2, probs = c(0.5, 0.2, 0.1, 0.1, 0.1), link = "logit")
+
+summary(fit_clm)
+
+ths <- -(fit_clm$alpha/fit_clm$beta)
+betas <- 1/fit_clm$beta
+
+dat <- cbind(dat, dummy_ord(dat$y))
+
+fit <- glm(y1234vs5 ~ x, data = dat, family = binomial(link = "logit"))
+
+coefs <- coef(fit)
+
+x <- seq(0, 1, 0.01)
+
+plot(x, plogis(coefs[1] + coefs[2] * x), type = "l")
+
+
+-(fit_clm$alpha/fit_clm$beta)
+1/fit_clm$beta
+
+```
+
+Proportional odds can be also visualized by plotting the cumulative probabilities of $y$, in terms of $g(P(y \leq j))$ (where $g()$ is the logit link function) as a function of the predictor $x$. If the proportional odds assumptions holds the slopes are parallel (also known as parallel regression assumption). The Figure \@ref(fig:poa-plot-example) depicts the assumption of proportional odds in the probability and logit space.
+
+```{r poa-plot-example, fig.cap="POA assumption"}
+k <- 5 # number of levels for y
+grid <- data.frame(x = seq(0, 1, 0.1)) # numeric predictor
+probs <- get_probs(~x, 5, rep(1/k, k), data = grid, link = "logit") # probabilities
+cprobs <- apply(probs, 1, cumsum, simplify = FALSE)
+cprobs <- data.frame(do.call(rbind, cprobs))
+names(cprobs) <- sprintf("y<=%s", 1:k)
+cprobs <- cprobs[, -ncol(cprobs)] # remove the last
+grid <- cbind(grid, cprobs)
+
+grid <- grid |> 
+  pivot_longer(starts_with("y")) |> 
+  mutate(lp = qlogis(value))
+
+poa_probs_plot <- grid |> 
+  ggplot(aes(x = x, y = value, color = name)) +
+  geom_line() +
+  theme_minimal(15) +
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        axis.title.y = element_blank()) +
+  ggtitle("Probability")
+
+poa_lp_plot <- grid |> 
+  ggplot(aes(x = x, y = lp, color = name)) +
+  geom_line() +
+  theme_minimal(15) +
+  theme(axis.title.y = element_blank()) +
+  ggtitle("Linear Predictor")
+
+bl <- cowplot::get_legend(
+  poa_probs_plot
+)
+
+poa_plot <- cowplot::plot_grid(
+  poa_probs_plot + theme(legend.position = "none"),
+  poa_lp_plot + theme(legend.position = "none")
+)
+
+cowplot::plot_grid(poa_plot, bl, ncol = 1, rel_heights = c(0.9, 0.1))
+```
+
+@Harrell-2015-no proposed a very intuitive plot to assess the proportional odds assumption and eventually the degree of deviation from the ideal case. Basically predictor is plotted against the logit of the cumulative probability. Distances between pairs of symbols should be similar across levels of the predictors. Numerical predictors can be binned before plotting the corresponding logit. Figure \@ref(fig:harrel-poa-plot) depicts an example with simulated data satisfying the proportional odds assumption.
+
+```{r harrel-poa-plot, fig.cap="Harrel Poa Plot"}
+k <- 5 # number of levels for y
+grid <- data.frame(x = seq(0, 1, 0.1)) # numeric predictor
+probs <- get_probs(~x, 5, rep(1/k, k), data = grid, link = "logit") # probabilities
+cprobs <- apply(probs, 1, cumsum, simplify = FALSE)
+cprobs <- data.frame(do.call(rbind, cprobs))
+names(cprobs) <- sprintf("y<=%s", 1:k)
+cprobs <- cprobs[, -ncol(cprobs)] # remove the last
+grid <- cbind(grid, cprobs)
+
+grid <- grid |> 
+  pivot_longer(starts_with("y")) |> 
+  mutate(lp = qlogis(value))
+
+grid |> 
+  ggplot(aes(x = lp, y = x)) +
+  geom_point(aes(color = name, 
+                 shape = name),
+             size = 3) +
+  theme_minimal(20) +
+  xlab("Logit") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+```
+
+From a statistical point of view, the proportional odds assumption can be assessed by fitting $k - 1$ binomial regressions and checking if the estimated $\beta$ is similar between regressions. The regressions are estimated by creating $k - 1$ dummy variables from the ordinal $y$. The code below show that simulating data with the proportional odds create $k - 1$ binomial regression with similar $\beta$s. In fact, fitting $k - 1$ binomial regressions can be considered also an alternative to fitting an ordinal regression [see @Gelman2020-tg] with more flexibility in parameters (there will be $k - 1$ regression coefficients instead of a single one) but losing the latent intepretation (magari qualcosa di più qui).
+
+```{r}
+#| echo: true
+k <- 4
+n <- 1e5
+dat <- data.frame(
+  x = runif(n)
+)
+
+dat <- sim_ord_latent(~x, By = 5, probs = rep(1/k, k), data = dat, link = "logit")
+
+# create dummy variables
+
+dat$y1vs234 <- ifelse(dat$y <= 1, 1, 0)
+dat$y12vs34 <- ifelse(dat$y <= 2, 1, 0)
+dat$y123vs4 <- ifelse(dat$y <= 3, 1, 0)
+
+fit1vs234 <- glm(y1vs234 ~ x, data = dat, family = binomial(link = "logit"))
+fit12vs34 <- glm(y12vs34 ~ x, data = dat, family = binomial(link = "logit"))
+fit123vs4 <- glm(y123vs4 ~ x, data = dat, family = binomial(link = "logit"))
+
+car::compareCoefs(fit123vs4, fit12vs34, fit1vs234)
+```

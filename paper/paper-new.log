@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.12.5)  12 DEC 2023 16:44
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.12.14)  19 DEC 2023 19:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **paper-new.tex
 (./paper-new.tex
 LaTeX2e <2023-11-01>
-L3 programming layer <2023-11-09>
+L3 programming layer <2023-12-11>
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/apa6/apa6.cls
 Document Class: apa6 2023/08/07 v2.35 APA formatting (6th edition)
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/article.cls
@@ -13,20 +13,20 @@ Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/size12.clo
 File: size12.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
 )
-\c@part=\count182
-\c@section=\count183
-\c@subsection=\count184
-\c@subsubsection=\count185
-\c@paragraph=\count186
-\c@subparagraph=\count187
-\c@figure=\count188
-\c@table=\count189
+\c@part=\count183
+\c@section=\count184
+\c@subsection=\count185
+\c@subsubsection=\count186
+\c@paragraph=\count187
+\c@subparagraph=\count188
+\c@figure=\count189
+\c@table=\count190
 \abovecaptionskip=\skip48
 \belowcaptionskip=\skip49
 \bibindent=\dimen140
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count190
+\etb@tempcnta=\count191
 )
 Class apa6 Info: No bibliography package was specified; defaulting to (but not loading) Biblatex on input line 213.
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lm/lmodern.sty
@@ -78,9 +78,9 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty
 Package: iftex 2022/02/03 v1.0f TeX engine tests
 ))
-\Gm@cnth=\count191
-\Gm@cntv=\count192
-\c@Gm@tempcnt=\count193
+\Gm@cnth=\count192
+\Gm@cntv=\count193
+\c@Gm@tempcnt=\count194
 \Gm@bindingoffset=\dimen141
 \Gm@wd@mp=\dimen142
 \Gm@odd@mp=\dimen143
@@ -125,12 +125,12 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \cmidrulesep=\dimen158
 \cmidrulekern=\dimen159
 \defaultaddspace=\dimen160
-\@cmidla=\count194
-\@cmidlb=\count195
+\@cmidla=\count195
+\@cmidlb=\count196
 \@aboverulesep=\dimen161
 \@belowrulesep=\dimen162
-\@thisruleclass=\count196
-\@lastruleclass=\count197
+\@thisruleclass=\count197
+\@lastruleclass=\count198
 \@thisrulewidth=\dimen163
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/threeparttable/threeparttable.sty
 Package: threeparttable 2003/06/13  v 3.0
@@ -160,11 +160,11 @@ Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
 \caption@hangindent=\dimen171
 Package caption Info: Standard document class detected.
 )
-\c@caption@flags=\count198
-\c@continuedfloat=\count199
+\c@caption@flags=\count199
+\c@continuedfloat=\count266
 Package caption Info: threeparttable package is loaded.
 )
-\c@APAenum=\count266
+\c@APAenum=\count267
 \@text@par@indent=\skip60
 \gr@box=\box52
 \gr@boxwidth=\skip61
@@ -177,7 +177,7 @@ Package: bm 2023/07/08 v1.2f Bold Symbol Support (DPC/FMi)
 Package bm Info: No bold for \OMX/lmex/m/n, using \pmb.
 LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 149.
 )
-\c@appendix=\count267
+\c@appendix=\count268
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
 Package: fancyhdr 2022/11/09 v4.1 Extensive control of page headers and footers
 \f@nch@headwidth=\skip63
@@ -191,15 +191,15 @@ Package: fancyhdr 2022/11/09 v4.1 Extensive control of page headers and footers
 \f@nch@O@orf=\skip71
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/endfloat/endfloat.sty
 Package: endfloat 2019/04/15 v2.7 LaTeX2e package puts figures and tables at end (jdm)
-\c@posttable=\count268
+\c@posttable=\count269
 \efloat@postttt=\write3
-\@ef@tttopen=\count269
-\c@postfigure=\count270
+\@ef@tttopen=\count270
+\c@postfigure=\count271
 \efloat@postfff=\write4
-\@ef@fffopen=\count271
+\@ef@fffopen=\count272
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count272
+\c@float@type=\count273
 \float@exts=\toks19
 \float@box=\box53
 \@float@everytoks=\toks20
@@ -221,14 +221,14 @@ LaTeX Info: Redefining \boldsymbol on input line 28.
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
-\inf@bad=\count273
+\inf@bad=\count274
 LaTeX Info: Redefining \frac on input line 234.
-\uproot@=\count274
-\leftroot@=\count275
+\uproot@=\count275
+\leftroot@=\count276
 LaTeX Info: Redefining \overline on input line 399.
 LaTeX Info: Redefining \colon on input line 410.
-\classnum@=\count276
-\DOTSCASE@=\count277
+\classnum@=\count277
+\DOTSCASE@=\count278
 LaTeX Info: Redefining \ldots on input line 496.
 LaTeX Info: Redefining \dots on input line 499.
 LaTeX Info: Redefining \cdots on input line 620.
@@ -241,20 +241,20 @@ LaTeX Info: Redefining \Bigg on input line 725.
 \big@size=\dimen174
 LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
-\macc@depth=\count278
+\macc@depth=\count279
 LaTeX Info: Redefining \bmod on input line 905.
 LaTeX Info: Redefining \pmod on input line 910.
 LaTeX Info: Redefining \smash on input line 940.
 LaTeX Info: Redefining \relbar on input line 970.
 LaTeX Info: Redefining \Relbar on input line 971.
-\c@MaxMatrixCols=\count279
+\c@MaxMatrixCols=\count280
 \dotsspace@=\muskip16
-\c@parentequation=\count280
-\dspbrk@lvl=\count281
+\c@parentequation=\count281
+\dspbrk@lvl=\count282
 \tag@help=\toks22
-\row@=\count282
-\column@=\count283
-\maxfields@=\count284
+\row@=\count283
+\column@=\count284
+\maxfields@=\count285
 \andhelp@=\toks23
 \eqnshift@=\dimen175
 \alignsep@=\dimen176
@@ -278,14 +278,14 @@ LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 )) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.sty (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2023-11-09 L3 programming layer (loader) 
+Package: expl3 2023-12-11 L3 programming layer (loader) 
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
 File: l3backend-xetex.def 2023-11-09 L3 backend support: XeTeX
-\g__graphics_track_int=\count285
+\g__graphics_track_int=\count286
 \l__pdf_internal_box=\box57
-\g__pdf_backend_object_int=\count286
-\g__pdf_backend_annotation_int=\count287
-\g__pdf_backend_link_int=\count288
+\g__pdf_backend_object_int=\count287
+\g__pdf_backend_annotation_int=\count288
+\g__pdf_backend_link_int=\count289
 ))
 Package: unicode-math 2023/08/13 v0.8r Unicode maths in XeLaTeX and LuaLaTeX
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math-xetex.sty
@@ -298,17 +298,17 @@ Package: l3keys2e 2023-10-10 LaTeX2e option processing using LaTeX3 keys
 Package: fontspec 2022/01/15 v2.8a Font selection for XeLaTeX and LuaLaTeX
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
 Package: fontspec-xetex 2022/01/15 v2.8a Font selection for XeLaTeX and LuaLaTeX
-\l__fontspec_script_int=\count289
-\l__fontspec_language_int=\count290
-\l__fontspec_strnum_int=\count291
-\l__fontspec_tmp_int=\count292
-\l__fontspec_tmpa_int=\count293
-\l__fontspec_tmpb_int=\count294
-\l__fontspec_tmpc_int=\count295
-\l__fontspec_em_int=\count296
-\l__fontspec_emdef_int=\count297
-\l__fontspec_strong_int=\count298
-\l__fontspec_strongdef_int=\count299
+\l__fontspec_script_int=\count290
+\l__fontspec_language_int=\count291
+\l__fontspec_strnum_int=\count292
+\l__fontspec_tmp_int=\count293
+\l__fontspec_tmpa_int=\count294
+\l__fontspec_tmpb_int=\count295
+\l__fontspec_tmpc_int=\count296
+\l__fontspec_em_int=\count297
+\l__fontspec_emdef_int=\count298
+\l__fontspec_strong_int=\count299
+\l__fontspec_strongdef_int=\count300
 \l__fontspec_tmpa_dim=\dimen181
 \l__fontspec_tmpb_dim=\dimen182
 \l__fontspec_tmpc_dim=\dimen183
@@ -320,15 +320,15 @@ Package: fix-cm 2020/11/24 v1.1t fixes to LaTeX
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding TS1 on input line 47.
 ))
-\g__um_fam_int=\count300
-\g__um_fonts_used_int=\count301
-\l__um_primecount_int=\count302
+\g__um_fam_int=\count301
+\g__um_fonts_used_int=\count302
+\l__um_primecount_int=\count303
 \g__um_primekern_muskip=\muskip17
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math-table.tex))) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/microtype.sty
 Package: microtype 2023/03/13 v3.1a Micro-typographical refinements (RS)
 \MT@toks=\toks26
 \MT@tempbox=\box58
-\MT@count=\count303
+\MT@count=\count304
 LaTeX Info: Redefining \noprotrusionifhmode on input line 1059.
 LaTeX Info: Redefining \leftprotrusion on input line 1060.
 \MT@prot@toks=\toks27
@@ -336,7 +336,7 @@ LaTeX Info: Redefining \rightprotrusion on input line 1078.
 LaTeX Info: Redefining \textls on input line 1368.
 \MT@outer@kern=\dimen184
 LaTeX Info: Redefining \textmicrotypecontext on input line 1988.
-\MT@listname@count=\count304
+\MT@listname@count=\count305
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/microtype-xetex.def
 File: microtype-xetex.def 2023/03/13 v3.1a Definitions specific to xetex (RS)
 LaTeX Info: Redefining \lsstyle on input line 238.
@@ -361,11 +361,11 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1372.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1373.
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2023/11/06 4.5b verbatim text (tvz,hv)
-\FV@CodeLineNo=\count305
+\FV@CodeLineNo=\count306
 \FV@InFile=\read2
 \FV@TabBox=\box59
-\c@FancyVerbLine=\count306
-\FV@StepNumber=\count307
+\c@FancyVerbLine=\count307
+\FV@StepNumber=\count308
 \FV@OutFile=\write5
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/framed/framed.sty
 Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
@@ -379,28 +379,28 @@ Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
 \csllabelwidth=\skip77
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2023/07/08 v4.3 Infix arithmetic (KKT,FJ)
-\calc@Acount=\count308
-\calc@Bcount=\count309
+\calc@Acount=\count309
+\calc@Bcount=\count310
 \calc@Adimen=\dimen189
 \calc@Bdimen=\dimen190
 \calc@Askip=\skip78
 \calc@Bskip=\skip79
 LaTeX Info: Redefining \setlength on input line 80.
 LaTeX Info: Redefining \addtolength on input line 81.
-\calc@Ccount=\count310
+\calc@Ccount=\count311
 \calc@Cskip=\skip80
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/babel/babel.sty
-Package: babel 2023/11/11 v3.97 The Babel package
-\babel@savecnt=\count311
+Package: babel 2023/12/10 v3.99 The Babel package
+\babel@savecnt=\count312
 \U@D=\dimen191
 \l@unhyphenated=\language3
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/babel/xebabel.def)
 \bbl@readstream=\read3
-\bbl@dirlevel=\count312
+\bbl@dirlevel=\count313
 Package babel Info: You haven't specified a language as a class or package
-(babel)             option. I'll load 'nil'. Reported on input line 4301.
+(babel)             option. I'll load 'nil'. Reported on input line 4334.
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/babel/nil.ldf
-Language: nil 2023/11/11 v3.97 Nil language
+Language: nil 2023/12/10 v3.99 Nil language
 \l@nil=\language4
 ))
 \everypar=\toks28
@@ -419,24 +419,24 @@ Package: longtable 2023-11-01 v4.19 Multi-page Table package (DPC)
 \LTright=\skip82
 \LTpre=\skip83
 \LTpost=\skip84
-\LTchunksize=\count313
+\LTchunksize=\count314
 \LTcapwidth=\dimen192
 \LT@head=\box60
 \LT@firsthead=\box61
 \LT@foot=\box62
 \LT@lastfoot=\box63
 \LT@gbox=\box64
-\LT@cols=\count314
-\LT@rows=\count315
-\c@LT@tables=\count316
-\c@LT@chunks=\count317
+\LT@cols=\count315
+\LT@rows=\count316
+\c@LT@tables=\count317
+\c@LT@chunks=\count318
 \LT@p@ftn=\toks29
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics/lscape.sty
 Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
 \multirow@colwidth=\skip85
-\multirow@cntb=\count318
+\multirow@cntb=\count319
 \multirow@dima=\skip86
 \bigstrutjot=\dimen193
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/tabularx.sty
@@ -456,7 +456,7 @@ Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
 \TX@old@col=\dimen198
 \TX@target=\dimen199
 \TX@delta=\dimen256
-\TX@cols=\count319
+\TX@cols=\count320
 \TX@ftn=\toks31
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/threeparttablex/threeparttablex.sty
 Package: threeparttablex 2013/07/23 v0.3 by daleif
@@ -474,12 +474,12 @@ Failed to patch title.
 Package: xpatch 2020/03/25 v0.3a Extending etoolbox patching commands
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/csquotes/csquotes.sty
 Package: csquotes 2022-09-14 v5.2n context-sensitive quotations (JAW)
-\csq@reset=\count320
-\csq@gtype=\count321
-\csq@glevel=\count322
-\csq@qlevel=\count323
-\csq@maxlvl=\count324
-\csq@tshold=\count325
+\csq@reset=\count321
+\csq@gtype=\count322
+\csq@glevel=\count323
+\csq@qlevel=\count324
+\csq@maxlvl=\count325
+\csq@tshold=\count326
 \csq@ltx@everypar=\toks32
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/csquotes/csquotes.def
 File: csquotes.def 2022-09-14 v5.2n csquotes generic definitions (JAW)
@@ -489,7 +489,7 @@ Package csquotes Info: ... configuration file loaded successfully.
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/csquotes/csquotes.cfg
 File: csquotes.cfg 
 )) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/bookmark/bookmark.sty
-Package: bookmark 2020-11-06 v1.29 PDF bookmarks (HO)
+Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2023-11-26 v7.01g Hypertext links for LaTeX
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty
@@ -514,17 +514,17 @@ Package: nameref 2023-11-26 v2.56 Cross-referencing by name of section
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty
 Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 )
-\c@section@level=\count326
+\c@section@level=\count327
 )
 \@linkdim=\dimen257
-\Hy@linkcounter=\count327
-\Hy@pagecounter=\count328
+\Hy@linkcounter=\count328
+\Hy@pagecounter=\count329
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2023-11-26 v7.01g Hyperref: PDFDocEncoding definition (HO)
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count329
+\Hy@SavedSpaceFactor=\count330
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
 File: puenc.def 2023-11-26 v7.01g Hyperref: PDF Unicode definition (HO)
 )
@@ -536,7 +536,7 @@ Package hyperref Info: Plain pages OFF on input line 4196.
 Package hyperref Info: Backreferencing OFF on input line 4201.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4448.
-\c@Hy@tempcnt=\count330
+\c@Hy@tempcnt=\count331
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
@@ -548,7 +548,7 @@ Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
-\Fld@menulength=\count331
+\Fld@menulength=\count332
 \Field@Width=\dimen259
 \Fld@charsize=\dimen260
 Package hyperref Info: Hyper figures OFF on input line 6065.
@@ -562,9 +562,9 @@ Package hyperref Info: PDF/A mode OFF on input line 6095.
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
-\Hy@abspage=\count332
-\c@Item=\count333
-\c@Hfootnote=\count334
+\Hy@abspage=\count333
+\c@Item=\count334
+\c@Hfootnote=\count335
 )
 Package hyperref Info: Driver (autodetected): hxetex.
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/hxetex.def
@@ -573,10 +573,10 @@ File: hxetex.def 2023-11-26 v7.01g Hyperref driver for XeTeX
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
 )
 \pdfm@box=\box67
-\c@Hy@AnnotLevel=\count335
-\HyField@AnnotCount=\count336
-\Fld@listcount=\count337
-\c@bookmark@seq@number=\count338
+\c@Hy@AnnotLevel=\count336
+\HyField@AnnotCount=\count337
+\Fld@listcount=\count338
+\c@bookmark@seq@number=\count339
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
 Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
 (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty
@@ -589,8 +589,8 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 )
 \Hy@SectionHShift=\skip91
 ) (c:/Users/user/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/bookmark/bkm-dvipdfm.def
-File: bkm-dvipdfm.def 2020-11-06 v1.29 bookmark driver for dvipdfm (HO)
-\BKM@id=\count339
+File: bkm-dvipdfm.def 2023-12-10 v1.31 bookmark driver for dvipdfm (HO)
+\BKM@id=\count340
 ))
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... found 'babel' package.
@@ -957,93 +957,115 @@ File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
 ] [2] [3] [4]
 File: img/fig-ordinal-models.png Graphic file (type bmp)
 <img/fig-ordinal-models.png>
-Missing character: There is no 𝛽 (U+1D6FD) in font [lmroman12-bold]:mapping=tex-text;!
 [5] [6]
 Missing character: There is no 𝛽 (U+1D6FD) in font [lmroman12-bold]:mapping=tex-text;!
-Missing character: There is no 𝛽 (U+1D6FD) in font [lmroman12-bold]:mapping=tex-text;!
-[7] [8] [9]
-LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 387.
-[10] [11]
+[7]
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 10.0pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 7.0pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 5.0pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 10.00092pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 7.00064pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 5.00046pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 9.99893pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 6.99925pt on input line 332.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 4.99947pt on input line 332.
+[8] [9] [10]
+Underfull \vbox (badness 4805) has occurred while \output is active []
+
+[11]
+File: paper-new_files/figure-latex/fig-odds-example-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/fig-odds-example-1.pdf>
+[12]
 File: paper-new_files/figure-latex/fig-prop-odds-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-prop-odds-1.pdf>
-[12] [13]
-File: paper-new_files/figure-latex/poa-plot-example-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/poa-plot-example-1.pdf>
-File: paper-new_files/figure-latex/harrel-poa-plot-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/harrel-poa-plot-1.pdf>
-[14] [15] [16]
-File: paper-new_files/figure-latex/logit-vs-probit-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/logit-vs-probit-1.pdf>
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 10.0pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.0pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.0pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 10.00092pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.00064pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.00046pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 9.99893pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 6.99925pt on input line 636.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 4.99947pt on input line 636.
+
+Underfull \vbox (badness 3623) has occurred while \output is active []
+
+[13]
+Underfull \vbox (badness 3623) has occurred while \output is active []
+
+[14]
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 493.
+[15]
+
+LaTeX Warning: Reference `eq:probit-prop-odds' on page 16 undefined on input line 523.
+
+
+LaTeX Warning: Reference `tab:tab-prop-ord-ex' on page 16 undefined on input line 523.
+
+[16]
+File: paper-new_files/figure-latex/fig-logit-vs-probit-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/fig-logit-vs-probit-1.pdf>
 [17]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Warning: Reference `tab:tab-model-summary' on page 18 undefined on input line 585.
 
 [18]
-File: paper-new_files/figure-latex/unnamed-chunk-9-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-9-1.pdf>
-Missing character: There is no 𝛽 (U+1D6FD) in font [lmroman12-bold]:mapping=tex-text;!
+File: paper-new_files/figure-latex/unnamed-chunk-4-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-4-1.pdf>
 [19]
-File: paper-new_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-11-1.pdf>
-[20] [21]
+Missing character: There is no 𝛽 (U+1D6FD) in font [lmroman12-bold]:mapping=tex-text;!
+[20]
+File: paper-new_files/figure-latex/unnamed-chunk-6-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-6-1.pdf>
+[21]
 File: paper-new_files/figure-latex/sim-with-probs-lat-plot-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/sim-with-probs-lat-plot-1.pdf>
 [22]
 Missing character: There is no 𝛽 (U+1D6FD) in font [lmroman12-bold]:mapping=tex-text;!
 Missing character: There is no 𝜖 (U+1D716) in font [lmroman12-bold]:mapping=tex-text;!
-File: paper-new_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-17-1.pdf>
+File: paper-new_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-12-1.pdf>
 [23]
-Underfull \vbox (badness 10000) detected at line 847
- []
+File: paper-new_files/figure-latex/fig-show-th-example-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/fig-show-th-example-1.pdf>
 
-
-Underfull \vbox (badness 10000) detected at line 847
- []
-
-[24]
-
-LaTeX Warning: Reference `fig:example-unequal-variance' on page 25 undefined on input line 853.
-
-[25] [26]
-Underfull \vbox (badness 1087) detected at line 1001
- []
-
-[27]
-Underfull \vbox (badness 10000) detected at line 1001
- []
-
-
-Underfull \vbox (badness 10000) detected at line 1001
- []
-
-[28]
-File: paper-new_files/figure-latex/ex-categorical-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/ex-categorical-1.pdf>
-File: paper-new_files/figure-latex/ex-numerical-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/ex-numerical-1.pdf>
-[29] [30] [31] [32]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[33] AED endfloat: Processing end Figures and Tables [34] (./paper-new.aux)
+[24] [25]
+File: paper-new_files/figure-latex/fig-example-cat-latent-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/fig-example-cat-latent-1.pdf>
+File: paper-new_files/figure-latex/fig-example-num-latent-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/fig-example-num-latent-1.pdf>
+[26]
+
+LaTeX Warning: Reference `fig:example-unequal-variance' on page 27 undefined on input line 853.
+
+
+LaTeX Warning: Reference `fig:fig-scale-effect-example' on page 27 undefined on input line 853.
+
+[27]
+Underfull \vbox (badness 3623) has occurred while \output is active []
+
+[28]
+File: paper-new_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-17-1.pdf>
+[29]
+File: paper-new_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-20-1.pdf>
+[30] [31]
+File: paper-new_files/figure-latex/unnamed-chunk-22-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-22-1.pdf>
+[32] [33] [34]
+File: paper-new_files/figure-latex/unnamed-chunk-26-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-26-1.pdf>
+[35] [36]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[37]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[38] AED endfloat: Processing end Figures and Tables [39] (./paper-new.aux)
  ***********
 LaTeX2e <2023-11-01>
 L3 programming layer <2020/03/25>
@@ -1053,12 +1075,12 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 24096 strings out of 476928
- 445920 string characters out of 5805161
- 1939189 words of memory out of 5000000
- 45571 multiletter control sequences out of 15000+600000
- 590840 words of font info for 118 fonts, out of 8000000 for 9000
+ 24186 strings out of 476836
+ 449674 string characters out of 5803393
+ 1939109 words of memory out of 5000000
+ 45743 multiletter control sequences out of 15000+600000
+ 590864 words of font info for 121 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 90i,12n,120p,2271b,627s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,12n,120p,2271b,620s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on paper-new.pdf (34 pages).
+Output written on paper-new.pdf (39 pages).
