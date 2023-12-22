@@ -97,7 +97,7 @@ theme_set(mtheme())
 
 # palettes
 options(ggplot2.continuous.colour="viridis")
-options(ggplot2.continuous.fill = "viridis")
+options(ggplot2.continuous.fill = "viridis")  
 scale_color_discrete <- scale_colour_viridis_d
 scale_fill_discrete <- scale_fill_viridis_d
 ```
@@ -110,11 +110,42 @@ rfigs <- readRDS(here("objects", "r-figs.rds"))
 
 # Introduction
 
-Psychological research make an extensive use of ordinal data. One of the main reason is probably the usage of Likert scales [@Likert1932-xw]. Ordinal data refers to a specific type of measurement scale [@Stevens1946-te] where ordered numbers are assigned to a variable. Compared to nominal scale and as the name suggest the labels are ordered. Compared to interval or ratio scales there is no explicit assumption about the distance between labels. (rivedi questo). An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. @Stevens1946-te and @Kemp2021-dj suggested that for ordinal variables is appropriate to calculate ranks-based statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation). This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels [@Liddell2018-wu].
+Psychological research make an extensive use of ordinal data. One of the main reason is probably the usage of Likert scales [@Likert1932-xw]. Ordinal data refers to a specific type of measurement scale [@Stevens1946-te] where ordered numbers are assigned to a variable. Compared to nominal scale and as the name suggest the labels are ordered. Compared to interval or ratio scales there is no explicit assumption about the distance between labels. An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. @Stevens1946-te and @Kemp2021-dj suggested that for ordinal variables is appropriate to calculate ranks-based statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation). This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels [@Liddell2018-wu].
 
 In Psychology especially when using item-based measures (questionnaires, surveys, etc.) the common practice is using a normal linear regression that makes an explicit assumption about metric features of the response variable. @Liddell2018-wu reviewed the psychological literature using likert-based measures and reported how the majority of papers used metric-based statistical models. In the same work, @Liddell2018-wu showed extensive examples and simulations about the potential pitfalls of treating an ordinal variable as metric [but see @Robitzsch2020-la for an alternative perspective]. They reported problems in terms of lack of power, inversion of the effects and distortion in estimating the effect size (rivedi meglio qui). (vedi se c'è qualche altro lavoro che fa vedere questa cosa). Some authors suggested that despite individual items being ordinal, averaging multiple items could solve the problem of applying metric models (e.g., Carifio & Perla, 2007, 2008 metti queste citazioni). @Liddell2018-wu suggested that in some conditions even averaging multiple items and applying metric models could be problematic. @Cliff2016-ck suggest that most of the research questions in behavioral sciences can be considered as ordinal (*is the score $x$ higher than the score $y$*?) concerning variables where the most appropriate measurement scale is probably ordinal.
 
 qualcosa ancora qui
+
+aggiungi @Cliff1996-qo per considerazioni ancora riguardo dati ordinali in psicologia e misure appropriate di correlazione e differenza
+
+> We usually do not want our conclusions to be confined to the current, somewhat arbitrary version of the variables; moreover, these are often assumed to be manifest versions of latent variables that are nonlinearly related to them.
+
+@Agresti2010-rz
+
+This approach assigns numerical scores to the ordered categories and then
+uses ordinary least squares (OLS) methods such as linear regression and analysis
+of variance (ANOVA). The second way restricts analyses solely to methods that
+use only the ordering information about the categories. Examples of this approach
+are nonparametric methods based on ranks and models for cumulative response
+probabilities.
+
+
+That being said, we recommend against the simplistic approach of posing linear
+regression models for ordinal response scores and fitting them using OLS methods.
+Although that approach can be useful for identifying variables that clearly affect
+a response variable, and for simple descriptions, limitations occur. First, there is
+usually not a clear-cut choice for the scores. Second, a particular response outcome
+is likely to be consistent with a range of values for some underlying latent variable,
+and an ordinary regression analysis does not allow for the measurement error that
+results from replacing such a range by a single numerical value. Third, unlike the
+methods presented in this book, that approach does not yield estimated probabilities
+for the response categories at fixed settings of the explanatory variables. Fourth, that
+approach can yield predicted values above the highest category score or below the
+lowest. Fifth, that approach ignores the fact that the variability of the responses is
+naturally nonconstant for categorical data: For an ordinal response variable, there is
+little variability at predictor values for which observations fall mainly in the highest
+category (or mainly in the lowest category), but there is considerable variability at
+predictor values for which observations tend to be spread among the categories.
 
 ## Ordinal regression models
 
@@ -138,6 +169,17 @@ to McCullagh (1980) and with a complementary log-log link, the model is sometime
 to as the proportional hazards model for grouped survival times.
 
 In this section we introduce some notations for the cumulative model that is used through the paper and in the R code. We proposed a notation as consistent as possible with the main textbooks and seminal papers and with the `ordinal` R package used in the tutorial. We define $Y_k$ as the observed ordinal response with $1, \dots,k$ levels and $Y^\star$ is the underlying latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \dots, \alpha_{k - 1}$. Similarly to the generalized linear models framework, we define $g(x) = \eta$ as the link function that maps that transforms probabilities into the linear predictor $\eta$. To transform $\eta$ into probabilities we use the inverse of the link function $x = g^{-1}(\eta)$. The specific link function define the type of model and require a different R function. For example, when assuming a Gaussian distribution we are fitting a model with a `probit` link function is the cumulative distribution function $g(x) = \Phi^{-1}(x) = \eta$ and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined $x = g^{-1}(\eta) = \Phi(\eta)$. When modelling an ordinal variable in a cumulative link model we actually modelling the cumulative probability $P(Y < k), k = 1, \dots, k - 1$. Equation \@ref(eq:prob-cum-model1) depict the general cumulative model including predictors $\mathbf{X}$ and regression coefficients $\boldsymbol{\beta}$. The minus sign in $\mathbf{X} \boldsymbol{\beta}$ is used to give the usual interpretation of standard regression models where an increase in $\beta$ corresponds to an increase in the probability of higher categories of $Y$ (metti il libro di agresti sui dati ordinali).
+
+
+@Agresti2010-rz
+For simplicity of notation, unless we need to refer to
+particular subjects or to particular values of the explanatory variables, we replace
+P (Yi ≤ j | xi) in such equations by P (Y ≤ j ), keeping in mind that in the model
+this is actually a conditional probability at each fixed value for the explanatory
+variables.
+
+
+
 
 \begin{equation} 
 P(Y \leq k) = g^{-1}(\alpha_k - \mathbf{X} \boldsymbol{\beta}), \;\;k = 1, \dots, k - 1
