@@ -155,3 +155,30 @@ get_link <- function(link = c("logit", "probit")){
   }
   list(rfun = rfun, pfun = pfun, dfun = dfun, qfun = qfun)
 }
+
+#' Create k - 1 dummy variables from an ordinal variable
+#' @description
+#' Given an ordinal variable with `k` levels the function return a data.frame with k - 1 dummy variables.
+#'
+#' @param y a vector. Can be numeric, integer or (ordered) factor. If `y` is a factor, the function extract the underlying integer representation.
+#'
+#' @return a data.frame with k - 1 dummy variables.
+#' @export
+#'
+#' @examples
+#' k <- 4
+#' y <- sample(1:k, size = 10, replace = TRUE)
+#' dummy_ord(y)
+dummy_ord <- function(y){
+  if(!all(is.numeric(y) | is.integer(y) | is.factor(y))){
+    stop("y need to be numeric, integer or (ordered) factor")
+  }
+  # nothing for numeric and integers, safe for (ordered) factors
+  y <- as.integer(y)
+  yc <- sort(unique(y))
+  dummy <- lapply(yc, function(t) ifelse(y <= t, 1, 0))
+  nn1 <- Reduce(paste0, yc, accumulate = TRUE)
+  nn2 <- Reduce(paste0, yc, accumulate = TRUE, right = TRUE)
+  names(dummy) <- sprintf("y%svs%s", nn1[-length(nn1)], nn2[-1])
+  data.frame(dummy[-length(dummy)])
+}

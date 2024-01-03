@@ -25,3 +25,14 @@ forse quando faccio P(Y = 1) devo condizionare a x (grassetto) P(Y = 1|x)
 vedere se nell'equazione devo fare il trasposto di qualche cosa X o \beta
 
 vedi agresti 2012 categorical 8.2.3 per equazione della variabile latente
+
+
+
+
+
+> The name, cumulative link models is adopted from Agresti (2002), but the model class has
+been referred to by several other names in the literature, such as ordered logit models and
+ordered probit models (Greene and Hensher 2010) for the logit and probit link functions. The
+cumulative link model with a logit link is widely known as the proportional odds model due
+to McCullagh (1980) and with a complementary log-log link, the model is sometimes referred
+to as the proportional hazards model for grouped survival times.

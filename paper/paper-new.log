@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.12.14)  20 DEC 2023 17:43
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2024.1.3)  3 JAN 2024 20:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -957,119 +957,123 @@ File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
 ] [2] [3] [4]
 File: img/fig-ordinal-models.png Graphic file (type bmp)
 <img/fig-ordinal-models.png>
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 10.0pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 7.0pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 5.0pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 10.00092pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 7.00064pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 5.00046pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 9.99893pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 6.99925pt on input line 286.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 4.99947pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
-(Font)              scaled to size 12.0pt on input line 297.
+(Font)              scaled to size 12.0pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
-(Font)              scaled to size 8.4pt on input line 297.
+(Font)              scaled to size 8.4pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
-(Font)              scaled to size 6.0pt on input line 297.
+(Font)              scaled to size 6.0pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
-(Font)              scaled to size 12.0011pt on input line 297.
+(Font)              scaled to size 12.0011pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
-(Font)              scaled to size 8.40076pt on input line 297.
+(Font)              scaled to size 8.40076pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
-(Font)              scaled to size 6.00055pt on input line 297.
+(Font)              scaled to size 6.00055pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
-(Font)              scaled to size 11.99872pt on input line 297.
+(Font)              scaled to size 11.99872pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
-(Font)              scaled to size 8.3991pt on input line 297.
+(Font)              scaled to size 8.3991pt on input line 286.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
-(Font)              scaled to size 5.99936pt on input line 297.
+(Font)              scaled to size 5.99936pt on input line 286.
 [5] [6]
 
-LaTeX Warning: Reference `eq:eq:prob-cum-model2' on page 7 undefined on input line 304.
+LaTeX Warning: Reference `eq:eq:prob-cum-model2' on page 7 undefined on input line 293.
 
-[7]
 File: paper-new_files/figure-latex/fig-explain-cumulative-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-explain-cumulative-1.pdf>
-[8] [9]
+[7] [8] [9]
 File: paper-new_files/figure-latex/fig-logit-vs-probit-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-logit-vs-probit-1.pdf>
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 10.0pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.0pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.0pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 10.00092pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.00064pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.00046pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 9.99893pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 6.99925pt on input line 384.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 4.99947pt on input line 384.
-[10] [11] [12] [13] [14]
+
+Overfull \hbox (16.73322pt too wide) in paragraph at lines 355--365
+ [][] 
+ []
+
+
+Underfull \vbox (badness 2961) has occurred while \output is active []
+
+[10] [11] [12]
 File: paper-new_files/figure-latex/fig-odds-example-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-odds-example-1.pdf>
-[15]
+[13]
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 464.
+
+LaTeX Font Warning: Font shape `TU/lmtt/bx/it' in size <8> not available
+(Font)              Font shape `TU/lmtt/b/sl' tried instead on input line 469.
+
+[14] [15]
 File: paper-new_files/figure-latex/fig-prop-odds-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-prop-odds-1.pdf>
 [16] [17]
-LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 545.
 
-LaTeX Warning: Reference `eq:probit-prop-odds' on page 18 undefined on input line 575.
+LaTeX Warning: Reference `eq:probit-prop-odds' on page 18 undefined on input line 580.
 
 
-LaTeX Warning: Reference `tab:tab-prop-ord-ex' on page 18 undefined on input line 575.
+LaTeX Warning: Reference `tab:tab-prop-ord-ex' on page 18 undefined on input line 580.
 
-[18] [19]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[20]
-File: paper-new_files/figure-latex/unnamed-chunk-4-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-4-1.pdf>
-[21]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[22]
+[18] [19] [20]
 File: paper-new_files/figure-latex/unnamed-chunk-6-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/unnamed-chunk-6-1.pdf>
+[21] [22]
+File: paper-new_files/figure-latex/unnamed-chunk-8-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-8-1.pdf>
 [23]
 File: paper-new_files/figure-latex/sim-with-probs-lat-plot-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/sim-with-probs-lat-plot-1.pdf>
 [24]
 Missing character: There is no 𝜖 (U+1D716) in font [lmroman12-bold]:mapping=tex-text;!
-File: paper-new_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-12-1.pdf>
+File: paper-new_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-14-1.pdf>
 [25]
 File: paper-new_files/figure-latex/fig-show-th-example-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-show-th-example-1.pdf>
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 3623) has occurred while \output is active []
 
 [26] [27]
 File: paper-new_files/figure-latex/fig-example-cat-latent-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-example-cat-latent-1.pdf>
+[28]
 File: paper-new_files/figure-latex/fig-example-num-latent-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/fig-example-num-latent-1.pdf>
-[28]
-
-LaTeX Warning: Reference `fig:example-unequal-variance' on page 29 undefined on input line 886.
-
-
-LaTeX Warning: Reference `fig:fig-scale-effect-example' on page 29 undefined on input line 886.
-
 [29]
-Underfull \vbox (badness 3623) has occurred while \output is active []
+
+LaTeX Warning: Reference `fig:example-unequal-variance' on page 30 undefined on input line 886.
+
+
+LaTeX Warning: Reference `fig:fig-scale-effect-example' on page 30 undefined on input line 886.
 
 [30]
-File: paper-new_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-17-1.pdf>
+File: paper-new_files/figure-latex/unnamed-chunk-19-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-19-1.pdf>
 [31]
-File: paper-new_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-20-1.pdf>
-[32] [33]
 File: paper-new_files/figure-latex/unnamed-chunk-22-1.pdf Graphic file (type pdf)
 <use paper-new_files/figure-latex/unnamed-chunk-22-1.pdf>
+[32] [33]
+File: paper-new_files/figure-latex/unnamed-chunk-24-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-24-1.pdf>
 [34] [35] [36]
-File: paper-new_files/figure-latex/unnamed-chunk-26-1.pdf Graphic file (type pdf)
-<use paper-new_files/figure-latex/unnamed-chunk-26-1.pdf>
+File: paper-new_files/figure-latex/unnamed-chunk-28-1.pdf Graphic file (type pdf)
+<use paper-new_files/figure-latex/unnamed-chunk-28-1.pdf>
 [37] [38]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
@@ -1086,12 +1090,12 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 24233 strings out of 476836
- 451509 string characters out of 5803393
+ 24234 strings out of 476836
+ 451521 string characters out of 5803395
  1939109 words of memory out of 5000000
- 45781 multiletter control sequences out of 15000+600000
- 592088 words of font info for 130 fonts, out of 8000000 for 9000
+ 45780 multiletter control sequences out of 15000+600000
+ 592096 words of font info for 131 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 90i,14n,120p,2266b,620s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,13n,120p,1933b,628s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on paper-new.pdf (41 pages).
