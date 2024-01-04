@@ -108,8 +108,7 @@ alpha_to_prob <- function(alpha, link = c("logit", "probit"), ...){
   lf <- get_link(link)
   ths <- c(-Inf, unname(alpha), Inf)
   cprobs <- lf$pfun(ths, ...)
-  probs <- diff(cprobs)
-  return(probs)
+  diff(cprobs)
 }
 
 #' Transform probabilities into thresholds

@@ -2,12 +2,18 @@ show_alpha <- function(prob = NULL,
                        alpha = NULL, 
                        link = c("logit", "probit"),
                        plot = c("latent", "cumulative", "probs")){
-  require(ggplot2)
-  require(cowplot)
-  require(ggtext)
   
   if(is.null(prob) & is.null(alpha)){
     stop("alpha or prob must be specified!")
+  }
+  
+  if(is.null(prob)){
+    prob <- alpha_to_prob(alpha, link)
+  }else{
+    if(sum(prob) != 1){
+      stop("the prob vector must sum to 1!")
+    }
+    alpha <- prob_to_alpha(prob, link)
   }
   
   lf <- get_link(link)
@@ -18,15 +24,6 @@ show_alpha <- function(prob = NULL,
   }else{
     xlim <- c(-5, 5)
     dist <- distributional::dist_normal
-  }
-  
-  if(is.null(prob)){
-    prob <- alpha_to_prob(alpha, link)
-  }else{
-    if(sum(prob) != 1){
-      stop("the prob vector must sum to 1!")
-    }
-    alpha <- prob_to_alpha(prob, link)
   }
   
   k <- length(prob)
@@ -53,7 +50,7 @@ show_alpha <- function(prob = NULL,
                               y = 1, 
                               label = alpha_n), 
                           angle = 90,
-                          hjust = 0.5)
+                          hjust = 1)
   
   y_n <- sprintf("P(Y = %s)", 1:k)
   y_cp <- lf$pfun(c(-Inf, alpha, Inf))
@@ -76,7 +73,7 @@ show_alpha <- function(prob = NULL,
     p = diff(y_cp)
   )
   
-  hplot <- ggplot(pp, aes(x = y, fill = factor(y), y = p)) +
+  hplot <- ggplot(pp, aes(x = factor(y), fill = factor(y), y = p)) +
     geom_col(width = 0.6) +
     ylab("Probability") +
     theme_minimal(15) +
@@ -86,11 +83,8 @@ show_alpha <- function(prob = NULL,
     ylim(c(0, 1))
   
   plist <- list(latent = dplot, cumulative = pplot, probs = hplot)
-  plist <- plist[plot]
-  bl <- get_legend(dplot)
-  
-  pgrid <- plot_grid(plotlist = lapply(plist, function(x) x + theme(legend.position = "none")))
-  plot_grid(pgrid, bl, nrow = 2, rel_heights = c(0.9, 0.1))
+  print(cowplot::plot_grid(plotlist = (plist[plot])))
+  invisible(plist)
 }
 
 cat_latent_plot <- function(m = 0, 
@@ -180,7 +174,8 @@ num_latent_plot <- function(x,
                             probs = NULL,
                             link = c("logit", "probit"), 
                             nsample = 1e3, 
-                            size = 20){
+                            size = 20,
+                            linewidth = 1){
   lf <- get_link(link)
   if(is.null(th)){
     th <- prob_to_alpha(probs, link)
@@ -189,7 +184,7 @@ num_latent_plot <- function(x,
   data <- get_probs(~x, b1, probs, data, link, append = TRUE)
   datal <- tidyr::pivot_longer(data, starts_with("y"), names_to = "y", values_to = "value")
   ggplot(datal, aes(x = x, y = value, color = y)) +
-    geom_line() +
+    geom_line(linewidth = linewidth) +
     theme_minimal(size) +
     theme(legend.position = "bottom",
           legend.title = element_blank()) +
