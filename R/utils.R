@@ -1,33 +1,3 @@
-get_probs <- function(formula, 
-                      B, 
-                      probs0, 
-                      data, 
-                      link = c("logit", "probit"),
-                      ynames = NULL,
-                      append = FALSE){
-  if(is.null(ynames)){
-    ynames <- paste0("y", 1:length(probs0))
-  }
-  lf <- get_link(link)
-  ths <- c(-Inf, prob_to_alpha(probs0, link = link), Inf)
-  X <- model.matrix(formula, data = data)[, -1]
-  X <- matrix(X)
-  # notice the minus sign t - X %*% B thus an increase in x
-  # is an increase in p
-  P <- lapply(ths, function(t) c(lf$pfun(t - X %*% B)))
-  P <- data.frame(P)
-  P <- data.frame(t(apply(P, 1, diff)))
-  names(P) <- ynames
-  if(append){
-    P <- cbind(data, P)
-  }
-  return(P)
-}
-
-vlogit <- function(scale = 1){
-  (scale^2 * pi^2)/3
-}
-
 #' Simulating Ordinal Data
 #'
 #' @param location a formula with predictors for the location parameter. The components of the formula need to be columns of the \code{data} object.
@@ -38,6 +8,7 @@ vlogit <- function(scale = 1){
 #' @param alpha vector of baseline thresholds. Either \code{probs} or \code{alpha} must be specified. The function calculated thresholds from \code{probs} and viceversa
 #' @param data a dataframe with predictors. both \code{location} and \code{scale} formulas refers to columns of the dataframe.
 #' @param link character vector indicating the link function. Can be \code{logit} or \code{probit}.
+#' @param simulate logical indicating if sampling values (`TRUE`) or returning the true probabilities 
 #'
 #' @return a dataframe with the ordinal variable \code{y} and the latent variable \code{ys}
 #' @export
@@ -57,7 +28,8 @@ sim_ord_latent <- function(location,
                            prob = NULL, 
                            alpha = NULL, 
                            data, 
-                           link = c("logit", "probit")){
+                           link = c("logit", "probit"),
+                           simulate = TRUE){
   
   # get all the correct functions according to the link
   lf <- get_link(link)
@@ -80,14 +52,23 @@ sim_ord_latent <- function(location,
     lps <- c(Xsigma %*% Bscale) # linear predictor for the scale
   }
   
-  # latent variable with appropriate error function
-  ystar <- lf$rfun(n, lpy, exp(lps))
-  
-  # cut according to thresholds
-  y <- findInterval(ystar, alpha) + 1 # to start from 1
-  
-  data$y <- ordered(y) # to ordered factor
-  data$ys <- ystar # save also the latent
+  if(simulate){
+    # latent variable with appropriate error function
+    ystar <- lf$rfun(n, lpy, exp(lps))
+    
+    # cut according to thresholds
+    y <- findInterval(ystar, alpha) + 1 # to start from 1
+    
+    data$y <- ordered(y) # to ordered factor
+    data$ys <- ystar # save also the latent
+  } else{
+    alpha <- c(-Inf, alpha, Inf)
+    cp <- lapply(alpha, function(a) plogis(a - (lpy / exp(lps))))
+    cp <- data.frame(do.call(cbind, cp))
+    p <- data.frame(t(apply(cp, 1, diff)))
+    names(p) <- paste0("y", 1:ncol(p))
+    data <- cbind(data, p)
+  }
   return(data)
 }
 
@@ -172,6 +153,9 @@ dummy_ord <- function(y){
   if(!all(is.numeric(y) | is.integer(y) | is.factor(y))){
     stop("y need to be numeric, integer or (ordered) factor")
   }
+  if(length(unique(y)) < 2){
+    stop("y need to have at least 2 levels!")
+  }
   # nothing for numeric and integers, safe for (ordered) factors
   y <- as.integer(y)
   yc <- sort(unique(y))
@@ -180,4 +164,18 @@ dummy_ord <- function(y){
   nn2 <- Reduce(paste0, yc, accumulate = TRUE, right = TRUE)
   names(dummy) <- sprintf("y%svs%s", nn1[-length(nn1)], nn2[-1])
   data.frame(dummy[-length(dummy)])
+}
+
+#' Calculate the variance of a logistic distribution
+#'
+#' @param scale the scale of the logistic distribution. Default to `1`
+#'
+#' @return variance of the logistic distribution
+#' @export
+#'
+#' @examples
+#' vlogit(scale = 1)
+#' vlogit(scale = 2)
+vlogit <- function(scale = 1){
+  (scale^2 * pi^2)/3
 }

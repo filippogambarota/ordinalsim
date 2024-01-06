@@ -1,7 +1,6 @@
 show_alpha <- function(prob = NULL, 
                        alpha = NULL, 
-                       link = c("logit", "probit"),
-                       plot = c("latent", "cumulative", "probs")){
+                       link = c("logit", "probit")){
   
   if(is.null(prob) & is.null(alpha)){
     stop("alpha or prob must be specified!")
@@ -82,9 +81,7 @@ show_alpha <- function(prob = NULL,
           axis.title.y = element_blank()) +
     ylim(c(0, 1))
   
-  plist <- list(latent = dplot, cumulative = pplot, probs = hplot)
-  print(cowplot::plot_grid(plotlist = (plist[plot])))
-  invisible(plist)
+  list(latent = dplot, cumulative = pplot, probs = hplot)
 }
 
 cat_latent_plot <- function(m = 0, 
@@ -181,7 +178,8 @@ num_latent_plot <- function(x,
     th <- prob_to_alpha(probs, link)
   }
   data <- data.frame(x = seq(min(x), max(x), length.out = nsample))
-  data <- get_probs(~x, b1, probs, data, link, append = TRUE)
+  #data <- get_probs(~x, b1, probs, data, link, append = TRUE)
+  data <- sim_ord_latent(~x, By = b1, prob = probs, data = data, link = link, simulate = FALSE)
   datal <- tidyr::pivot_longer(data, starts_with("y"), names_to = "y", values_to = "value")
   ggplot(datal, aes(x = x, y = value, color = y)) +
     geom_line(linewidth = linewidth) +

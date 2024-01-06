@@ -301,6 +301,8 @@ There are always two special cases when computing the probability of a single ou
 \caption{caption here}\label{fig:fig-explain-cumulative}
 \end{figure}
 
+\begin{center}\textbf{[Figure 1 about here]} \end{center}
+
 \normalsize
 
 The same model can be written in the so-called latent formulation as reported in Equation \eqref{eq:latent-model}. The model is no longer directly about the cumulative probabilities but focused on the continuous latent variable \(Y^\star\) as a function of the linear predictor \(\eta = \mathbf{X} \boldsymbol{\beta}\) similar to a standard linear regression.
@@ -334,6 +336,8 @@ In terms of parameters, both distributions can be defined with a location \(\mu\
 
 \caption{caption here}\label{fig:fig-logit-vs-probit}
 \end{figure}
+
+\begin{center}\textbf{[Figure 2 about here]} \end{center}
 
 \normalsize
 
@@ -448,6 +452,8 @@ To understand the logit model we need to introduce odds and odds ratio. The odds
 \caption{caption here}\label{fig:fig-odds-example}
 \end{figure}
 
+\begin{center}\textbf{[Figure 3 about here]} \end{center}
+
 \normalsize
 
 Odds and odds ratios are clearly defined with \(k = 2\) outcomes. With an ordinal variable and a cumulative model we can use the cumulative odds ratio. With e.g.~\(k = 4\) outcomes we have \(k - 1\) models determined by the cumulative probability in terms of \(P(Y \leq 1), \dots, P(Y \leq k - 1)\). We can manually calculate the odds ratio starting from the previous dataset.
@@ -533,6 +539,8 @@ The proportional odds is assuming that the regression coefficients \(\beta\) are
 \caption{caption here}\label{fig:fig-prop-odds}
 \end{figure}
 
+\begin{center}\textbf{[Figure 4 about here]} \end{center}
+
 \normalsize
 
 The proportional odds assumption is convenient because regardless of \(k\), the \(\beta_j\) (\(j\) being the number of regression coefficients) effect is assumed to be the same. The model is more parsimonious compared to estimating \(k - 1\) coefficients for each \(\beta_j\) as in the multinomial regression or the non-proportional model.
@@ -576,7 +584,7 @@ In this case the odds ratio is exactly the same because the model (thus the pred
 The proportional odds assumption is relevant only for the \emph{logit} model because of the link function that put \(\beta\) as log odds. However the concept of the proportional odds that is more generally called parallel slopes assumption is assumed also for the probit model. Equation \eqref{eq:probit-prop-odds} depict the parallel slopes assumption for a probit model. Basically the difference in \(z\) for a unit increase in \(x\) (i.e., the slope) is the same regardless the \(Y\) level. This can be directly demonstrated in the same way as for the logit model. We use the same dataset of the previous simulation. The difference between the \(z\) scores comparing the two groups calculated on the cumulative probability is the same regardless the \(k - 1\) level.
 
 \begin{equation}
-z_{x_1 - x_0} = \Phi(P \leq k|x_0) - \Phi(P \leq k|x_1) = \dots = \Phi(P \leq k - 1|x_0) - \Phi(P \leq k - 1|x_1)
+z_{x_1 - x_0} = \Phi(P \leq 1|x_0) - \Phi(P \leq 1|x_1) = \dots = \Phi(P \leq k - 1|x_0) - \Phi(P \leq k - 1|x_1)
 \label{eq:probit-prop-odds}
 \end{equation}
 
@@ -754,12 +762,12 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \NormalTok{dat}\SpecialCharTok{$}\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(p, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(ps) }\FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{k, }\AttributeTok{size =} \DecValTok{1}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ ps))}
 \FunctionTok{head}\NormalTok{(dat)}
 \CommentTok{\#\textgreater{}   x y}
-\CommentTok{\#\textgreater{} 1 0 2}
-\CommentTok{\#\textgreater{} 2 0 4}
-\CommentTok{\#\textgreater{} 3 0 2}
+\CommentTok{\#\textgreater{} 1 0 3}
+\CommentTok{\#\textgreater{} 2 0 3}
+\CommentTok{\#\textgreater{} 3 0 1}
 \CommentTok{\#\textgreater{} 4 0 4}
-\CommentTok{\#\textgreater{} 5 0 2}
-\CommentTok{\#\textgreater{} 6 0 1}
+\CommentTok{\#\textgreater{} 5 0 3}
+\CommentTok{\#\textgreater{} 6 0 2}
 
 \CommentTok{\# let\textquotesingle{}s compute the observed probabilities, to be compared to the true}
 \CommentTok{\# probabilities}
@@ -768,8 +776,8 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \NormalTok{(op }\OtherTok{\textless{}{-}} \FunctionTok{prop.table}\NormalTok{(}\FunctionTok{table}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{x, dat}\SpecialCharTok{$}\NormalTok{y), }\AttributeTok{margin =} \DecValTok{1}\NormalTok{))}
 \CommentTok{\#\textgreater{}    }
 \CommentTok{\#\textgreater{}        1    2    3    4}
-\CommentTok{\#\textgreater{}   0 0.42 0.22 0.20 0.16}
-\CommentTok{\#\textgreater{}   1 0.14 0.08 0.34 0.44}
+\CommentTok{\#\textgreater{}   0 0.24 0.34 0.22 0.20}
+\CommentTok{\#\textgreater{}   1 0.16 0.14 0.30 0.40}
 
 \CommentTok{\# true (just selecting a row from x = 0 and x = 1)}
 \NormalTok{p[}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{51}\NormalTok{), ]}
@@ -782,13 +790,13 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \NormalTok{(cum\_op }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(op, }\DecValTok{1}\NormalTok{, cumsum))}
 \CommentTok{\#\textgreater{}    }
 \CommentTok{\#\textgreater{}        0    1}
-\CommentTok{\#\textgreater{}   1 0.42 0.14}
-\CommentTok{\#\textgreater{}   2 0.64 0.22}
-\CommentTok{\#\textgreater{}   3 0.84 0.56}
+\CommentTok{\#\textgreater{}   1 0.24 0.16}
+\CommentTok{\#\textgreater{}   2 0.58 0.30}
+\CommentTok{\#\textgreater{}   3 0.80 0.60}
 \CommentTok{\#\textgreater{}   4 1.00 1.00}
 \FunctionTok{odds}\NormalTok{(cum\_op[, }\DecValTok{1}\NormalTok{]) }\SpecialCharTok{/} \FunctionTok{odds}\NormalTok{(cum\_op[, }\DecValTok{2}\NormalTok{])}
 \CommentTok{\#\textgreater{}        1        2        3        4 }
-\CommentTok{\#\textgreater{} 4.448276 6.303030 4.125000      NaN}
+\CommentTok{\#\textgreater{} 1.657895 3.222222 2.666667      NaN}
 
 \CommentTok{\# the odds ratios are not the same as the parameter. as we increase N}
 \CommentTok{\# the parameter will converge to the true value}
@@ -808,19 +816,19 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link   threshold nobs logLik  AIC    niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  probit flexible  100  {-}126.98 261.96 9(0)  1.80e{-}11 2.1e+01}
+\CommentTok{\#\textgreater{}  probit flexible  100  {-}134.51 277.02 5(0)  6.26e{-}14 1.6e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
-\CommentTok{\#\textgreater{}   Estimate Std. Error z value Pr(\textgreater{}|z|)    }
-\CommentTok{\#\textgreater{} x   0.9373     0.2275    4.12 3.78e{-}05 ***}
+\CommentTok{\#\textgreater{}   Estimate Std. Error z value Pr(\textgreater{}|z|)  }
+\CommentTok{\#\textgreater{} x   0.5424     0.2193   2.474   0.0134 *}
 \CommentTok{\#\textgreater{} {-}{-}{-}}
 \CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2  {-}0.1879     0.1683  {-}1.117}
-\CommentTok{\#\textgreater{} 2|3   0.2706     0.1697   1.594}
-\CommentTok{\#\textgreater{} 3|4   1.0595     0.1893   5.596}
+\CommentTok{\#\textgreater{} 1|2  {-}0.6064     0.1727  {-}3.510}
+\CommentTok{\#\textgreater{} 2|3   0.1084     0.1649   0.657}
+\CommentTok{\#\textgreater{} 3|4   0.8175     0.1786   4.576}
 \end{Highlighting}
 \end{Shaded}
 
@@ -892,12 +900,12 @@ An equivalent but more efficient way to simulate an ordinal outcome is using the
 
 \FunctionTok{head\_tail}\NormalTok{(dat, }\AttributeTok{n =} \DecValTok{3}\NormalTok{)}
 \CommentTok{\#\textgreater{}      x       lp       ystar y}
-\CommentTok{\#\textgreater{} 1    0 0.000000 {-}0.63265006 2}
-\CommentTok{\#\textgreater{} 2    0 0.000000  0.96340682 3}
-\CommentTok{\#\textgreater{} 3    0 0.000000  0.95041920 3}
-\CommentTok{\#\textgreater{} 998  1 1.386294  0.07772189 3}
-\CommentTok{\#\textgreater{} 999  1 1.386294  1.09468340 3}
-\CommentTok{\#\textgreater{} 1000 1 1.386294  1.91057532 4}
+\CommentTok{\#\textgreater{} 1    0 0.000000  5.69014212 4}
+\CommentTok{\#\textgreater{} 2    0 0.000000 {-}0.46455234 2}
+\CommentTok{\#\textgreater{} 3    0 0.000000  0.46477194 3}
+\CommentTok{\#\textgreater{} 998  1 1.386294  1.77268372 4}
+\CommentTok{\#\textgreater{} 999  1 1.386294  0.31432885 3}
+\CommentTok{\#\textgreater{} 1000 1 1.386294  0.09155736 3}
 \end{Highlighting}
 \end{Shaded}
 
@@ -913,8 +921,10 @@ The Figure \ref{fig:fig-sim-from-latent} depict the simulated \(Y^{*}\) and the 
 
 }
 
-\caption{ }\label{fig:fig-sim-from-latent}
+\caption{caption}\label{fig:fig-sim-from-latent}
 \end{figure}
+
+\begin{center}\textbf{[Figure 5 about here]} \end{center}
 
 \normalsize
 
@@ -929,19 +939,19 @@ The Figure \ref{fig:fig-sim-from-latent} depict the simulated \(Y^{*}\) and the 
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link  threshold nobs logLik   AIC     niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  logit flexible  1000 {-}1284.98 2577.96 4(0)  1.51e{-}08 1.8e+01}
+\CommentTok{\#\textgreater{}  logit flexible  1000 {-}1230.46 2468.92 4(0)  1.50e{-}07 1.5e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
 \CommentTok{\#\textgreater{}   Estimate Std. Error z value Pr(\textgreater{}|z|)    }
-\CommentTok{\#\textgreater{} x   1.1905     0.1201   9.914   \textless{}2e{-}16 ***}
+\CommentTok{\#\textgreater{} x    1.532      0.124   12.35   \textless{}2e{-}16 ***}
 \CommentTok{\#\textgreater{} {-}{-}{-}}
 \CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2 {-}1.02783    0.09358 {-}10.984}
-\CommentTok{\#\textgreater{} 2|3  0.02280    0.08403   0.271}
-\CommentTok{\#\textgreater{} 3|4  1.06892    0.09184  11.639}
+\CommentTok{\#\textgreater{} 1|2 {-}1.19697    0.09975  {-}12.00}
+\CommentTok{\#\textgreater{} 2|3 {-}0.01383    0.08657   {-}0.16}
+\CommentTok{\#\textgreater{} 3|4  1.21659    0.09628   12.64}
 \end{Highlighting}
 \end{Shaded}
 
@@ -965,12 +975,12 @@ The simulation using the latent formulation of the model is implemented in the \
 
 \FunctionTok{head\_tail}\NormalTok{(dat, }\AttributeTok{n =} \DecValTok{3}\NormalTok{)}
 \CommentTok{\#\textgreater{}     x y         ys}
-\CommentTok{\#\textgreater{} 1   0 1 {-}1.1479983}
-\CommentTok{\#\textgreater{} 2   0 2 {-}0.7163737}
-\CommentTok{\#\textgreater{} 3   0 4  1.3481517}
-\CommentTok{\#\textgreater{} 98  1 3  0.1655840}
-\CommentTok{\#\textgreater{} 99  1 4  1.2106967}
-\CommentTok{\#\textgreater{} 100 1 3  0.6463900}
+\CommentTok{\#\textgreater{} 1   0 3  0.2137525}
+\CommentTok{\#\textgreater{} 2   0 2 {-}0.8345836}
+\CommentTok{\#\textgreater{} 3   0 3  0.3450251}
+\CommentTok{\#\textgreater{} 98  1 3  1.0198405}
+\CommentTok{\#\textgreater{} 99  1 3  0.5007378}
+\CommentTok{\#\textgreater{} 100 1 2 {-}0.2334367}
 \end{Highlighting}
 \end{Shaded}
 
@@ -990,24 +1000,10 @@ The previous simulation can be easily extended by adding predictors and their in
 
 }
 
-\caption{ }\label{fig:fig-show-th-example-1}
+\caption{caption}\label{fig:fig-show-th-example}
 \end{figure}
-\begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-show-th-example-2} 
-
-}
-
-\caption{ }\label{fig:fig-show-th-example-2}
-\end{figure}
-\begin{figure}
-
-{\centering \includegraphics{paper-new_files/figure-latex/fig-show-th-example-3} 
-
-}
-
-\caption{ }\label{fig:fig-show-th-example-3}
-\end{figure}
+\begin{center}\textbf{[Figure 6 about here]} \end{center}
 
 \normalsize
 
@@ -1028,6 +1024,8 @@ We can also calculate and plot the predicted probabilities (i.e., \(g^{-1}(\eta)
 \caption{\texttt{cat\_latent\_plot(m\ =\ c(0,\ 0.5),\ s\ =\ 1,\ probs\ =\ rep(1/4,\ 4),\ link\ =\ "logit",\ plot\ =\ "both")}}\label{fig:fig-example-cat-latent}
 \end{figure}
 
+\begin{center}\textbf{[Figure 7 about here]} \end{center}
+
 \normalsize
 
 \scriptsize
@@ -1040,6 +1038,8 @@ We can also calculate and plot the predicted probabilities (i.e., \(g^{-1}(\eta)
 
 \caption{\texttt{num\_latent\_plot(x\ =\ runif(100),\ b1\ =\ 2,\ probs\ =\ c(0.6,\ 0.2,\ 0.1,\ 0.1),\ link\ =\ "probit")}}\label{fig:fig-example-num-latent}
 \end{figure}
+
+\begin{center}\textbf{[Figure 8 about here]} \end{center}
 
 \normalsize
 
@@ -1076,20 +1076,20 @@ P(Y \leq k) = g^{-1}(\alpha_k - \beta_1X_{1_i} + \beta_2X_{2_i} + \beta_3X_{1_i}
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link   threshold nobs logLik  AIC    niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  probit flexible  400  {-}401.15 812.29 4(0)  2.53e{-}07 2.1e+01}
+\CommentTok{\#\textgreater{}  probit flexible  400  {-}402.44 814.87 5(0)  1.38e{-}07 2.6e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
 \CommentTok{\#\textgreater{}         Estimate Std. Error z value Pr(\textgreater{}|z|)    }
-\CommentTok{\#\textgreater{} x11      0.11896    0.11514   1.033    0.302    }
-\CommentTok{\#\textgreater{} x21      1.00637    0.11746   8.568   \textless{}2e{-}16 ***}
-\CommentTok{\#\textgreater{} x11:x21  0.09606    0.23022   0.417    0.676    }
+\CommentTok{\#\textgreater{} x11      {-}0.1513     0.1165  {-}1.299   0.1940    }
+\CommentTok{\#\textgreater{} x21       0.9056     0.1177   7.691 1.45e{-}14 ***}
+\CommentTok{\#\textgreater{} x11:x21   0.4015     0.2330   1.723   0.0849 .  }
 \CommentTok{\#\textgreater{} {-}{-}{-}}
 \CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2 {-}0.53497    0.06870  {-}7.787}
-\CommentTok{\#\textgreater{} 2|3  0.43367    0.06783   6.393}
+\CommentTok{\#\textgreater{} 1|2 {-}0.43622    0.06724  {-}6.487}
+\CommentTok{\#\textgreater{} 2|3  0.32019    0.06626   4.832}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1107,6 +1107,8 @@ The parameters interpretation is the same as introduced in the general case. The
 
 \caption{ }\label{fig:fig-effects-2-by-2-interaction}
 \end{figure}
+
+\begin{center}\textbf{[Figure 9 about here]} \end{center}
 
 \normalsize
 
@@ -1132,19 +1134,21 @@ Another common scenario is to compute and interaction between a numerical variab
 \CommentTok{\#\textgreater{} formula: y \textasciitilde{} x * g}
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
-\CommentTok{\#\textgreater{}  link   threshold nobs logLik AIC    niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  probit flexible  100  {-}95.71 201.41 5(0)  2.95e{-}08 1.0e+02}
+\CommentTok{\#\textgreater{}  link   threshold nobs logLik  AIC    niter max.grad cond.H }
+\CommentTok{\#\textgreater{}  probit flexible  100  {-}100.58 211.15 6(0)  2.24e{-}13 9.7e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
-\CommentTok{\#\textgreater{}      Estimate Std. Error z value Pr(\textgreater{}|z|)}
-\CommentTok{\#\textgreater{} x      0.4754     0.4198   1.132    0.257}
-\CommentTok{\#\textgreater{} g1     0.3572     0.4483   0.797    0.426}
-\CommentTok{\#\textgreater{} x:g1   1.2149     0.8401   1.446    0.148}
+\CommentTok{\#\textgreater{}      Estimate Std. Error z value Pr(\textgreater{}|z|)  }
+\CommentTok{\#\textgreater{} x     0.39237    0.38698   1.014   0.3106  }
+\CommentTok{\#\textgreater{} g1    0.02712    0.44200   0.061   0.9511  }
+\CommentTok{\#\textgreater{} x:g1  1.43293    0.77516   1.849   0.0645 .}
+\CommentTok{\#\textgreater{} {-}{-}{-}}
+\CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2  {-}0.5090     0.2356  {-}2.160}
-\CommentTok{\#\textgreater{} 2|3   0.2431     0.2321   1.047}
+\CommentTok{\#\textgreater{} 1|2  {-}0.2440     0.2289  {-}1.066}
+\CommentTok{\#\textgreater{} 2|3   0.4631     0.2308   2.006}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1162,6 +1166,8 @@ Again, \texttt{x} is the slope of the numerical predictor averaging over \texttt
 
 \caption{ }\label{fig:fig-effects-num-by-cat-interaction}
 \end{figure}
+
+\begin{center}\textbf{[Figure 10 about here]} \end{center}
 
 \normalsize
 
@@ -1221,7 +1227,7 @@ To make a practical example, we simulate the power of detecting a group differen
 
 \CommentTok{\# estimate the power}
 \FunctionTok{mean}\NormalTok{(p }\SpecialCharTok{\textless{}=}\NormalTok{ alpha, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
-\CommentTok{\#\textgreater{} [1] 0.386}
+\CommentTok{\#\textgreater{} [1] 0.404}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1248,7 +1254,7 @@ Despite useful, calculating power curves instead a single value is more informat
 \NormalTok{\}}
 
 \NormalTok{power}
-\CommentTok{\#\textgreater{} [1] 0.219 0.409 0.531 0.749 0.970}
+\CommentTok{\#\textgreater{} [1] 0.231 0.405 0.521 0.768 0.969}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1264,6 +1270,8 @@ Despite useful, calculating power curves instead a single value is more informat
 
 \caption{caption}\label{fig:fig-power-curve}
 \end{figure}
+
+\begin{center}\textbf{[Figure 11 about here]} \end{center}
 
 \normalsize
 
@@ -1353,6 +1361,10 @@ Tutz, G. (2022). Ordinal regression: A review and a taxonomy of models. \emph{Wi
 Tutz, G., \& Berger, M. (2020). Non proportional odds models are widely dispensable -- sparser modeling based on parametric and additive location-shift approaches. \emph{arXiv {[}Stat.ME{]}}. Retrieved from \url{http://arxiv.org/abs/2006.03914}
 
 \end{CSLReferences}
+
+
+
+
 
 
 

@@ -43,6 +43,8 @@ mask              : no
 figurelist        : no
 tablelist         : no
 footnotelist      : no
+params:
+  floatplaceh: true
 
 classoption       : "man"
 output: 
@@ -124,6 +126,34 @@ head_tail <- function(x, n = 5){
 }
 ```
 
+```{r}
+#| label: fighook
+#| include: false
+#| eval: !expr params$floatplaceh
+
+fig_counter <- filor::scount()
+tbl_counter <- filor::scount()
+
+knitr::knit_hooks$set(fig.place = function(before = FALSE, options) {
+  if(isTRUE(options$fig.place)){
+      if(before){
+          NULL
+      }else{
+          sprintf("\n \\begin{center}\\textbf{[Figure %s about here]} \\end{center}\n", fig_counter())
+      }
+  }
+})
+knitr::knit_hooks$set(tbl.place = function(before = FALSE, options) {
+  if(isTRUE(options$tbl.place)){
+      if(before){
+          NULL
+      }else{
+          sprintf("\n \\begin{center}\\textbf{[Table %s about here]} \\end{center}\n", tbl_counter())
+      }
+  }
+})
+```
+
 # Introduction
 
 Psychological research make an extensive use of ordinal data. One of the main reason is probably the usage of Likert scales [@Likert1932-xw]. Ordinal data refers to a specific type of measurement scale [@Stevens1946-te] where ordered numbers are assigned to a variable. Compared to nominal scale and as the name suggest the labels are ordered. Compared to interval or ratio scales there is no explicit assumption about the distance between labels. An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. @Stevens1946-te and @Kemp2021-dj suggested that for ordinal variables is appropriate to calculate ranks-based descriptive statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation) and using appropriate inferential tools [e.g., @Cliff1996-qo; @Agresti2010-rz]. This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels [@Liddell2018-wu]. More generally, @Cliff2016-ck suggest that most of the research questions in behavioral sciences can be considered as ordinal (*is the score* $x$ higher than the score $y$?) concerning variables where the most appropriate measurement scale is probably ordinal.
@@ -158,7 +188,7 @@ P(Y = k) = g^{-1}(\alpha_k - \eta) -  g^{-1}(\alpha_{k - 1} - \eta), \;\;k = 1, 
 
 There are always two special cases when computing the probability of a single outcome $Y$ that is when $Y = 1$ and $Y = k$. In the first case the cumulative probability is calculated from $-\infty$ that is the same as temporary assuming an $\alpha_0 = -\infty$. In the second case ($Y = 1$) the probability is calculated as $P(Y = k) = 1 - g^{-1}(\alpha_{k - 1} - \eta)$ that is the same as assuming a temporary threshold $\alpha_k = +\infty$. The Figure \@ref(fig:fig-explain-cumulative) shows how the single probabilities of the ordinal outcome are calculated from cumulative probabilities.
 
-```{r fig-explain-cumulative, fig.cap=filor::get_caption()}
+```{r fig-explain-cumulative, fig.cap=filor::get_caption(), fig.place = TRUE}
 probs <- c(0.4, 0.2, 0.3, 0.1)
 th <- prob_to_alpha(probs, link = "probit")
 lat <- data.frame(m = 0, s = 1)
@@ -205,7 +235,7 @@ The two models provide similar results with a different parameters interpretatio
 
 In terms of parameters, both distributions can be defined with a location $\mu$ and a scale $s$ parameter. The standard normal distribution has $\mu = 0$ and $s = 1$. Furthermore the variance corresponds to the scale $s^2 = \sigma^2 = 1$. The variance of the logistic distribution is $\sigma^2 = \frac{s^2\pi^2}{3}$. The standard logistic distribution has $\mu = 0$ and $s^2 = 1$ thus the standard deviation simplified to $\frac{\pi}{\sqrt{3}} \approx 1.81$. In practical terms, fixing $\mu$ and $s$ lead to an higher standard deviation for the logistic distribution.
 
-```{r fig-logit-vs-probit, fig.cap=filor::get_caption()}
+```{r fig-logit-vs-probit, fig.cap=filor::get_caption(), fig.place = TRUE}
 dplot <- ggplot(data = NULL) +
   stat_function(fun = dnorm, aes(color = "Normal"), lwd = 1) +
   stat_function(fun = dlogis, aes(color = "Logistic"), lwd = 1) +
@@ -277,7 +307,7 @@ The two main sections of the model summary are the *Coefficients* section report
 
 To understand the logit model we need to introduce odds and odds ratio. The odds of a probability $p$ is defined as $\frac{p}{1 - p}$ thus the probability of success divided by the probability of failure. The odds takes value ranging from 0 to $\infty$. For example with a probability of $p = 0.8$ we have an odds of $4$, thus we have a 4 successes for each failure. The same as having $p = 0.2$ and an odds of $0.25$ means that for each $0.25$ successes we have a failure or that we have $4$ failures for each success. When comparing two groups or conditions we can compare the two odds calculating an odds ratio. The odds ratio is the mostly used statistics to compare groups or conditions on a binary outcome. An odds ratio of $4$ means that the odds of success at the numerator is 4 times higher than the odds of success at the denominator. The Figure \@ref(fig:fig-odds-example) shows the relationship between probabilities and odds. The logit transformation is about taking the logarithm of the odds creating a symmetric function ranging from $-\infty$ to $\infty$ with $p = 0.5$ as the midpoint because $\text{log}(\frac{0.5}{1 - 0.5}) = 0$. The standard logistic regression with two outcome model the logit transformed probability.
 
-```{r fig-odds-example, fig.cap=filor::get_caption()}
+```{r fig-odds-example, fig.cap=filor::get_caption(), fig.place = TRUE}
 p <- seq(0, 1, 0.001)
 
 dd <- data.frame(
@@ -354,7 +384,7 @@ The proportional odds is assuming that the regression coefficients $\beta$ are i
 (\#eq:prop-odds)
 \end{equation}
 
-```{r fig-prop-odds, fig.cap=filor::get_caption()}
+```{r fig-prop-odds, fig.cap=filor::get_caption(), fig.place = TRUE}
 rfigs$fig_prop_odds
 ```
 
@@ -394,7 +424,7 @@ In this case the odds ratio is exactly the same because the model (thus the pred
 The proportional odds assumption is relevant only for the *logit* model because of the link function that put $\beta$ as log odds. However the concept of the proportional odds that is more generally called parallel slopes assumption is assumed also for the probit model. Equation \@ref(eq:probit-prop-odds) depict the parallel slopes assumption for a probit model. Basically the difference in $z$ for a unit increase in $x$ (i.e., the slope) is the same regardless the $Y$ level. This can be directly demonstrated in the same way as for the logit model. We use the same dataset of the previous simulation. The difference between the $z$ scores comparing the two groups calculated on the cumulative probability is the same regardless the $k - 1$ level.
 
 \begin{equation}
-z_{x_1 - x_0} = \Phi(P \leq k|x_0) - \Phi(P \leq k|x_1) = \dots = \Phi(P \leq k - 1|x_0) - \Phi(P \leq k - 1|x_1)
+z_{x_1 - x_0} = \Phi(P \leq 1|x_0) - \Phi(P \leq 1|x_1) = \dots = \Phi(P \leq k - 1|x_0) - \Phi(P \leq k - 1|x_1)
 (\#eq:probit-prop-odds)
 \end{equation}
 
@@ -607,7 +637,7 @@ head_tail(dat, n = 3)
 
 The Figure \@ref(fig:fig-sim-from-latent) depict the simulated $Y^{*}$ and the corresponding ordinal value. As for the previous simulation we can fit the model using `clm()` and check the estimated parameters.
 
-```{r fig-sim-from-latent}
+```{r fig-sim-from-latent, fig.cap = filor::get_caption(), fig.place = TRUE}
 alpha_n <- latex2exp::TeX(sprintf("$\\alpha_{%s}$", th_names(k)))
 
 dat |> 
@@ -635,7 +665,7 @@ summary(fit)
 
 The simulation using the latent formulation of the model is implemented in the `sim_ord_latent()` function. Details about the function can be found on the Github repository LINK.
 
-```{r}
+```{r simulating-from-latent3}
 #| echo: true
 #| collapse: true
 N <- 100 # sample size
@@ -657,10 +687,16 @@ head_tail(dat, n = 3)
 
 The previous simulation can be easily extended by adding predictors and their interactions. The crucial part is setting appropriate and empirically meaningful parameters. Thresholds $\alpha$ are usually not of main interest [but see the location-shift models @Tutz2022-dg] and can be considered as intercepts in standard linear regression. The thresholds are quantiles of the latent distribution that produced a certain probability distribution of the ordinal variable. To set meaningful $\alpha$ values we can convert probabilities into thresholds (`alpha_to_prob()`). The function `show_alpha()` create a meaningful visual representation of using a specific set of thresholds (see Figure \@ref(fig:fig-show-th-example)). The function can be used as `show_alpha(prob = rep(1/4, 4), link = "probit", plot = c("latent", "probs"))`. In regression terms, the thresholds determine the probabilities when $x = 0$ (as the intercept). Thus with two groups for example, the thresholds are the $k$ probabilities of the ordinal variable $Y$ for the reference group.
 
-```{r fig-show-th-example}
-p1 <- show_alpha(prob = rep(1/4, 4), link = "probit", plot = c("latent", "probs"))
-p2 <- show_alpha(prob = c(0.1, 0.2, 0.5, 0.2), link = "probit", plot = c("latent", "probs"))
-plot_grid(p1, p2, ncol = 1)
+```{r fig-show-th-example, fig.cap=filor::get_caption(), fig.place = TRUE}
+p1 <- show_alpha(prob = rep(1/4, 4), link = "probit")
+p2 <- show_alpha(prob = c(0.1, 0.2, 0.5, 0.2), link = "probit")
+
+p1 <- plot_grid(p1$latent, p1$probs)
+p2 <- plot_grid(p2$latent, p2$probs)
+
+plot_grid(p1, 
+          p2, 
+          ncol = 1)
 ```
 
 #### Regression coefficients $\beta$
@@ -669,11 +705,11 @@ Regression coefficients are the effect size parameters. For *probit* models we c
 
 We can also calculate and plot the predicted probabilities (i.e., $g^{-1}(\eta)$, without actually sampling) given the predictors and the chosen regression coefficients. In this way we can try different values and see if predicted probabilities are plausible or not. The `cat_latent_plot()` and `num_latent_plot()` functions can be for respectively a categorical (Figures \@ref(fig:fig-example-cat-latent)) and numerical predictor (Figures \@ref(fig:fig-example-num-latent)).
 
-```{r fig-example-cat-latent, fig.cap=filor::get_caption()}
+```{r fig-example-cat-latent, fig.cap=filor::get_caption(), fig.place = TRUE}
 cat_latent_plot(m = c(0, 0.5), s = 1, probs = rep(1/4, 4), link = "logit", plot = "both")
 ```
 
-```{r fig-example-num-latent, fig.cap=filor::get_caption()}
+```{r fig-example-num-latent, fig.cap=filor::get_caption(), fig.place = TRUE}
 num_latent_plot(x = runif(100), b1 = 2, probs = c(0.6, 0.2, 0.1, 0.1), link = "probit") +
   mtheme() +
   viridis::scale_color_viridis(discrete = TRUE)
@@ -711,7 +747,7 @@ summary(fit)
 
 The parameters interpretation is the same as introduced in the general case. The thresholds $\alpha$ are fixed representing the probabilities $P(Y = k)$ when all predictors are zero. In this case by doing `alpha_to_prob(fit$alpha, link = "probit")` we should recover the `probs0` vector. `x1` is the main effect thus the difference in $z$ scores between *a* and *b* averaging over `x2`. The same holds for `x2`. `x1:x2` is the difference of differences in $z$ scores (i.e., the interaction). Figure \@ref(fig:fig-effects-2-by-2-interaction) depicts the model results.
 
-```{r fig-effects-2-by-2-interaction}
+```{r fig-effects-2-by-2-interaction, fig.place = TRUE}
 # plot(ggpredict(fit, terms = c("x1", "x2")))
 ggpredict(fit, terms = c("x1", "x2")) |> 
   data.frame() |>
@@ -747,7 +783,7 @@ summary(fit)
 
 Again, `x` is the slope of the numerical predictor averaging over `g` (given that `g` has been coded with sum to zero contrasts) thus the increase in $z$ scores for a unit increase in `x`. `g1` is the main effect of the factor evaluated when $x = 0$. To change the interpretation of `g1` a possibility is to center `x` differently (e.g., mean centering). The `x:g1` is the difference in slopes between the two groups. Figure \@ref(fig:fig-effects-num-by-cat-interaction) depicts the model results.
 
-```{r fig-effects-num-by-cat-interaction}
+```{r fig-effects-num-by-cat-interaction, fig.place = TRUE}
 # plot(ggpredict(fit, terms = c("x[all]", "g")))
 ggpredict(fit, terms = c("x[all]", "g")) |> 
   data.frame() |>
@@ -826,7 +862,7 @@ for(i in 1:length(n)){
 power
 ```
 
-```{r fig-power-curve, fig.cap=filor::get_caption()}
+```{r fig-power-curve, fig.cap=filor::get_caption(), fig.place = TRUE}
 power_df <- data.frame(power = power, n = n)
 
 ggplot(power_df, aes(x = n, y = power)) +
@@ -870,6 +906,10 @@ The current paper proposed a simplified way with some functions to generate ordi
 (ref:fig-effects-num-by-cat-interaction) `plot(ggpredict(fit, terms = c("x[all]", "g")))`
 
 (ref:fig-power-curve) caption
+
+(ref:fig-sim-from-latent) caption
+
+(ref:fig-show-th-example) caption
 
 <!-- TABLES -->
 

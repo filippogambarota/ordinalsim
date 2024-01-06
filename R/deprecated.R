@@ -94,3 +94,28 @@ get_slope <- function(b1){
 get_b0_from_th <- function(th, b1){
   -b1 * th
 }
+get_probs <- function(formula, 
+                      B, 
+                      probs0, 
+                      data, 
+                      link = c("logit", "probit"),
+                      ynames = NULL,
+                      append = FALSE){
+  if(is.null(ynames)){
+    ynames <- paste0("y", 1:length(probs0))
+  }
+  lf <- get_link(link)
+  ths <- c(-Inf, prob_to_alpha(probs0, link = link), Inf)
+  X <- model.matrix(formula, data = data)[, -1]
+  X <- matrix(X)
+  # notice the minus sign t - X %*% B thus an increase in x
+  # is an increase in p
+  P <- lapply(ths, function(t) c(lf$pfun(t - X %*% B)))
+  P <- data.frame(P)
+  P <- data.frame(t(apply(P, 1, diff)))
+  names(P) <- ynames
+  if(append){
+    P <- cbind(data, P)
+  }
+  return(P)
+}
