@@ -1,4 +1,5 @@
 library(flextable)
+library(tidyverse)
 devtools::load_all()
 
 # MODEL TABLE
@@ -8,10 +9,10 @@ models_table <- data.frame(
   Model = c("Model", "Cumulative Logit", "Cumulative Probit"),
   Link.Function = c("Equation",
                     "$\\text{logit}(p) = \\text{log}(p / (1-p))$",
-                    "$z = \\Phi(p)$"),
+                    "$z = \\Phi^{-1}(p)$"),
   Link.Function = c("R Code", "`qlogis()`", "`qnorm()`"),
   Inverse.Link.Function = c("Equation",
-                            "$e^{\\text{logit}(p)} / (1 + e^{\\text{logit}(p)})$","$\\Phi^{-1}(z)$"),
+                            "$e^{\\text{logit}(p)} / (1 + e^{\\text{logit}(p)})$","$\\Phi^(z)$"),
   Inverse.Link.Function = c("R Code", "`plogis()`", "`pnorm()`")
 )
 
@@ -39,7 +40,7 @@ n <- 100
 x <- rep(c("a", "b"), each = n/2)
 dat <- data.frame(x = x)
 probs <- rep(1/k, k) # for the group "a", uniform probabilities
-dat <- sim_ord_latent(~x, By = b1, prob = probs, data = dat, link = "logit")
+dat <- sim_ord_latent(~x, beta = b1, prob0 = probs, data = dat, link = "logit")
 
 funs <- list(mean = mean, median = median, sd = sd)
 ss <- sapply(funs, function(f) tapply(as.numeric(dat$y), dat$x, f))

@@ -178,8 +178,7 @@ num_latent_plot <- function(x,
     th <- prob_to_alpha(probs, link)
   }
   data <- data.frame(x = seq(min(x), max(x), length.out = nsample))
-  #data <- get_probs(~x, b1, probs, data, link, append = TRUE)
-  data <- sim_ord_latent(~x, By = b1, prob = probs, data = data, link = link, simulate = FALSE)
+  data <- sim_ord_latent(~x, beta = b1, prob0 = probs, data = data, link = link, simulate = FALSE)
   datal <- tidyr::pivot_longer(data, starts_with("y"), names_to = "y", values_to = "value")
   ggplot(datal, aes(x = x, y = value, color = y)) +
     geom_line(linewidth = linewidth) +

@@ -23,9 +23,9 @@
 #' dat <- sim_ord_latent(~x, By = 0.5, prob = bprobs, data = dat, link = "probit")
 sim_ord_latent <- function(location,
                            scale = NULL,
-                           By,
-                           Bscale = NULL,
-                           prob = NULL, 
+                           beta,
+                           zeta = NULL,
+                           prob0 = NULL, 
                            alpha = NULL, 
                            data, 
                            link = c("logit", "probit"),
@@ -35,26 +35,26 @@ sim_ord_latent <- function(location,
   lf <- get_link(link)
   if(is.null(alpha)){
     # calculate thresholds if not provided
-    alpha <- prob_to_alpha(prob, link = link)
+    alpha <- prob_to_alpha(prob0, link = link)
   }
   k <- length(alpha) + 1 # number of ordinal outcomes
   n <- nrow(data) # number of observations
   
   # model matrix for the location effect
-  Xy <- model.matrix(location, data = data)[, -1, drop = FALSE] # remove intercept
-  lpy <- c(Xy %*% By) # linear predictor for the location
-  lps <- 0 # default scale effect 0, exp(0) = 1 (the default scale)
+  Xloc <- model.matrix(location, data = data)[, -1, drop = FALSE] # remove intercept
+  lploc <- c(Xloc %*% beta) # linear predictor for the location
+  lpscale <- 0 # default scale effect 0, exp(0) = 1 (the default scale)
   
   # check predictors on the scale parameter
   if(!is.null(scale)){
     # model matrix for the scale effect
-    Xsigma <- model.matrix(scale, data = data)[, -1, drop = FALSE] # remove intercept
-    lps <- c(Xsigma %*% Bscale) # linear predictor for the scale
+    Xscale <- model.matrix(scale, data = data)[, -1, drop = FALSE] # remove intercept
+    lpscale <- c(Xscale %*% zeta) # linear predictor for the scale
   }
   
   if(simulate){
     # latent variable with appropriate error function
-    ystar <- lf$rfun(n, lpy, exp(lps))
+    ystar <- lf$rfun(n, lploc, exp(lpscale))
     
     # cut according to thresholds
     y <- findInterval(ystar, alpha) + 1 # to start from 1
@@ -63,7 +63,7 @@ sim_ord_latent <- function(location,
     data$ys <- ystar # save also the latent
   } else{
     alpha <- c(-Inf, alpha, Inf)
-    cp <- lapply(alpha, function(a) plogis(a - (lpy / exp(lps))))
+    cp <- lapply(alpha, function(a) plogis(a - (lploc / exp(lpscale))))
     cp <- data.frame(do.call(cbind, cp))
     p <- data.frame(t(apply(cp, 1, diff)))
     names(p) <- paste0("y", 1:ncol(p))
