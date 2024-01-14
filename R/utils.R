@@ -63,11 +63,13 @@ sim_ord_latent <- function(location,
     data$ys <- ystar # save also the latent
   } else{
     alpha <- c(-Inf, alpha, Inf)
-    cp <- lapply(alpha, function(a) plogis(a - (lploc / exp(lpscale))))
+    cp <- lapply(alpha, function(a) plogis((a - lploc) / exp(lpscale)))
     cp <- data.frame(do.call(cbind, cp))
     p <- data.frame(t(apply(cp, 1, diff)))
     names(p) <- paste0("y", 1:ncol(p))
-    data <- cbind(data, p)
+    cp <- cp[, 2:k]
+    names(cp) <- paste0("yp", Reduce(paste0, 1:(k - 1), accumulate = TRUE))
+    data <- cbind(data, cp, p)
   }
   return(data)
 }

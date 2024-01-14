@@ -1,0 +1,16 @@
+---
+title: "Useful Resources"
+format: html
+---
+
+In this document we collect some useful resources for ordinal regression models.
+
+# Books
+
+# Papers
+
+# Posts
+
+- [Violation of Proportional Odds is Not Fatal](https://www.fharrell.com/post/po/)
+- [Assessing the Proportional Odds Assumption and Its Impact](https://www.fharrell.com/post/impactpo/)
+- [Resources for Ordinal Regression Models](https://www.fharrell.com/post/rpo/)

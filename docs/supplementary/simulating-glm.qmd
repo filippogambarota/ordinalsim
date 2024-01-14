@@ -1,0 +1,109 @@
+---
+title: "Simulating Generalized Linear Models"
+format: 
+  html:
+    toc: true
+bibliography: "`r filor::fil()$bib`"
+csl: "`r filor::fil()$csl`"
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+```
+
+# Introduction
+
+This document present a general workflow to simulate data for a binomial generalized linear model. This simulation is similar to what is presented in the paper for the special case of an ordinal regression.
+
+# Simulation
+
+The general formula for a binomial GLM is presented in @eq-glm. Where $g^{-1}(\cdot)$ is the inverse of the link function. In the case of a binomial regression with a *logit* link function $g(p) = \text{logit}(p) = log(\frac{p}{1 - p})$ and $g^{-1}[logit(p)] = \text{invlogit}(p) = \frac{e^p}{1 + e^p}$.
+
+$$
+P(Y = 1|\mathbf{X}) = g^{-1}(\mathbf{X} \boldsymbol{\beta})
+$$ {#eq-glm}
+
+The linear combination of parameters $\eta = \mathbf{X} \boldsymbol{\beta}$ define the true probabilities. Then the random part of the model (in this case a *logistic* distribution) define the random variability around the true values. To make an example, let's assume to predict $P(Y = 1)$ with a numerical variable $x$ coming from an uniform distribution $x \sim \mathcal{U}(0, 1)$. As in standard regression we have two parameters:
+
+-   $\beta_0$: the intercept. The probability of having 1 when all predictors are fixed to zero ($P(Y = 1|x = 0)$).
+-   $\beta_1$: the slope. Is the increase in the log-odds of $Y = 1$ for a unit increase in $x$.
+
+Thus we can choose two values for the parameters and plot the true relationship between $x$ and $P(Y = 1)$. The link function is `qlogis()` and the inverse of the link function is `plogis()`. Parameters are expressed in the scale of the of the link function.
+
+```{r}
+b0 <- qlogis(0.01) # probability of success when x = 0, in the link function space
+b1 <- 10 # increase in the log odds of success for a unit increase in x
+x <- seq(0, 1, 0.01) # x values
+p <- plogis(b0 + b1 * x)
+
+plot(x, p, type = "l")
+```
+
+The curve depict the true probability of success for each value of $x$. To include the random error we need to sample the observed values from a Binomial distribution using the vector of probabilities `p`. We sample a vector of 0 and 1.
+
+```{r}
+ns <- length(x) # number of subjects
+y <- rbinom(ns, 1, p)
+head(y)
+
+par(mfrow = c(1,2))
+
+# binary values
+plot(x, jitter(y, amount = 0.05))
+lines(x, p)
+
+# grouped values
+xc <- cut(x, seq(0, 1, 0.1), include.lowest = TRUE)
+yc <- tapply(y, xc, mean)
+
+plot(as.integer(unique(xc))/10, yc)
+lines(x, p)
+```
+
+In practical terms, the $\eta$ define the true probability of success for each observation (i.e., combination of predictors $\mathbf{X}$) and then the random part is introduced by sampling from the assumed probability distribution.
+
+Then we can fit the logistic regression using `glm()` and we should recover the simulation parameters. Increasing the number of trials/observations will reduce the distance between the simulated the true values.
+
+```{r}
+dat <- data.frame(x, y)
+fit <- glm(y ~ x, data = dat, family = binomial(link = "logit"))
+summary(fit)
+
+# model
+coef(fit)
+
+# truth
+c(b0 = b0, b1 = b1)
+```
+
+Changing $\beta_0$ will affect the lower bound of the sigmoid curve while $\beta_1$ determine the slope of the function. @fig-ex-sigmoid depicts logistic curves with different parameters.
+
+```{r}
+#| label: fig-ex-sigmoid
+#| echo: false
+#| code-fold: true
+
+b0 <- qlogis(c(0.01, 0.3, 0.5))
+b1 <- c(5, 10, 20)
+
+pars <- expand.grid(b0 = b0, b1 = b1)
+pars$x <- list(seq(0, 1, 0.01))
+pars <- tibble(pars)
+pars$b0t <- factor(sprintf("$\\beta_0 = g(%s)$", plogis(pars$b0)))
+pars$b0t <- factor(pars$b0t, labels = latex2exp::TeX(levels(pars$b0t)))
+
+pars$b1t <- factor(sprintf("$\\beta_1 = %s$", pars$b1))
+pars$b1t <- factor(pars$b1t, labels = latex2exp::TeX(levels(pars$b1t)))
+
+pars <- unnest(pars, x)
+pars$p <- with(pars, plogis(b0 + b1 * x))
+
+ggplot(pars, aes(x = x, y = p)) +
+  geom_line() +
+  facet_grid(b0t ~ b1t, labeller = label_parsed)
+```
+
+This method is implemented in the paper when sampling from a categorical distribution. In the case of ordinal data we need $k - 1$ equations where $k$ is the number of ordered categories.
