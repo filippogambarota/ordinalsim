@@ -296,7 +296,7 @@ There are always two special cases when computing the probability of a single ou
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-explain-cumulative-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-explain-cumulative-1} 
 
 }
 
@@ -334,7 +334,7 @@ In terms of parameters, both distributions can be defined with a location \(\mu\
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-logit-vs-probit-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-logit-vs-probit-1} 
 
 }
 
@@ -447,7 +447,7 @@ To understand the logit model we need to introduce odds and odds ratio. The odds
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-odds-example-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-odds-example-1} 
 
 }
 
@@ -532,7 +532,7 @@ Basically if we use the \emph{logit} link function \(g(\cdot)\), regression coef
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-prop-odds-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-prop-odds-1} 
 
 }
 
@@ -752,7 +752,7 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 
 \CommentTok{\# example of a random Y outcome based on the probabilities}
 \FunctionTok{sample}\NormalTok{(}\AttributeTok{x =} \DecValTok{1}\SpecialCharTok{:}\NormalTok{k, }\AttributeTok{size =} \DecValTok{1}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p[}\DecValTok{1}\NormalTok{, ])}
-\CommentTok{\#\textgreater{} [1] 3}
+\CommentTok{\#\textgreater{} [1] 1}
 
 \CommentTok{\# we can apply it to the full dataset, this step lead to different results}
 \CommentTok{\# each time we run the code because we are sampling from a distribution}
@@ -760,11 +760,11 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \NormalTok{dat}\SpecialCharTok{$}\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(p, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(ps) }\FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{k, }\AttributeTok{size =} \DecValTok{1}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ ps))}
 \FunctionTok{head}\NormalTok{(dat)}
 \CommentTok{\#\textgreater{}   x y}
-\CommentTok{\#\textgreater{} 1 0 2}
+\CommentTok{\#\textgreater{} 1 0 4}
 \CommentTok{\#\textgreater{} 2 0 4}
 \CommentTok{\#\textgreater{} 3 0 4}
 \CommentTok{\#\textgreater{} 4 0 2}
-\CommentTok{\#\textgreater{} 5 0 1}
+\CommentTok{\#\textgreater{} 5 0 3}
 \CommentTok{\#\textgreater{} 6 0 1}
 
 \CommentTok{\# let\textquotesingle{}s compute the observed probabilities, to be compared to the true}
@@ -774,8 +774,8 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \NormalTok{(op }\OtherTok{\textless{}{-}} \FunctionTok{prop.table}\NormalTok{(}\FunctionTok{table}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{x, dat}\SpecialCharTok{$}\NormalTok{y), }\AttributeTok{margin =} \DecValTok{1}\NormalTok{))}
 \CommentTok{\#\textgreater{}    }
 \CommentTok{\#\textgreater{}        1    2    3    4}
-\CommentTok{\#\textgreater{}   0 0.24 0.32 0.12 0.32}
-\CommentTok{\#\textgreater{}   1 0.10 0.28 0.26 0.36}
+\CommentTok{\#\textgreater{}   0 0.28 0.24 0.22 0.26}
+\CommentTok{\#\textgreater{}   1 0.08 0.12 0.24 0.56}
 
 \CommentTok{\# true (just selecting a row from x = 0 and x = 1)}
 \NormalTok{p[}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{51}\NormalTok{), ]}
@@ -788,13 +788,13 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \NormalTok{(cum\_op }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(op, }\DecValTok{1}\NormalTok{, cumsum))}
 \CommentTok{\#\textgreater{}    }
 \CommentTok{\#\textgreater{}        0    1}
-\CommentTok{\#\textgreater{}   1 0.24 0.10}
-\CommentTok{\#\textgreater{}   2 0.56 0.38}
-\CommentTok{\#\textgreater{}   3 0.68 0.64}
+\CommentTok{\#\textgreater{}   1 0.28 0.08}
+\CommentTok{\#\textgreater{}   2 0.52 0.20}
+\CommentTok{\#\textgreater{}   3 0.74 0.44}
 \CommentTok{\#\textgreater{}   4 1.00 1.00}
 \FunctionTok{odds}\NormalTok{(cum\_op[, }\DecValTok{1}\NormalTok{]) }\SpecialCharTok{/} \FunctionTok{odds}\NormalTok{(cum\_op[, }\DecValTok{2}\NormalTok{])}
 \CommentTok{\#\textgreater{}        1        2        3        4 }
-\CommentTok{\#\textgreater{} 2.842105 2.076555 1.195312      NaN}
+\CommentTok{\#\textgreater{} 4.472222 4.333333 3.622378      NaN}
 
 \CommentTok{\# the odds ratios are not the same as the parameter. as we increase N}
 \CommentTok{\# the parameter will converge to the true value}
@@ -814,17 +814,19 @@ An important step is converting from \(\alpha\) to probability and the opposite.
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link   threshold nobs logLik  AIC    niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  probit flexible  100  {-}133.18 274.37 7(0)  9.13e{-}08 2.1e+01}
+\CommentTok{\#\textgreater{}  probit flexible  100  {-}125.40 258.80 5(0)  3.05e{-}09 1.8e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
-\CommentTok{\#\textgreater{}   Estimate Std. Error z value Pr(\textgreater{}|z|)}
-\CommentTok{\#\textgreater{} x   0.3518     0.2190   1.606    0.108}
+\CommentTok{\#\textgreater{}   Estimate Std. Error z value Pr(\textgreater{}|z|)    }
+\CommentTok{\#\textgreater{} x   0.8280     0.2275   3.639 0.000274 ***}
+\CommentTok{\#\textgreater{} {-}{-}{-}}
+\CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2  {-}0.7949     0.1794  {-}4.431}
-\CommentTok{\#\textgreater{} 2|3   0.1063     0.1693   0.628}
-\CommentTok{\#\textgreater{} 3|4   0.5994     0.1740   3.445}
+\CommentTok{\#\textgreater{} 1|2 {-}0.58309    0.17598  {-}3.313}
+\CommentTok{\#\textgreater{} 2|3  0.02447    0.16790   0.146}
+\CommentTok{\#\textgreater{} 3|4  0.66422    0.17602   3.774}
 \end{Highlighting}
 \end{Shaded}
 
@@ -893,13 +895,13 @@ The Figure \ref{fig:fig-sim-from-latent} depict the simulated \(Y^{*}\) and the 
 \NormalTok{dat}\SpecialCharTok{$}\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{findInterval}\NormalTok{(dat}\SpecialCharTok{$}\NormalTok{ystar, alpha) }\SpecialCharTok{+} \DecValTok{1}
 
 \FunctionTok{head\_tail}\NormalTok{(dat, }\AttributeTok{n =} \DecValTok{3}\NormalTok{)}
-\CommentTok{\#\textgreater{}      x       lp      ystar y}
-\CommentTok{\#\textgreater{} 1    0 0.000000 {-}1.4897139 1}
-\CommentTok{\#\textgreater{} 2    0 0.000000 {-}0.9811171 2}
-\CommentTok{\#\textgreater{} 3    0 0.000000 {-}0.2015837 2}
-\CommentTok{\#\textgreater{} 998  1 1.386294  1.0619636 3}
-\CommentTok{\#\textgreater{} 999  1 1.386294  0.9690069 3}
-\CommentTok{\#\textgreater{} 1000 1 1.386294 {-}1.8056165 1}
+\CommentTok{\#\textgreater{}      x       lp       ystar y}
+\CommentTok{\#\textgreater{} 1    0 0.000000  0.40548307 3}
+\CommentTok{\#\textgreater{} 2    0 0.000000  1.89090227 4}
+\CommentTok{\#\textgreater{} 3    0 0.000000 {-}2.26992221 1}
+\CommentTok{\#\textgreater{} 998  1 1.386294 {-}0.98284222 2}
+\CommentTok{\#\textgreater{} 999  1 1.386294 {-}0.06339477 2}
+\CommentTok{\#\textgreater{} 1000 1 1.386294 {-}0.21570993 2}
 \end{Highlighting}
 \end{Shaded}
 
@@ -909,7 +911,7 @@ The Figure \ref{fig:fig-sim-from-latent} depict the simulated \(Y^{*}\) and the 
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-sim-from-latent-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-sim-from-latent-1} 
 
 }
 
@@ -931,19 +933,19 @@ The Figure \ref{fig:fig-sim-from-latent} depict the simulated \(Y^{*}\) and the 
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link  threshold nobs logLik   AIC     niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  logit flexible  1000 {-}1255.36 2518.73 4(0)  3.26e{-}08 1.6e+01}
+\CommentTok{\#\textgreater{}  logit flexible  1000 {-}1265.26 2538.51 4(0)  2.10e{-}08 1.7e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
 \CommentTok{\#\textgreater{}   Estimate Std. Error z value Pr(\textgreater{}|z|)    }
-\CommentTok{\#\textgreater{} x   1.3403     0.1217   11.02   \textless{}2e{-}16 ***}
+\CommentTok{\#\textgreater{} x   1.2901     0.1209   10.67   \textless{}2e{-}16 ***}
 \CommentTok{\#\textgreater{} {-}{-}{-}}
 \CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2 {-}1.11938    0.09713 {-}11.524}
-\CommentTok{\#\textgreater{} 2|3 {-}0.03563    0.08586  {-}0.415}
-\CommentTok{\#\textgreater{} 3|4  1.10228    0.09360  11.777}
+\CommentTok{\#\textgreater{} 1|2 {-}1.10239    0.09662 {-}11.410}
+\CommentTok{\#\textgreater{} 2|3 {-}0.01977    0.08561  {-}0.231}
+\CommentTok{\#\textgreater{} 3|4  1.09680    0.09307  11.784}
 \end{Highlighting}
 \end{Shaded}
 
@@ -966,13 +968,13 @@ The simulation using the latent formulation of the model is implemented in the \
 \NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{sim\_ord\_latent}\NormalTok{(}\AttributeTok{location =} \SpecialCharTok{\textasciitilde{}}\NormalTok{x, }\AttributeTok{beta =} \FunctionTok{log}\NormalTok{(or), }\AttributeTok{prob0 =}\NormalTok{ probs0, }\AttributeTok{data =}\NormalTok{ dat, }\AttributeTok{link =} \StringTok{"logit"}\NormalTok{)}
 
 \FunctionTok{head\_tail}\NormalTok{(dat, }\AttributeTok{n =} \DecValTok{3}\NormalTok{)}
-\CommentTok{\#\textgreater{}     x y         ys}
-\CommentTok{\#\textgreater{} 1   0 3  0.1445982}
-\CommentTok{\#\textgreater{} 2   0 1 {-}1.5179018}
-\CommentTok{\#\textgreater{} 3   0 4  1.5222026}
-\CommentTok{\#\textgreater{} 98  1 4  3.3201003}
-\CommentTok{\#\textgreater{} 99  1 4  2.6305353}
-\CommentTok{\#\textgreater{} 100 1 2 {-}0.1008892}
+\CommentTok{\#\textgreater{}     x y        ys}
+\CommentTok{\#\textgreater{} 1   0 4  1.925855}
+\CommentTok{\#\textgreater{} 2   0 1 {-}1.663871}
+\CommentTok{\#\textgreater{} 3   0 1 {-}1.215561}
+\CommentTok{\#\textgreater{} 98  1 4  1.935991}
+\CommentTok{\#\textgreater{} 99  1 4  2.818956}
+\CommentTok{\#\textgreater{} 100 1 4  3.384374}
 \end{Highlighting}
 \end{Shaded}
 
@@ -988,7 +990,7 @@ The previous simulation can be easily extended by adding more predictors and the
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-show-th-example-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-show-th-example-1} 
 
 }
 
@@ -1009,7 +1011,7 @@ We can also calculate and plot the predicted probabilities (i.e., \(g^{-1}(\eta)
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-example-cat-latent-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-example-cat-latent-1} 
 
 }
 
@@ -1024,7 +1026,7 @@ We can also calculate and plot the predicted probabilities (i.e., \(g^{-1}(\eta)
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-example-num-latent-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-example-num-latent-1} 
 
 }
 
@@ -1068,20 +1070,20 @@ P(Y \leq k) = g^{-1}(\alpha_k - \beta_1X_{1_i} + \beta_2X_{2_i} + \beta_3X_{1_i}
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link   threshold nobs logLik  AIC    niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  probit flexible  400  {-}421.76 853.51 5(0)  6.60e{-}13 2.3e+01}
+\CommentTok{\#\textgreater{}  probit flexible  400  {-}398.87 807.73 5(0)  2.70e{-}10 2.4e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
 \CommentTok{\#\textgreater{}         Estimate Std. Error z value Pr(\textgreater{}|z|)    }
-\CommentTok{\#\textgreater{} x11      0.06325    0.11371   0.556   0.5781    }
-\CommentTok{\#\textgreater{} x21      0.61698    0.11444   5.391    7e{-}08 ***}
-\CommentTok{\#\textgreater{} x11:x21  0.57404    0.22768   2.521   0.0117 *  }
+\CommentTok{\#\textgreater{} x11       0.1294     0.1165   1.111  0.26659    }
+\CommentTok{\#\textgreater{} x21       0.9499     0.1181   8.046 8.57e{-}16 ***}
+\CommentTok{\#\textgreater{} x11:x21   0.6674     0.2333   2.861  0.00422 ** }
 \CommentTok{\#\textgreater{} {-}{-}{-}}
 \CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2 {-}0.43993    0.06606  {-}6.659}
-\CommentTok{\#\textgreater{} 2|3  0.45458    0.06642   6.844}
+\CommentTok{\#\textgreater{} 1|2 {-}0.31805    0.06668  {-}4.770}
+\CommentTok{\#\textgreater{} 2|3  0.50499    0.06839   7.384}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1093,7 +1095,7 @@ The parameters interpretation is the same as introduced in the general case. The
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-effects-2-by-2-interaction-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-effects-2-by-2-interaction-1} 
 
 }
 
@@ -1127,18 +1129,20 @@ Another common scenario is the interaction between a numerical variable \(x\) an
 \CommentTok{\#\textgreater{} data:    dat}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{}  link   threshold nobs logLik AIC    niter max.grad cond.H }
-\CommentTok{\#\textgreater{}  probit flexible  100  {-}97.98 205.97 6(0)  5.36e{-}13 1.1e+02}
+\CommentTok{\#\textgreater{}  probit flexible  100  {-}99.92 209.84 4(0)  1.85e{-}11 7.2e+01}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Coefficients:}
-\CommentTok{\#\textgreater{}      Estimate Std. Error z value Pr(\textgreater{}|z|)}
-\CommentTok{\#\textgreater{} x     0.03305    0.40738   0.081    0.935}
-\CommentTok{\#\textgreater{} g1    0.30569    0.46246   0.661    0.509}
-\CommentTok{\#\textgreater{} x:g1  1.01724    0.81525   1.248    0.212}
+\CommentTok{\#\textgreater{}      Estimate Std. Error z value Pr(\textgreater{}|z|)  }
+\CommentTok{\#\textgreater{} x      0.9464     0.4066   2.328   0.0199 *}
+\CommentTok{\#\textgreater{} g1     1.0557     0.4603   2.293   0.0218 *}
+\CommentTok{\#\textgreater{} x:g1  {-}0.3967     0.8086  {-}0.491   0.6237  }
+\CommentTok{\#\textgreater{} {-}{-}{-}}
+\CommentTok{\#\textgreater{} Signif. codes:  0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
 \CommentTok{\#\textgreater{} }
 \CommentTok{\#\textgreater{} Threshold coefficients:}
 \CommentTok{\#\textgreater{}     Estimate Std. Error z value}
-\CommentTok{\#\textgreater{} 1|2 {-}0.65333    0.24337  {-}2.685}
-\CommentTok{\#\textgreater{} 2|3  0.04236    0.23666   0.179}
+\CommentTok{\#\textgreater{} 1|2  {-}0.1297     0.2349  {-}0.552}
+\CommentTok{\#\textgreater{} 2|3   0.9918     0.2494   3.977}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1150,7 +1154,7 @@ Again, \texttt{x} is the slope of the numerical predictor averaging over \texttt
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-effects-num-by-cat-interaction-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-effects-num-by-cat-interaction-1} 
 
 }
 
@@ -1217,7 +1221,7 @@ We can estimate the power of detecting a group difference of \(d = 0.4\) (assumi
 
 \CommentTok{\# estimate the power}
 \FunctionTok{mean}\NormalTok{(p }\SpecialCharTok{\textless{}=}\NormalTok{ alpha, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
-\CommentTok{\#\textgreater{} [1] 0.381}
+\CommentTok{\#\textgreater{} [1] 0.414}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1244,7 +1248,7 @@ Despite useful, calculating power curves instead a single value is more informat
 \NormalTok{\}}
 
 \NormalTok{power}
-\CommentTok{\#\textgreater{} [1] 0.216 0.407 0.561 0.748 0.964}
+\CommentTok{\#\textgreater{} [1] 0.229 0.383 0.540 0.745 0.971}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1254,7 +1258,7 @@ Despite useful, calculating power curves instead a single value is more informat
 
 \begin{figure}
 
-{\centering \includegraphics{paper-new_files/figure-latex/fig-power-curve-1} 
+{\centering \includegraphics{paper_files/figure-latex/fig-power-curve-1} 
 
 }
 
