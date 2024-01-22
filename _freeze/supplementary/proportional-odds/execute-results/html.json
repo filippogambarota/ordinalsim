@@ -1,0 +1,15 @@
+{
+  "hash": "4241e2ca0a9843444ffc61932572b7de",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Checking Proportional Odds\"\nformat: \n  html:\n    toc: true\nbibliography: \"https://raw.githubusercontent.com/filippogambarota/bib-database/main/references.bib\"\ncsl: \"https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl\"\n---\n\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

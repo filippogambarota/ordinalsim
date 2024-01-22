@@ -47,3 +47,19 @@ rsconnect/
 inst/doc
 
 math-rendered-by-lua-filter*
+
+/.quarto/
+
+.DS_Store
+.Rhistoryt
+.Rhistory
+/.quarto/
+/_*.local
+/.venv/
+/.condaenv/
+*_cache/
+/env/
+/_site/
+
+
+/.luarc.json
