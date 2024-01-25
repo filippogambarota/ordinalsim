@@ -1,41 +1,12 @@
-qrender <- function(){
-  rmarkdown::render("paper/paper.Rmd")
-  system("quarto render")
+anonymize_paper <- function(file){
+  # remove title page
+  qpdf::pdf_subset(file, pages = -1, output = sprintf("%s_anonymized.pdf", xfun::sans_ext(file)))
+  
+  # create title page
+  qpdf::pdf_subset(file, pages = 1, output = sprintf("%s_title_page.pdf", xfun::sans_ext(file)))
 }
 
-mkdirif <- function(dir){
-  if(!fs::is_dir(dir)){
-    fs::dir_create(dir)
-  }
-}
-
-render <- function(file){
-  db <- getdb()
-  parent <- dirname(file)
-  current_md5 <- tools::md5sum(file)
-  update <- !(db$md5[db$files == names(current_md5)] == current_md5)
-  if(update){
-    rmarkdown::render(file)
-    db$md5[db$files == names(current_md5)] <- current_md5
-    saveRDS(db, ".dbcache/dbcache.rds")
-  }else{
-    cat("file not changed!")
-  }
-}
-
-getdb <- function(){
-  mkdirif(file.path(".dbcache"))
-  dbpath <- here::here(".dbcache", "dbcache.rds")
-  if(!fs::file_exists(dbpath)){
-    files <- list.files(pattern = "Rmd", full.names = TRUE, recursive = TRUE)
-    md5 <- tools::md5sum(files)
-    db <- data.frame(
-      file = gsub("\\./", "", names(md5)),
-      md5 = md5
-    )
-    names(db) <- c("files", "md5")
-    rownames(db) <- NULL
-    saveRDS(db, dbpath)
-  }
-  db <- readRDS(dbpath)
+render_paper <- function(){
+  rmarkdown::render(here::here("paper", "paper.Rmd"), output_format = "all")
+  anonymize_paper("paper/paper.pdf")
 }

@@ -116,3 +116,38 @@ qapa <- function(data, caption){
 rm_legend <- function(){
   theme(legend.position = "none")
 }
+
+replace_before_after <- function(x, before, after = NULL, new){
+  if(is.null(after)) after <- before
+  whole <- sprintf("%s.*%s", before, after)
+  within <- sprintf("(?<=%s).*(?=%s)", before, after)
+  within_string <- regmatches(x, regexpr(within, x, perl = TRUE))
+  new_string <- sprintf(new, within_string)
+  x[grepl(whole, x)] <- stringr::str_replace_all(x[grepl(whole, x)], whole, new_string)
+  return(x)
+}
+
+fmt <- function(x, what, type = "markdown", digits = 2, ...){
+  type <- match.arg(type, c("latex", "markdown"))
+  what <- match.arg(what, c("bold", "italic"))
+  if(is.numeric(x)) x <- round(x, digits)
+  fun <- switch(what,
+    "bold" = bold,
+    "italic" = italic
+  )
+  fun(x, type, ...)
+}
+
+bold <- function(x, type = "markdown"){
+  switch(type,
+    "markdown" = sprintf("**%s**", x),
+    "latex" = sprintf("\\textbf{%s}", x)
+  )
+}
+
+italic <- function(x, type = "markdown"){
+  switch(type,
+         "markdown" = sprintf("*%s*", x),
+         "latex" = sprintf("\\textit{%s}", x)
+  )
+}

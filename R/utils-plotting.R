@@ -179,6 +179,7 @@ num_latent_plot <- function(x,
   }
   data <- data.frame(x = seq(min(x), max(x), length.out = nsample))
   data <- sim_ord_latent(~x, beta = b1, prob0 = probs, data = data, link = link, simulate = FALSE)
+  data <- data[, !grepl("^yp", names(data))]
   datal <- tidyr::pivot_longer(data, starts_with("y"), names_to = "y", values_to = "value")
   ggplot(datal, aes(x = x, y = value, color = y)) +
     geom_line(linewidth = linewidth) +
