@@ -1,7 +1,12 @@
 ---
-title: "Test"
+title: "Simulating ordinal data"
 ---
 
-This is a Quarto website.
+This is the online supplementary material for the tutorial-paper *Ordinal regression models made easy. A tutorial on parameter interpretation, data simulation, and power analysis*.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+In the next links there are useful materials and examples that extended what presented in the tutorial-paper.
+
+- [Useful resources](supplementary/useful-resources.qmd): a collection of books, blog posts, R packages and more about ordinal data
+- [Ordinal notes](supplementary/ordinal-notes.qmd): a miscellanea of code snippets and quick examples about ordinal regression models
+- [Location-scale models](supplementary/location-scale-models.qmd): a tutorial to fit, interpret and simulate location-scale cumulative link models.
+- [Simulating a GLM](supplementary/simulating-glm.qmd): a quick example on how to simulate data for a Generalized Linear Model (GLM).

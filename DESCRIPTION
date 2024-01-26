@@ -1,12 +1,12 @@
 Package: ordinalsim
-Title: Utilities to understand and simulate ordinal regression models
-Version: 0.0.1
+Title: Understanding and simulating ordinal regression models
+Version: 1.0.0
 Authors@R: 
     person("Filippo", "Gambarota", , "filippo.gambarota@unipd.id", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6666-1747"))
     person("Gianmarco", "Altoè", , "gianmarco.altoe@unipd.id", role = c("aut"),
            comment = c(ORCID = "0000-0003-1154-9528"))
-Description: Collection of functions to understand and simulate (cumulative link) ordinal regression models.
+Description: Collection of functions to understand and simulate (cumulative) ordinal regression models.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

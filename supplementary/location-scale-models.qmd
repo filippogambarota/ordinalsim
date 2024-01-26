@@ -20,25 +20,34 @@ knitr::opts_chunk$set(echo = TRUE,
                       dev = "svg",
                       warning = FALSE,
                       message = FALSE)
+mtheme <- function(){
+  theme_minimal(15)
+}
+theme_set(mtheme())
 ```
 
 ## Scale Effects
 
-The default ordinal regression model assume that the variance of the underlying latent distribution is the same across condition. This is similar to a standard linear regression assuming the homogeneity of variance. For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test [see @Delacre2017-qy]. In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. The Equations [-@eq-scale-location] and [-@eq-latent-scale-location] expand the standard model including the linear predictor on the scale of the latent distribution.
+The default ordinal regression model assume that the variance of the underlying latent distribution is the same across conditions. This is similar to a standard linear regression assuming the homogeneity of variances. 
+
+For example, when comparing two groups or conditions we can run a standard linear model (i.e., a t-test) assuming homogeneity of variances or using the Welch t-test [see @Delacre2017-qy] that relaxes the assumption. In addition, there are the so-called location-scale models that allows to include predictors also for the scale (e.g., the variance) of the distribution. 
+
+This can be done also in ordinal regression where instead of assuming the same variance between conditions, the linear predictors can be included. The Equations [-@eq-scale-location] and [-@eq-latent-scale-location] expand the standard model including the linear predictor on the scale of the latent distribution.
 
 $$
 P(Y \leq k) = g^{-1}\left(\frac{\alpha_k - \mathbf{X}\boldsymbol{\beta}}{e^{\boldsymbol{Z}\boldsymbol{\zeta}}}\right)
 $$ {#eq-scale-location}
 
 $$
-Y^\star_i = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon} \;\;\; \epsilon_i \sim \mathcal{N}(0, e^{Z\zeta})
+Y^\star = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon} \;\;\; \epsilon_i \sim \mathcal{N}(0, e^{Z\zeta})
 $$ {#eq-latent-scale-location}
 
-Where $X\zeta$ is the linear predictor for the scale of the distribution. By default for both the *logit* and *probit* model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function $\eta = \text{log}(X\zeta)$. As suggested by @Tutz2017-de location-scale models can be considered as a more parsimonious approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexibility. Furthermore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The fig-scale-effect-example) depict the impact of having different scales between two groups on the ordinal probabilities.
+Where $X\zeta$ is the linear predictor for the scale of the distribution. By default for both the *logit* and *probit* model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function $\eta = \text{log}(X\zeta)$. As suggested by @Tutz2017-de location-scale models can be considered as a more parsimonious approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexibility. Furthermore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The @fig-scale-effect-example depict the impact of having different scales between two groups on the ordinal probabilities.
 
 ```{r}
-#| label: fig-scale-effect-example 
-cat_latent_plot(m = c(0, 1), s = c(1, 2), probs = rep(1/4, 4), link = "logit", plot = "both")
+#| label: fig-scale-effect-example
+cat_latent_plot(location = c(0, 1), scale = c(1, 2), prob0 = rep(1/4, 4), link = "logit", plot = FALSE) |> 
+  cowplot::plot_grid(plotlist = _, nrow = 1)
 ```
 
 
@@ -53,31 +62,42 @@ The location parameter determine the category and the scale determine the concen
 #| warning: false
 #| fig-width: 10
 #| fig-height: 10
-sigma_high <- cat_latent_plot(m = c(0, 0), 
-                s = c(1, 2), 
-                probs = rep(1/4, 4), 
-                link = "probit", 
-                plot = "both",
-                title = latex2exp::TeX("$\\sigma^2_{g_2} = 2$"))
-sigma_low <- cat_latent_plot(m = c(0, 0), 
-                s = c(1, 0.5), 
-                probs = rep(1/4, 4), 
-                link = "probit", 
-                plot = "both",
-                title = latex2exp::TeX("$\\sigma^2_{g_2} = 0.5$"))
-sigma_high_mu1 <- cat_latent_plot(m = c(0, 1), 
-                s = c(1, 2), 
-                probs = rep(1/4, 4), 
-                link = "probit", 
-                plot = "both",
-                title = latex2exp::TeX("$\\sigma^2_{g_2} = 2$, $\\mu_2 = 1$"))
-sigma_low_mu1 <- cat_latent_plot(m = c(0, 1), 
-                s = c(1, 0.5), 
-                probs = rep(1/4, 4), 
-                link = "probit", 
-                plot = "both",
-                title = latex2exp::TeX("$\\sigma^2_{g_2} = 0.5$, $\\mu_2 = 1$"))
-plot_grid(sigma_high, sigma_low, sigma_high_mu1, sigma_low_mu1)
+
+ggrid <- function(plt, title){
+  plt[[1]] <- plt[[1]] + ggtitle(title)
+  cowplot::plot_grid(plotlist = plt, nrow = 1)
+}
+
+sigma_high <- cat_latent_plot(location = c(0, 0), 
+                scale = c(1, 2), 
+                prob0 = rep(1/4, 4), 
+                link = "probit",
+                plot = FALSE)
+
+sigma_low <- cat_latent_plot(location = c(0, 0), 
+                scale = c(1, 0.5), 
+                prob0 = rep(1/4, 4), 
+                link = "probit",
+                plot = FALSE)
+
+sigma_high_mu1 <- cat_latent_plot(location = c(0, 1), 
+                scale = c(1, 2), 
+                prob0 = rep(1/4, 4), 
+                link = "probit",
+                plot = FALSE)
+
+sigma_low_mu1 <- cat_latent_plot(location = c(0, 1), 
+                scale = c(1, 0.5), 
+                prob0 = rep(1/4, 4), 
+                link = "probit",
+                plot = FALSE)
+
+plot_grid(
+  ggrid(sigma_high, latex2exp::TeX("$\\mu = 0, 0$, $\\sigma = 1, 2$")), 
+  ggrid(sigma_low, latex2exp::TeX("$\\mu = 0, 0$, $\\sigma = 1, 0.5$")), 
+  ggrid(sigma_high_mu1, latex2exp::TeX("$\\mu = 0, 1$, $\\sigma = 1, 2$")), 
+  ggrid(sigma_low_mu1, latex2exp::TeX("$\\mu = 0, 1$, $\\sigma = 1, 0.5$"))
+)
 ```
 
 ### Simulating scale effects
@@ -134,7 +154,8 @@ lapply(fits, function(x) coef(x)) |>
   mutate(xp = list(seq(0, 5, 0.01))) |> 
   unnest(xp) |> 
   ggplot(aes(x = xp, y = `(Intercept)` + x * xp)) +
-  geom_line(aes(color = model))
+  geom_line(aes(color = model)) +
+  theme_minimal(15)
 ```
 
 ### Parallel slopes with scale effects
@@ -146,6 +167,8 @@ If a scale effect is included in `clm()` is not immediately clear what happens t
 ```{r}
 #| label: fig-scale-slope-effect
 #| echo: false
+#| fig-height: 8
+#| fig-width: 8
 location <- 0
 scale <- c(0.2, 1, 2)
 
@@ -202,7 +225,7 @@ apply(pcum, 2, function(c) log(odds(c[1])/odds(c[2])))
 ```
 
 ```{r}
-cat_latent_plot(c(0, 0 + b1), s = c(exp(0), (exp(0) + z1)), probs = rep(1/k, k), link = "logit", plot = "both")
+cat_latent_plot(c(0, 0 + b1), s = c(exp(0), (exp(0) + z1)), prob0 = rep(1/k, k), link = "logit")
 ```
 
 

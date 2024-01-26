@@ -10,3 +10,17 @@ render_paper <- function(){
   rmarkdown::render(here::here("paper", "paper.Rmd"), output_format = "all")
   anonymize_paper("paper/paper.pdf")
 }
+
+.get_packages <- function(){
+  options(renv.verbose = FALSE)
+  pkgs <- renv::dependencies()
+  pkgs <- unique(pkgs$Package)
+  pkgs <- pkgs[!pkgs %in% c("R", "shiny")]
+  pkgs_data <- data.frame(
+    pkg = pkgs
+  )
+  
+  pkgs_data$version <- sapply(pkgs_data$pkg, 
+                              function(x) paste(packageVersion(x), collapse = "."))
+  pkgs_data
+}

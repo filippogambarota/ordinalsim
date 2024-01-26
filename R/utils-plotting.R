@@ -1,6 +1,18 @@
+#' Show the thresholds and associated probabilities
+#'
+#' @param prob vector of probabilities
+#' @param alpha vector of thresholds
+#' @param link link function (logit or probit)
+#'
+#' @return a list of plots
+#' @export
 show_alpha <- function(prob = NULL, 
                        alpha = NULL, 
-                       link = c("logit", "probit")){
+                       link = "logit",
+                       plot = TRUE){
+  
+  # not elegant, but effective
+  suppressMessages(suppressWarnings(library(ggplot2)))
   
   if(is.null(prob) & is.null(alpha)){
     stop("alpha or prob must be specified!")
@@ -9,9 +21,7 @@ show_alpha <- function(prob = NULL,
   if(is.null(prob)){
     prob <- alpha_to_prob(alpha, link)
   }else{
-    if(sum(prob) != 1){
-      stop("the prob vector must sum to 1!")
-    }
+    sum_to_1(prob)
     alpha <- prob_to_alpha(prob, link)
   }
   
@@ -35,7 +45,7 @@ show_alpha <- function(prob = NULL,
     ggdist::stat_slab(aes(dist = dist,
                           fill = factor(after_stat(findInterval(x, alpha) + 1))),
                       orientation = "horizontal",
-                      alpha = 0.8) +
+                      alpha = 1) +
     xlim(xlim) +
     theme_minimal(15) +
     theme(legend.title = element_blank(),
@@ -55,16 +65,20 @@ show_alpha <- function(prob = NULL,
   y_cp <- lf$pfun(c(-Inf, alpha, Inf))
   y_p <- 0.5 * (y_cp[1:(length(y_cp) - 1)] + y_cp[2:length(y_cp)])
   
-  pplot <- ggplot() +
-    stat_function(geom = "line", fun = lf$pfun) +
-    xlim(xlim) +
-    geom_segment(aes(x = alpha, y = 0, xend = alpha, yend = lf$pfun(alpha))) +
-    geom_segment(aes(x = -Inf, y = lf$pfun(alpha), xend = alpha, yend = lf$pfun(alpha))) +
+  pplot <- ggplot(data = NULL, aes(x = xlim)) +
+    geom_line(stat = "function", 
+              fun = lf$pfun, 
+              #aes(color = factor(after_stat(findInterval(x, alpha)))),
+              linewidth = 1.5) +
+    geom_segment(data = NULL, aes(x = alpha, y = 0, xend = alpha, yend = lf$pfun(alpha))) +
+    geom_segment(data = NULL,aes(x = -Inf, y = lf$pfun(alpha), xend = alpha, yend = lf$pfun(alpha))) +
     ggtext::geom_richtext(aes(x = alpha, y = 0, label = alpha_n), angle = 90, hjust = 0) +
     annotate("label", x = -Inf, y = y_p, label = 1:k, hjust = -0.5) +
     theme_minimal(15) +
     theme(axis.title.x = element_blank(),
-          axis.title.y = element_blank())
+          axis.title.y = element_blank(),
+          legend.position = "none")
+  
   
   pp <- data.frame(
     y = 1:k,
@@ -77,71 +91,95 @@ show_alpha <- function(prob = NULL,
     ylab("Probability") +
     theme_minimal(15) +
     theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank()) +
+                   axis.title.x = element_blank(),
+                   axis.title.y = element_blank()) +
     ylim(c(0, 1))
   
-  list(latent = dplot, cumulative = pplot, probs = hplot)
+  out <- list(latent = dplot, cumulative = pplot, probs = hplot)
+  if(plot){
+    print(cowplot::plot_grid(dplot, pplot, hplot, nrow = 1))
+  }
+  invisible(out)
 }
 
-cat_latent_plot <- function(m = 0, 
-                            s = 1, 
-                            th = NULL, 
-                            probs = NULL, 
-                            link = c("logit", "probit"),
-                            plot = c("probs", "latent", "both"),
-                            title = NULL){
+#' Shows the effect of a categorical variable on predicted ordinal probabilities
+#'
+#' @param location vector of group latent locations
+#' @param scale vector of group latent scales
+#' @param alpha vector of threshold
+#' @param prob0 vector of baseline probabilities
+#' @param link 
+#' @param plot 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+cat_latent_plot <- function(location = 0,
+                            scale = 1, 
+                            alpha = NULL, 
+                            prob0 = NULL, 
+                            link = "logit",
+                            plot = TRUE
+){
   require(ggplot2)
-  plot <- match.arg(plot)
   lf <- get_link(link)
-  x <- paste0("g", 1:length(m))
-  lat <- data.frame(
-    x = x,
-    m = m,
-    s = s
-  )
   
-  if(is.null(th)){
-    th <- prob_to_alpha(probs, link)
+  if(is.null(alpha)){
+    sum_to_1(prob0)
+    alpha <- prob_to_alpha(prob0, link = link)
   }
   
-  thl <- latex2exp::TeX(sprintf("$\\alpha_{%s}$", 1:length(th)))
+  data <- data.frame(x = factor(1:length(location)))
+  k <- length(alpha) + 1
+  if(length(location) > 1){
+    beta <- abs(location[1] - location[2:length(location)])
+    zeta <- log(scale[2]/scale[1])
+    data <- sim_ord_latent(~x, scale = ~x, beta = beta, zeta = zeta, data = data, alpha = alpha, link = link, simulate = FALSE)
+    data <- data[, !grepl("^yp", names(data))]
+  }else{
+    names(prob0) <- paste0("y", 1:k)
+    data <- cbind(data, t(data.frame(prob0)))
+  }
+
+  data$location <- location
+  data$scale <- scale
+  
+  thl <- latex2exp::TeX(sprintf("$\\alpha_{%s}$", 1:length(alpha)))
   
   if(link == "logit"){
     dfun <- distributional::dist_logistic
-    s <- sqrt(vlogit(s))
-    title <- if(is.null(title)) "Logistic Distribution" else title
+    sd <- sqrt(vlogit(scale))
+    ylab <- latex2exp::TeX("Logistic Distribution $Y^{*}$")
   }else{
     dfun <- distributional::dist_normal
-    s <- lat$s
-    title <- if(is.null(title)) "Normal Distribution" else title
+    sd <- data$scale
+    ylab <- latex2exp::TeX("Gaussian Distribution $Y^{*}$")
   }
-  lat$dist <- dfun(lat$m, lat$s)
-  range_y <- c(min(lat$m) - max(s) * 5, max(lat$m) + max(s) * 5)
   
-  lat_plot <- ggplot(lat,
-                     aes(x = factor(x), y = m, dist = dist)) +
-    ggdist::stat_halfeye(aes(fill = after_stat(factor(findInterval(y, th) + 1))),
+  data$dist <- dfun(data$location, data$scale)
+  range_y <- c(min(data$location) - max(sd) * 5, max(data$location) + max(sd) * 5)
+  
+  lat_plot <- ggplot(data,
+                     aes(x = factor(x), y = location, dist = dist)) +
+    ggdist::stat_halfeye(aes(fill = after_stat(factor(findInterval(y, alpha) + 1))),
                          alpha = 0.85) +
     ylim(range_y) +
-    geom_hline(yintercept = th, linetype = "dashed", col = "black", alpha = 0.7) +
-    geom_line(aes(x = factor(x), y = m, group = 1)) +
-    annotate("label", x = 0.7, y = th, label = thl, size = 5) +
+    geom_hline(yintercept = alpha, linetype = "dashed", col = "black", alpha = 0.7) + {
+      if(length(location) > 1){
+        geom_line(aes(x = factor(x), y = location, group = 1))
+      }
+    } +
+    annotate("label", x = 0.7, y = alpha, label = thl, size = 5) +
     theme_minimal(15) +
     theme(legend.position = "bottom",
           legend.title = element_blank(),
           axis.title.x = element_blank()) +
-    ylab(latex2exp::TeX("\\mu")) +
-    ggtitle(title)
+    ylab(ylab)
   
-  th <- c(-Inf, th, Inf)
-  lat_ms <- lat[, c("m", "s")]
-  ps <- apply(lat_ms, 1, function(x) data.frame(t(diff(lf$pfun(th, x[1], x[2])))), simplify = FALSE)
-  ps <- do.call(rbind, ps)
-  names(ps) <- paste0("y", 1:ncol(ps))
-  latl <- cbind(lat, ps)
-  latl <- tidyr::pivot_longer(latl, starts_with("y"), names_to = "y", values_to = "value")
-  probs_plot <- ggplot(latl, aes(x = factor(x), y = value, fill = y)) +
+  probs_plot <- data |> 
+    tidyr::pivot_longer(dplyr::starts_with("y")) |> 
+    ggplot(aes(x = factor(x), y = value, fill = name)) +
     geom_col(position = position_dodge()) +
     theme_minimal(15) +
     theme(legend.position = "bottom",
@@ -149,44 +187,90 @@ cat_latent_plot <- function(m = 0,
           axis.title.x = element_blank()) +
     ylab("Probability") +
     ylim(c(0, 1))
-  if(plot == "probs"){
-    probs_plot
-  }else if(plot == "latent"){
-    lat_plot
-  }else{
-    legend_b <- cowplot::get_legend(
-      probs_plot
-    )
-    plts <- cowplot::plot_grid(
-      lat_plot + theme(legend.position = "none"),
-      probs_plot + theme(legend.position = "none")
-    )
-    cowplot::plot_grid(plts, legend_b, ncol = 1, rel_heights = c(1, .1))
+  
+  out <- list(lat_plot = lat_plot, probs_plot = probs_plot)
+  if(plot){
+    suppressWarnings(print(cowplot::plot_grid(lat_plot, probs_plot, ncol = 2)))
   }
+  invisible(out)
 }
 
-num_latent_plot <- function(x, 
+#' Shows the effect of a numerical variable on predicted ordinal probabilities
+#' @description
+#' Given the predictor `x` and a single regression parameter `b1` the function return a plot
+#' of the predicted probabilities P(Y = k|X). The function return also the plot of the predicted
+#' probabilities at specific `x` values. By default the 25th, 50th and 75th quantiles but custom
+#' values can be provided.
+#' 
+#' @param x vector with the predictor
+#' @param b1 regression coefficient
+#' @param alpha vector of thresholds
+#' @param prob0 vector of probabilities
+#' @param at vector of `x` values where probabilities are calculated. If `NULL`, the function use `quantile(x, c(0.25, 0.5, 0.75))`
+#' @param link link function (logit or probit)
+#' @param size size of the `ggplot2::theme_minimal(base_size = )`
+#' @param linewidth size of the `ggplot2::geom_line()`
+#'
+#' @return list of plots with the predicted probabilities and barplots at specific `x` values.
+#' @export
+#'
+num_latent_plot <- function(x,
                             b1, 
-                            th = NULL, 
-                            probs = NULL,
-                            link = c("logit", "probit"), 
-                            nsample = 1e3, 
+                            alpha = NULL, 
+                            prob0 = NULL,
+                            at = NULL,
+                            link = "logit",
                             size = 20,
-                            linewidth = 1){
+                            linewidth = 1,
+                            plot = TRUE){
   lf <- get_link(link)
-  if(is.null(th)){
-    th <- prob_to_alpha(probs, link)
+  
+  if(link == "logit"){
+    title <- latex2exp::TeX(sprintf("Logit $\\beta_1 = %s$", b1)) 
+  }else{
+    title <- latex2exp::TeX(sprintf("Probit $\\beta_1 = %s$", b1))
   }
-  data <- data.frame(x = seq(min(x), max(x), length.out = nsample))
-  data <- sim_ord_latent(~x, beta = b1, prob0 = probs, data = data, link = link, simulate = FALSE)
+  
+  data <- data.frame(x = seq(min(x), max(x), length.out = 1e3))
+  data <- sim_ord_latent(~x, beta = b1, prob0 = prob0, data = data, link = link, simulate = FALSE)
   data <- data[, !grepl("^yp", names(data))]
+  
+  if(is.null(at)){
+    at <- quantile(data$x, c(0.25, 0.5, 0.75))
+    xq <- sapply(at, function(q) filor::closest_number(data$x, q))
+  }else{
+    xq <- sapply(at, function(q) filor::closest_number(data$x, q))
+    names(xq) <- sprintf("~ %.2f", xq)
+  }
+  
   datal <- tidyr::pivot_longer(data, starts_with("y"), names_to = "y", values_to = "value")
-  ggplot(datal, aes(x = x, y = value, color = y)) +
+  pplot <- ggplot(datal, aes(x = x, y = value, color = y)) +
+    geom_vline(xintercept = at, linetype = "dashed") +
     geom_line(linewidth = linewidth) +
     theme_minimal(size) +
     theme(legend.position = "bottom",
           legend.title = element_blank()) +
     ylab("Probability") +
-    ggtitle(latex2exp::TeX(sprintf("$\\beta_1 = %s$", b1))) +
+    ggtitle(title) +
     ylim(c(0, 1))
+  
+  
+  data_q <- data[data$x %in% xq, ]
+  data_q$x <- names(xq)
+  data_q <- tidyr::pivot_longer(data_q, dplyr::starts_with("y"))
+  
+  qplot <- ggplot(data_q, aes(x = x, y = value, fill = name)) +
+    geom_col(position = position_dodge(), width = 0.5) +
+    ylab("Probability") +
+    xlab("x") +
+    theme_minimal(size) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank()) +
+    ylim(c(0, 1))
+  
+  out <- list(pplot = pplot, qplot = qplot)
+  if(plot){
+    print(cowplot::plot_grid(pplot, qplot, ncol = 1, align = "hv", rel_heights = c(0.6, 0.4)))
+  }
+  invisible(out)
 }

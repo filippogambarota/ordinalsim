@@ -18,9 +18,9 @@
 #' set.seed(123)
 #' n <- 100
 #' k <- 5 # 5 ordinal values
-#' bprobs <- rep(1/5, 5) # baseline probabilities for the group 0
+#' probs0 <- rep(1/k, k) # baseline probabilities for the group 0
 #' dat <- data.frame(x = rep(c(0, 1), each = n))
-#' dat <- sim_ord_latent(~x, By = 0.5, prob = bprobs, data = dat, link = "probit")
+#' dat <- sim_ord_latent(~x, By = 0.5, prob = probs0, data = dat, link = "probit")
 sim_ord_latent <- function(location,
                            scale = NULL,
                            beta,
@@ -28,7 +28,7 @@ sim_ord_latent <- function(location,
                            prob0 = NULL, 
                            alpha = NULL, 
                            data, 
-                           link = c("logit", "probit"),
+                           link = "logit",
                            simulate = TRUE){
   
   # get all the correct functions according to the link
@@ -63,7 +63,7 @@ sim_ord_latent <- function(location,
     data$ys <- ystar # save also the latent
   } else{
     alpha <- c(-Inf, alpha, Inf)
-    cp <- lapply(alpha, function(a) plogis((a - lploc) / exp(lpscale)))
+    cp <- lapply(alpha, function(a) lf$pfun((a - lploc) / exp(lpscale)))
     cp <- data.frame(do.call(cbind, cp))
     p <- data.frame(t(apply(cp, 1, diff)))
     names(p) <- paste0("y", 1:ncol(p))
@@ -87,11 +87,13 @@ sim_ord_latent <- function(location,
 #' alpha <- c(-2, -0.5, 1, 1.5)
 #' alpha_to_prob(alpha, link = "logit")
 #' alpha_to_prob(alpha, link = "probit")
-alpha_to_prob <- function(alpha, link = c("logit", "probit"), ...){
+alpha_to_prob <- function(alpha, link = "logit", ...){
   lf <- get_link(link)
   ths <- c(-Inf, unname(alpha), Inf)
   cprobs <- lf$pfun(ths, ...)
-  diff(cprobs)
+  prob <- diff(cprobs)
+  names(prob) <- paste0("p", 1:length(prob))
+  return(prob)
 }
 
 #' Transform probabilities into thresholds
@@ -106,10 +108,14 @@ alpha_to_prob <- function(alpha, link = c("logit", "probit"), ...){
 #' prob <- c(0.5, 0.3, 0.1, 0.1)
 #' prob_to_alpha(probs, link = "logit")
 #' prob_to_alpha(probs, link = "probit")
-prob_to_alpha <- function(prob, link = c("logit", "probit"), ...){
+prob_to_alpha <- function(prob, link = "logit", ...){
+  sum_to_1(prob)
+  k <- length(prob)
   lf <- get_link(link)
   cprobs <- cumsum(prob)
-  lf$qfun(cprobs[-length(cprobs)], ...)
+  alpha <- lf$qfun(cprobs[-length(cprobs)], ...)
+  names(alpha) <- th_names(k)
+  return(alpha)
 }
 
 #' List of probability functions
@@ -122,8 +128,8 @@ prob_to_alpha <- function(prob, link = c("logit", "probit"), ...){
 #' @examples
 #' str(get_link("logit"))
 #' str(get_link("probit"))
-get_link <- function(link = c("logit", "probit")){
-  link <- match.arg(link)
+get_link <- function(link = "logit"){
+  link <- match.arg(link, choices = c("logit", "probit"))
   if(link == "logit"){
     pfun <- plogis
     dfun <- dlogis
@@ -180,4 +186,27 @@ dummy_ord <- function(y){
 #' vlogit(scale = 2)
 vlogit <- function(scale = 1){
   (scale^2 * pi^2)/3
+}
+
+#' Assing names to thresholds
+#' @description
+#' Give intuitive names to thresholds in the form "k - 1|k".
+#' 
+#' @param k number of ordinal outcomes
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' th_names(5)
+th_names <- function(k){
+  sprintf("%s|%s", 1:(k-1), 2:k)
+}
+
+#' Check if the vector of probabilities sum to 1
+#' 
+sum_to_1 <- function(probs){
+  if(sum(probs) != 1){
+    stop("probs must sum to 1!")
+  }
 }

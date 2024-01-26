@@ -12,6 +12,18 @@ csl: "`r filor::fil()$csl`"
 #| include: false
 
 library(tidyverse)
+library(cowplot)
+library(ordinal)
+devtools::load_all()
+
+knitr::opts_chunk$set(echo = TRUE,
+                      dev = "svg",
+                      warning = FALSE,
+                      message = FALSE)
+mtheme <- function(){
+  theme_minimal(15)
+}
+theme_set(mtheme())
 ```
 
 # Introduction

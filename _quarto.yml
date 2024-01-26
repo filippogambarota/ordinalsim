@@ -6,6 +6,7 @@ project:
     - "!note"
     - "!README.md"
     - "!LICENSE.md"
+    - "!supplementary/deprecated"
 
 execute:
   freeze: auto  # re-render only when source changes

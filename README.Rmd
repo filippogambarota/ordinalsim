@@ -11,9 +11,48 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+devtools::load_all()
+pkgs <- .get_packages()
 ```
 
 # ordinalsim
 
 <!-- badges: start -->
+[<img alt="alt_text" src="https://img.shields.io/badge/OSF-https://osf.io/93h5j/-337AB7"/>](https://osf.io/93h5j/)
 <!-- badges: end -->
+
+This repository contains the code and functions to reproduce the analysis and simulations presented in the paper *Ordinal regression models made easy. A tutorial on parameter interpretation, data simulation, and power analysis.* by Filippo Gambarota and Gianmarco Altoè. This repository is organized as an R package:
+
+- `R/`: folder with all custom functions used in the paper and the supplementary materials
+  - `utils.R`: main functions for simulations
+  - `utils-plotting.R`: functions for plots
+  - `utils-project.R`: functions for the project and folders organization, mainly for internal usage
+  - `utils-paper.R`: functions for the paper formatting, mainly for internal usage
+- `paper/`: folder with the source of the paper (`.Rmd`) and the compiled pdf document
+- `supplementary/`: folder with some extra documents (`.qmd`) with examples
+- `tests/`: folder with unit tests for the main functions (`R/utils.R`)
+
+## Using the functions
+
+Once cloned or downloaded the repository, the functions can be used running `devtools::load_all()` (the `devtools` package is required). This is very similar to `library(package)` thus all functions are available but not as objects in the global environment (compared to using `source(file)`).
+
+## Packages
+
+These packages are used through the project:
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE, results='asis'}
+sprintf("- `%s` (%s)", pkgs$pkg, pkgs$version) |> 
+  cat(sep = "\n")
+```
+
+## Session info
+
+```{r, echo=FALSE}
+sinfo <- sessioninfo::session_info()$platform
+sinfo <- sinfo[names(sinfo) != "date"]
+paste0(
+  cli::style_bold(cli::col_blue(names(sinfo))), ": ", sinfo
+) |> 
+  cat(sep = "\n")
+```

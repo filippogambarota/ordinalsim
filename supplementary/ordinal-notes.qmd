@@ -1,0 +1,166 @@
+---
+title: "Ordinal Notes"
+format: 
+  html:
+    toc: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(cowplot)
+library(ordinal)
+devtools::load_all()
+
+knitr::opts_chunk$set(echo = TRUE,
+                      dev = "svg",
+                      warning = FALSE,
+                      message = FALSE)
+
+mtheme <- function(){
+  theme_minimal(15)
+}
+theme_set(mtheme())
+```
+
+## $-\mathbf{X}\boldsymbol{\beta}$ vs $\mathbf{X}\boldsymbol{\beta}$ parametrization
+
+In the tutorial we used the $\alpha_k -\mathbf{X}\boldsymbol{\beta}$ parametrization (thus with the minus sign) because this force the $\beta$ to have the interpretation as in standard regression models. Usually, $\beta$ is the increase in $y$ for a unit increase in $x$. A negative $\beta$ means that the expected value of $y$ decrease for an increase in $x$. Let's see an example using the positive sign for $\beta$.
+
+```{r}
+k <- 4 # number of ordinal outcomes
+x <- c(0, 1) # a binary predictor
+b1 <- log(3) # log odds ratio comparing x1 and x0
+probs0 <- rep(1/k, k)
+alpha <- prob_to_alpha(probs0, link = "logit")
+X <- matrix(x, nrow = 2)
+
+# positive sign
+(lp <- lapply(alpha, function(a) c(a + X %*% b1)))
+cump <- lapply(lp, plogis)
+cump <- cbind(0, data.frame(cump), 1)
+p <- data.frame(t(apply(cump, 1, diff)))
+names(p) <- paste0("y", 1:k)
+p$x <- x
+p
+
+p |> 
+  pivot_longer(starts_with("y")) |> 
+  ggplot(aes(x = x, y = value, fill = name)) +
+  geom_col(position = position_dodge()) +
+  ylab("Probability") +
+  ylim(c(0, 1)) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom") +
+  ggtitle(latex2exp::TeX("$P(Y \\leq k) = \\alpha_k + X\\beta$"))
+```
+
+Clearly a positive $\beta$ create higher probability for lower $Y$ categories. This can be somehow not intuitive thus we can use the negative sign.
+
+```{r}
+# negative sign
+
+(lp <- lapply(alpha, function(a) c(a - X %*% b1)))
+cump <- lapply(lp, plogis)
+cump <- cbind(0, data.frame(cump), 1)
+p <- data.frame(t(apply(cump, 1, diff)))
+names(p) <- paste0("y", 1:k)
+p$x <- x
+
+p |> 
+  pivot_longer(starts_with("y")) |> 
+  ggplot(aes(x = x, y = value, fill = name)) +
+  geom_col(position = position_dodge()) +
+  ylab("Probability") +
+  ylim(c(0, 1)) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom") +
+  ggtitle(latex2exp::TeX("$P(Y \\leq k) = \\alpha_k - X\\beta$"))
+```
+
+Using the second parametrization, with positive $\beta$ we have higher probability for higher $Y$ categories and the opposite.
+
+The negative-sign parametrization is implicit when simulating from the latent distribution. Let's see an example. We use a continuous $x$ predictor because it is easier to see the results.
+
+```{r}
+#| fig-cap: Simulated data using the latent variable approach. The dotted lines are the thresholds $\\alpha$
+n <- 1e3
+x <- runif(1e3)
+B <- 3
+ys_p <- x * B + rnorm(n)
+ys_n <- x * -B + rnorm(n)
+y_p <- findInterval(ys_p, alpha) + 1
+y_n <- findInterval(ys_n, alpha) + 1
+
+par(mfrow = c(1,2))
+plot(x, ys_p, col = y_p, pch = 19, ylim = c(-7, 7), main = latex2exp::TeX("$\\Y^{*} = X \\beta + \\epsilon$, $\\beta = 3$"), ylab = latex2exp::TeX("$Y^{*}$"))
+abline(h = alpha, lty = "dashed")
+legend("bottomleft", fill = 1:k, legend = paste0("Y", 1:k))
+
+plot(x, ys_n, col = y_n, pch = 19, ylim = c(-7, 7), main = latex2exp::TeX("$\\Y^{*} = X \\beta + \\epsilon$, $\\beta = -3$"), ylab = latex2exp::TeX("$Y^{*}$"))
+abline(h = alpha, lty = "dashed")
+```
+
+## Checking the impact of $\mathbf{\beta}$
+
+Choosing one or more plausible $\beta_j$ values can be challenging. For a single $\beta$ we can easily think about the odds ratio (for a *logit* model) or the Cohen's $d$ (for a *probit*) model. With multiple predictors and their interactions is not easy to fix plausible values. A good strategy is to try different values and check the impact on the predicted probabilities. In practice, we need to compute the predicted probabilities using the model equation for the $k$ ordinal outcomes. This can be easily done with the `sim_ord_latent()` function, fixing the `simulate = FALSE` parameter. In this way, only the predicted probabilities are computed. Let's see an example for a single $x$ sampled for a standard normal distribution.
+
+```{r}
+k <- 4
+dat <- data.frame(x = seq(-4, 4, 0.1))
+b1 <- 0.5
+probs0 <- rep(1/k, k)
+dat <- sim_ord_latent(~x, beta = b1, prob0 = probs0, data = dat, simulate = FALSE)
+head(dat)
+```
+
+Then we can plot the results:
+
+```{r}
+dat |> 
+  pivot_longer(matches("^y[1-9]")) |> 
+  ggplot(aes(x = x, y = value, color = name)) +
+  geom_line()
+```
+
+In this case the $\beta_1 = 0.5$ can be considered a plausible value. Let's see what happens increasing it:
+
+```{r}
+data.frame(x = seq(-4, 4, 0.1)) |> 
+  sim_ord_latent(~x, beta = 4, prob0 = probs0, data = _, simulate = FALSE) |> 
+  pivot_longer(matches("^y[1-9]")) |> 
+  ggplot(aes(x = x, y = value, color = name)) +
+  geom_line()
+```
+
+We can clearly see the difference and probably $\beta = 4$ can be considered too large. To note, the same result can be achieved using the `num_latent_plot()` (that under the hood uses the `sim_ord_latent()` function).
+
+Let's make now an example, with an interaction between a continous and categorical predictor.
+
+```{r}
+dat <- expand_grid(x = seq(-4, 4, 0.1), g = c("a", "b"))
+dat$g <- factor(dat$g)
+contrasts(dat$g) <- c(-0.5, 0.5)
+beta <- c(b1 = 0.5, b2 = 1, b3 = 0.1)
+dat <- sim_ord_latent(~ x * g, beta = beta, prob0 = probs0, data = dat, simulate = FALSE)
+
+dat |> 
+  pivot_longer(matches("^y[1-9]")) |> 
+  ggplot(aes(x = x, y = value, color = name, lty = g)) +
+  geom_line()
+```
+
+We can see the impact of $\beta_3 = 0.1$ that is the difference in slopes between the two groups. We can also use another plot to better see the group effect on each $Y$.
+
+```{r}
+dat |> 
+  pivot_longer(matches("^y[1-9]")) |> 
+  ggplot(aes(x = x, y = value, color = g)) +
+  geom_line() +
+  facet_wrap(~name)
+```
+
+
+
