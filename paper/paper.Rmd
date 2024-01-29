@@ -167,15 +167,16 @@ knitr::write_bib("base", file = "packages.bib")
 
 Psychological research make an extensive use of ordinal data. One of the main reason is probably the usage of Likert scales [@Likert1932-xw]. Ordinal data, as defined by @Stevens1946-te, belongs to a specific type of measurement scale where ordered numbers are assigned to a variable. Beyond Likert-like items, in Psychology there are several applications of ordinal scales. For instance, sociodemographic variables like educational levels or socioeconomic status, as well as general ratings such as pain severity, agreement with a statement, or the evaluation of sensory experiences [e.g., @Overgaard2021-hs].
 
-In contrast to nominal scales, the labels in ordinal scales are ordered. Unlike interval or ratio scales, there is no explicit assumption about the distance between labels. An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. @Stevens1946-te and @Kemp2021-dj suggested that for ordinal variables is appropriate to calculate ranks-based descriptive statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation) and using appropriate inferential tools [e.g., @Cliff1996-qo; @Agresti2010-rz]. This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels [@Liddell2018-wu]. More generally, @Cliff2016-ck suggests that several research questions in behavioral sciences can be considered as ordinal (*is the score* $x$ higher than the score $y$?) concerning variables where the most appropriate measurement scale is probably ordinal.
+In contrast to nominal scales, the labels in ordinal scales are ordered. Unlike interval or ratio scales, there is no explicit assumption about the distance between labels. An example is asking people the degree of agreement about a certain statement using a scale from 1 (no agreement) to 7 (total agreement). Answering 4 compared to 2 suggest an higher agreement but we cannot affirm that there is two times the agreement compared to the second answer. @Stevens1946-te and @Kemp2021-dj suggested that for ordinal variables is appropriate to calculate ranks-based descriptive statistics (e.g., median or percentiles) instead of metric statistics (e.g., mean or standard deviation) and using appropriate inferential tools [e.g., @Cliff1996-qo; @Agresti2010-rz]. This distinction in terms of the appropriateness of certain descriptive statistics is also relevant when modeling data. Treating ordinal data as metric refers to assuming the labels as actual integer numbers thus assuming a fixed and know distance between levels [@Liddell2018-wu].
 
-In Psychology especially when using item-based measures (questionnaires, surveys, etc.) the common practice is using a linear regression that makes an explicit assumption about metric features of the response variable. @Liddell2018-wu reviewed the psychological literature using Likert-based measures and reported how the majority of papers used metric-based statistical models. In the same work, @Liddell2018-wu showed examples about the potential pitfalls of metric models applied to ordinal variables [but see @Robitzsch2020-la for an alternative perspective]. They reported problems in terms of lack of power, inversion of the effects (e.g., finding a negative effect when the true effect is positive) and biased estimates. While sums or averages of ordinal items could be treated as metric [@Carifio2008-qd; @Carifio2007-kk; but see @Jamieson2004-xf] @Liddell2018-wu provided some examples of potential pitfalls even in this case. In the current paper we discuss only cases where there is a single ordinal outcome (e.g., a single item, question, etc.) without considering the case of aggregating ordinal responses.
+In Psychology especially with item-based measures (questionnaires, surveys, etc.) the common practice is running a linear regression that makes an explicit assumption about metric features of the response variable. @Liddell2018-wu reviewed the psychological literature using Likert-based measures and reported how the majority of papers used metric-based statistical models. In the same work, @Liddell2018-wu showed examples about the potential pitfalls of metric models applied to ordinal variables [but see @Robitzsch2020-la for an alternative perspective]. They reported problems in terms of lack of power, inversion of the effects (e.g., finding a negative effect when the true effect is positive) and biased estimates. While sums or averages of ordinal items could be treated as metric [@Carifio2008-qd; @Carifio2007-kk; but see @Jamieson2004-xf] @Liddell2018-wu provided some examples of potential pitfalls even in this case. In the current paper we discuss only cases where there is a single ordinal outcome (e.g., a single item, question, etc.) without considering the case of aggregating ordinal responses.
 
 For the tutorial, we assume that the reader is familiar with basic R programming and introductory theory about linear regression. Similar to other tutorials [@DeBruine2021-id; @Gambarota2023-on] we used few equations that are necessary to understand the model parameters and implement the Monte Carlo simulation.
 
 In the first part we introduce the ordinal models explaining the general structure and assumptions. Then we move with model fitting and parameters interpretation. Finally we introduce the simulation approach for common research scenarios and an application to power analysis. We used `r cite_r()` for the code, figures and tables. Details about R packages an The tutorial is supported by a set of custom R functions available on Github. Other examples and model extensions along with details about used R packages are available on the Github repository (supplementary materials). For the tutorial we used the following packages.
 
 ```{r tutorial-pkgs, eval = FALSE}
+#| echo: true
 library(dplyr)
 library(tidyr)
 library(ordinal)
@@ -194,33 +195,31 @@ head_tail <- function(x, n = 5){
 
 ## Ordinal regression models
 
-Despite the specific model proposed by @Liddell2018-wu proposed a specific modeling approach, there is a class of regression models that consider the ordinal nature of the response variable. The actual statistical nomenclature of *ordinal regression* models can be confusing [@Tutz2022-dg]. @Tutz2022-dg and @Burkner2019-aw provide a clear and updated taxonomy of ordinal regression models.
+We can generally define as *ordinal regression*, a statistical model explicitly considering the ordinal (and not metric) nature of the response variable. The nomenclature of *ordinal regression* models can be confusing but @Tutz2022-dg and @Burkner2019-aw provide a clear and updated taxonomy of ordinal regression models.
 
-We can identify three main types: *cumulative models* [CM, @McCullagh1980-cw; @Agresti2010-rz], *sequential models* [@Tutz1990-fe], and *adjacent category models*. Among these, the cumulative model is the most widely used, assuming the existence of a latent variable categorized using a set of thresholds. The *sequential model* is appropriate when modeling sequential processes. Assuming to have five response options, the sequential model assume that responding "3" assume a sequential process where steps "1" and "2" are already reached. A clear example is proposed by @Burkner2019-aw where the marriage duration in years is predicted as a function of some explanatory variables. For each level of the response variable there is a latent distribution where the step between a marriage year $k = 1$ and the next years $k > 1$ is modeled by the sequential model. When comparing $k$ with $k > 1$, everything lower than $k$ is assumed to be already reached [@Tutz2020-xq]. 
+We can identify three main models: *cumulative models* [CM, @McCullagh1980-cw; @Agresti2010-rz], *sequential models* [@Tutz1990-fe], and *adjacent category models*. Among these, the CM is the most widely used, assuming the existence of a latent variable categorized using a set of thresholds. The *sequential model* is appropriate when modeling sequential processes where responding to a certain category implies have already reached lower categories. The *adjacent category model* compares a category with the successive one and can be seen  the adjacent-category model can be seen as a series of binomial regressions taking into account the ordering [@Tutz2022-dg].
 
-The adjacent category model compare the category $k$ with $k + 1$ still assuming a latent distribution for each $k$. As suggested by @Tutz2022-dg the adjacent-category model can be seen as a series of binary binomial regressions taking into account the order of the categories. @Burkner2019-aw suggested that adjacent-category model can be chosen for its mathematical convenience and there is no a clear empirical interpretation as for the cumulative vs sequential model.
-
-In the current paper we put the focus on the CM for several reasons. Firstly, the latent formulation of the model is particularly convenient for parameter interpretation and data simulation. The second reason is that several psychological variables can be formalized as a latent continuous variable observed as an ordinal item. Furthermore, the signal detection theory framework that is very common in experimental psychology can be implemented using a CM [e.g., @DeCarlo2010-lj]. Figure \@ref(fig:fig-explain-cumulative) depicts the overall structure of the CM.
+In the current paper we focus on the CM for several reasons. Firstly, the latent formulation of the model is particularly convenient for parameter interpretation and data simulation. The second reason is that several psychological construct can be formalized as a latent continuous variable observed as an ordinal item(s). Furthermore, the signal detection theory framework that is very common in experimental psychology can be implemented using a CM [e.g., @DeCarlo2010-lj]. Figure \@ref(fig:fig-explain-cumulative) depicts the overall structure of the CM.
 
 ## Model notation
 
-In this section we introduce some notation for the CM to be consistent with the existing literature and the `ordinal` R package [@Christensen2022-jk]. We define $Y_k$ as the observed ordinal variable with $k$ levels and $Y^\star$ is the underlying latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \dots, \alpha_{k - 1}$. Similarly to the generalized linear models framework [e.g., @Fox2015-ps], we define $g(x) = \eta$ as the link function that maps probabilities into the linear predictor $\eta$. To transform back $\eta$ into probabilities we use the inverse of the link function $x = g^{-1}(\eta)$. The specific link function define the type of model and require a different R function. For example, when assuming a Gaussian distribution (*probit* link function) entails using the cumulative distribution function $g(x) = \Phi^{-1}(x) = \eta$ and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined $x = g^{-1}(\eta) = \Phi(\eta)$. 
+In this section we introduce some notation for the CM to be consistent with the existing literature and the `ordinal` R package [@Christensen2022-jk]. We define $Y_k$ as the observed ordinal variable with $k$ levels and $Y^\star$ is the underlying latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \dots, \alpha_{k - 1}$. Similarly to the generalized linear models framework [e.g., @Fox2015-ps], we define $g(p) = \eta$ as the link function that maps probabilities into the linear predictor $\eta$. To transform back $\eta$ into probabilities we use the inverse of the link function $p = g^{-1}(\eta)$. The specific link function define the type of model and require different R functions. For example, using a Normal distribution (*probit* link function) requires using the cumulative distribution function $g(p) = \Phi^{-1}(p) = \eta$ and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined $p = g^{-1}(\eta) = \Phi(\eta)$. 
 
-When modelling an ordinal variable in a cumulative link model we actually modelling the cumulative probability $P(Y \leq k), k = 1, \dots, k - 1$^[As done by @Agresti2010-rz, when referring to $P(Y \leq k)$ we are implicitly conditioning on a particular $\mathbf{X}$ value $P(Y \leq k | \mathbf{X}_i)$]. Equation \@ref(eq:prob-cum-model1) shows the general cumulative model including predictors $\mathbf{X}$ and regression coefficients $\boldsymbol{\beta}$. The minus sign in $\mathbf{X} \boldsymbol{\beta}$ is used to interpret the $\beta_j$ as in the standard regression models where higher $\beta$ values corresponds to increased probability of responding higher $k$ categories [@Agresti2010-rz].
+When modelling an ordinal variable in a CM we include predictors on the cumulative probability $P(Y \leq k), k = 1, \dots, k - 1$^[As done by @Agresti2010-rz, when referring to $P(Y \leq k)$ we are implicitly conditioning on a particular $\mathbf{X}$ value $P(Y \leq k | \mathbf{X}_i)$]. Equation \@ref(eq:prob-cum-model1) shows the general cumulative model with predictors $\mathbf{X}$ and coefficients $\boldsymbol{\beta}$. The minus sign in $\mathbf{X} \boldsymbol{\beta}$ is used to interpret the $\beta_j$ as in the standard regression models where higher positive values corresponds to increased probability of responding higher $k$ categories [@Agresti2010-rz].
 
 \begin{equation}
 P(Y \leq k) = g^{-1}(\alpha_k - \mathbf{X} \boldsymbol{\beta}) \;\;k = 1, \dots, k - 1
 (\#eq:prob-cum-model1)
 \end{equation}
 
-The $\mathbf{X} \boldsymbol{\beta}$ is the linear predictor $\eta$ that is the cumulative probability $P(Y \leq k)$ transformed using the link function $g(\cdot)$. To obtain the probability of a single outcome $P(Y = k)$ we can compute the difference between cumulative probabilities as shown in Equation \@ref(eq:prob-cum-model2).
+The $\mathbf{X} \boldsymbol{\beta}$ is the linear predictor $\eta$ that is the cumulative probability $P(Y \leq k)$ transformed using the link function $g(\cdot)$. The probability of a single outcome $P(Y = k)$ can be calculated as the difference between cumulative probabilities (see Equation \@ref(eq:prob-cum-model2)).
 
 \begin{equation}
 P(Y = k) = g^{-1}(\alpha_k - \eta) -  g^{-1}(\alpha_{k - 1} - \eta), \;\;k = 1, \dots, k - 1
 (\#eq:prob-cum-model2)
 \end{equation}
 
-There are always two special cases when computing the probability of a single outcome $Y$ that is when $Y = 1$ and $Y = k$. In the first case the cumulative probability is calculated from $-\infty$ that is the same as temporary assuming an $\alpha_0 = -\infty$. In the second case ($Y = 1$) the probability is calculated as $P(Y = k) = 1 - g^{-1}(\alpha_{k - 1} - \eta)$ that is the same as assuming a temporary threshold $\alpha_k = +\infty$. The Figure \@ref(fig:fig-explain-cumulative) shows how the single probabilities of the ordinal outcome are calculated from cumulative probabilities.
+There are always two special cases when computing the probability of a single outcome $Y$ that is when $Y = 1$ and $Y = k$. In the first case the cumulative probability is calculated from $-\infty$ (assuming that $\alpha_0 = -\infty$). In the second case ($Y = 1$) the probability is calculated as $P(Y = k) = 1 - g^{-1}(\alpha_{k - 1} - \eta)$ (a $\alpha_k = +\infty$. The Figure \@ref(fig:fig-explain-cumulative) shows how the single probabilities of the ordinal outcome are calculated from cumulative probabilities.
 
 ```{r fig-explain-cumulative, fig.cap=filor::get_caption(), fig.place = TRUE}
 probs <- c(0.4, 0.2, 0.3, 0.1)
@@ -250,23 +249,21 @@ ggplot(lat, aes(dist = norm)) +
 Equation \@ref(eq:latent-model) shows the latent formulation of the previous model. The latent variable $Y^\star$ is a function of the linear predictor $\eta = \mathbf{X} \boldsymbol{\beta}$ similar to a standard regression.
 
 \begin{equation}
-\mathbf{Y^\star} = \mathbf{X}\boldsymbol{\beta} + \mathbf{\epsilon}
+\mathbf{Y^\star} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}
 (\#eq:latent-model)
 \end{equation}
 
-The crucial part is $\epsilon$ that is the random part (errors) of the model. For a *probit* model, errors are sampled from a standard Normal distribution while for a *logit* model from a standard logistic distribution. Following the notation by @Tutz2022-dg, the observed ordinal value $Y_i = k$ comes from $Y^\star_i$ belonging to the interval defined by the thresholds $Y_i = k \iff \alpha_{k - 1} < Y^\star_i < \alpha_{k}$ where $- \infty = \alpha_0 < \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k = \infty$.
+The $\epsilon$ term is the random part (errors) of the model. For a *probit* model, errors are distributed as a standard Normal distribution and for a *logit* model as a standard logistic distribution. Following the notation by @Tutz2022-dg, the observed ordinal value $Y_i = k$ comes from $Y^\star_i$ belonging to the interval defined by the thresholds $Y_i = k \iff \alpha_{k - 1} < Y^\star_i < \alpha_{k}$ where $- \infty = \alpha_0 < \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k = \infty$.
 
-The thresholds $\alpha_k$ are considered fixed and part of the measurement procedure [@Liddell2018-wu; see the *location-shift* models by @Tutz2022-dg, where thresholds vary as a function of predictors]. The model can be also formalized in alternative ways. @Liddell2018-wu and @Kruschke2015-re proposed a Bayesian version of the model or @Gelman2020-tg for other thresholds parametrizations.
-
-The scale (spread) of the latent variable is fixed to one for both *probit* and *logit* models. In the supplementary materials we showed how to implement a location-scale models including predictors on the scale parameter [@Tutz2022-dg; @Rigby2005-ko; @Cox1995-ur].
+In the CM, thresholds $\alpha_k$ are considered fixed and part of the measurement procedure [@Liddell2018-wu; but see the *location-shift* models by @Tutz2022-dg, where thresholds vary as a function of predictors] and can be considered as intercepts. The proposed CM can be parametrized in different ways. @Liddell2018-wu and @Kruschke2015-re proposed a Bayesian version of the model and @Gelman2020-tg proposed other thresholds parametrizations.
 
 ## Link function
 
-The CM implemented in Equations \@ref(eq:prob-cum-model1) and \@ref(eq:latent-model) requires specifying the link function $g(\cdot)$ or the errors distribution $\epsilon_i \sim D(\mu, \sigma^2)$ ($D$ being a certain probability distribution). Among several available functions the *logit* and *probit* models are the most common. The *logit* model use a *logit* link function and a logistic distribution as latent variable. On the other side, the *probit* model assume a latent Gaussian distribution using the inverse of the cumulative distribution ($\Phi^{-1}$) function as link function.
+The CM implemented in Equations \@ref(eq:prob-cum-model1) and \@ref(eq:latent-model) requires specifying the link function $g(\cdot)$ or the errors distribution $\epsilon_i \sim D(\mu, \sigma^2)$ ($D$ being a certain probability distribution). Among several available functions the *logit* and *probit* models are the most common. The *logit* model use a *logit* link function and a standard logistic distribution as latent variable. On the other side, the *probit* model assume a standard Normal distribution using the inverse of the cumulative distribution ($\Phi^{-1}(\cdot)$) function as link function.
 
 The two models provide similar results with a different parameters interpretation. In the next sections we will illustrate the differences and simulation strategies. Figure \@ref(fig:fig-logit-vs-probit) depicts the two distributions while Table `r if(which_output("latex")) "\\@ref(tab:tab-model-summary-latex)" else "\\@ref(tab:tab-model-summary-word)"` summarise the presented CM with the proposed link function and the corresponding R code.
 
-In terms of parameters, both distributions can be defined with in terms of location $\mu$ and scale $s$. The standard normal distribution has $\mu = 0$ and $s = 1$. Furthermore the variance corresponds to the scale $s^2 = \sigma^2 = 1$. The variance of the logistic distribution is $\sigma^2 = \frac{s^2\pi^2}{3}$. The standard logistic distribution has $\mu = 0$ and $s^2 = 1$ thus the standard deviation simplified to $\frac{\pi}{\sqrt{3}} \approx 1.81$. In practical terms, fixing $\mu$ and $s$ lead to an higher standard deviation for the logistic distribution.
+In terms of parameters, both distributions can be defined with in terms of location $\mu$ and scale $s$. The standard normal distribution has $\mu = 0$ and $s = 1$. Furthermore the variance corresponds to the scale $s^2 = \sigma^2 = 1$. The variance of the logistic distribution is $\sigma^2 = \frac{s^2\pi^2}{3}$. The standard logistic distribution has $\mu = 0$ and $s^2 = 1$ thus the standard deviation simplified to $\frac{\pi}{\sqrt{3}} \approx 1.81$. In practical terms, fixing $\mu$ and $s$ lead to an higher standard deviation for the logistic distribution. In the supplementary materials we showed how to implement a location-scale models for including predictors on the scale parameter [@Tutz2022-dg; @Rigby2005-ko; @Cox1995-ur].
 
 ```{r fig-logit-vs-probit, fig.cap=filor::get_caption(), fig.place = TRUE}
 dplot <- ggplot(data = NULL) +
@@ -340,28 +337,28 @@ papaja::apa_table(models_table, escape = FALSE, align = "c", row.names = FALSE, 
 
 # Model fitting
 
-For fitting the cumulative models we used the `ordinal` package [@Christensen2019-cz]. Despite the presence of other possibilities the `ordinal` package provide the most complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R and default functions to calculate predictions, perform model comparison, extract relevant model information are implemented similarly to standard regression modelling.[^2]
+For fitting the CM we used the `ordinal` package [@Christensen2019-cz]. The `ordinal` package provide a complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R with functions to calculate predictions, perform model comparison and extract relevant model information.[^2]
 
 [^2]: For a very complete overview of the ordinal package see @Christensen2019-cz and the Package documentation <https://cran.r-project.org/web/packages/ordinal/ordinal.pdf>
 
 The main function is `clm()` and the formula is specified using the syntax `y ~ ...` where `y` is the ordinal response and `...` is a combination of predictors. The package also implements mixed-effects models including random intercepts and slopes.
 
-When fitting the model the crucial arguments are the `formula`, the `link` function and the `data`. More advanced arguments are the `nominal`, `scale` and `threshold`.
+When fitting the model the crucial arguments are the `formula`, the `link` function and the `data`. More advanced arguments are `nominal`, `scale` and `threshold`.
 
 -   `formula`: the formula `y ~ x` with the dependent variable and predictors.
--   `link`: is the link function. In this tutorial we consider only the *logit* and *probit* link but other link functions are available.
+-   `link`: is the link function (in this tutorial only *logit* and *probit*)
 -   `data`: is the dataset with variables included in the `formula`
 -   `nominal`: formula with predictors where the proportional odds assumption (See Section \@ref(proportional-odds-assumption)) is relaxed (i.e., partial or non proportional odds)
--   `scale`: formula with predictors for the scale (standard deviation) parameter. This argument allow to fit a scale-location model (see supplementary materials). The main `formula` argument refers to predictors on the location parameter (i.e., the mean $\mu$).
+-   `scale`: formula with predictors for the scale parameter for fitting a scale-location model
 -   `threshold`: different structures for estimating the thresholds. The default is `threshold = "flexible"` where $k - 1$ threshold (where $k$ is the number of ordinal levels for $Y$) are estimated.
 
-We can start by fitting a simple model, highlighting the crucial parameters where the detailed explanation will be expanded in the next sections. Table `r if(which_output("latex")) "\\@ref(tab:tab-dataset-example-latex)" else "\\@ref(tab:tab-dataset-example-docx)"` contains simulated data from $n = 100$ participants rating the agreement about a certain item with $k = 4$ ordered options. The participants are divided into two groups ($x_a$ and $x_b$). We can fit a cumulative link model with `clm()` function and check the model summary.
+We can start by fitting a simple model, highlighting the crucial parameters where the detailed explanation will be expanded in the next sections. Table `r if(which_output("latex")) "\\@ref(tab:tab-dataset-example-latex)" else "\\@ref(tab:tab-dataset-example-docx)"` contains simulated data from $n = 5000$ large $n$ for having stable estimations in the examples) participants rating the agreement about an item with $k = 4$ ordered options. The participants are divided into two groups ($X_a$ and $X_b$). We can fit a cumulative link model (`clm()` function)  and check the model summary.
 
 ```{r prep-tab-dataset-example}
 set.seed(2024)
 b1 <- log(3) # log odds ratio
 k <- 4
-n <- 100
+n <- 5e3
 x <- rep(c("a", "b"), each = n/2)
 dat <- data.frame(x = x)
 probs <- rep(1/k, k) # for the group "a", uniform probabilities
@@ -438,11 +435,9 @@ dd |>
   xlab("Probability")
 ```
 
-Odds and odds ratios are clearly defined with $k = 2$ outcomes. With an ordinal variable and a cumulative model we can use the cumulative odds ratio. With e.g. $k = 4$ outcomes we have $k - 1$ odds ratios determined by the cumulative probability in terms of $P(Y \leq 1), \dots, P(Y \leq k - 1)$ comparing the two groups.
+Odds and odds ratios are clearly defined with $k = 2$ outcomes. With an ordinal variable we have $k - 1$ odds ratios determined by the cumulative probability in terms of $P(Y \leq 1), \dots, P(Y \leq k - 1)$ comparing the two groups.
 
 ```{r odds-example}
-#| echo: true
-#| collapse: true
 #| include: false
 
 # function to calculate odds
@@ -466,10 +461,9 @@ For example the probability of responding $Y \leq 1$ in the group "a" is `r p1a`
 #| echo: true
 #| collapse: true
 
-# function to calculate odds
-odds <- function(p) p / (1 - p)
-
 # the dummy_ord() is a custom function creating k - 1 dummy variable for the cumulative probabilities
+
+odds <- function(p) p / (1 - p)
 
 # data.frame with the group (x) and the k - 1 dummy variables
 cum_p <- cbind(x = dat$x, dummy_ord(dat$y))
@@ -480,14 +474,13 @@ cum_p <- cbind(x = dat$x, dummy_ord(dat$y))
 (group_b <- apply(cum_p[cum_p$x == "b", -1], 2, mean))
 
 # calculating k - 1 odds ratios on the cumulative probabilities as a/b
-odds(group_a) / odds(group_b)
+(ors <- odds(group_a) / odds(group_b))
+log(ors) # logarithm of the odds
 ```
 
 ## Proportional odds assumption
 
-Following again the taxonomy by @Tutz2022-dg, each of the presented ordinal regression model has a basic version making the PO assumption. There are more advanced versions of the model relaxing this assumption completely (*non proportional odds*) and partially [*partial proportional odds*, @Peterson1990-cz].
-
-When fitting a logit model, the coefficients $\beta_j$ are the (log) odds ratios for a unit increase in $x$. However, the previous model estimate a single $\beta$ even if we have four ordinal outcomes. The CM model (in the basic version) made an assumption called *proportional odds* (PO). Under this assumption we assume that the $k - 1$ cumulative odds ratios are the same. The PO assumption is formalized in Equation \@ref(eq:prop-odds). The cumulative log odds ratio comparing $P(Y_k|x_0)$ with $P(Y_k|x_1)$ is the same regardless the specific threshold ($\beta_1 = \beta_2 \dots = \beta_{k - 1}$). The Figure (\@ref(fig:fig-prop-odds)) depicts the proportional odds assumption for the $k - 1$ logistic curves both for probabilities and linear predictors $\eta$.
+The ORs calculated above are very similar to the parameter estimated from the model (thanks to the large $n$). The CM estimate essentially the (cumulative) OR as a function of predictors. Furthermore, the $k - 1$ ORs are very similar because data are generated under the so-called proportional odds (PO) assumption. The basic version of the CM model fitted above assume the PO estimating a single $\beta$ (instead of $k - 1$). The PO assumption is formalized in Equation \@ref(eq:prop-odds). The cumulative log odds ratio comparing $P(Y_k|x_0)$ with $P(Y_k|x_1)$ ($x_0$ and $x_1$ being two levels of a predictor) is the same regardless the specific threshold ($\beta_1 = \beta_2 \dots = \beta_{k - 1}$). The Figure (\@ref(fig:fig-prop-odds)) depicts the proportional odds assumption for the $k - 1$ logistic curves both for probabilities and linear predictors $\eta$.
 
 \begin{equation}
 \text{logit} (\frac{P(Y \leq 1 |x_1)}{P(Y \leq 1 |x_0)}) = \dots = \text{logit} (\frac{P(Y \leq k - 1 |x_1)}{P(Y \leq k -1 |x_0)})
@@ -525,9 +518,9 @@ dd |>
   xlab("x")
 ```
 
-There are CM models relaxing this assumption completely [*non proportional odds*, @Tutz2022-dg] or partially [*partial proportional odds*, @Peterson1990-cz]. The PO model is more parsimonious but the PO assumption could be considered too strict. There are several methods for testing if data are supporting the PO assumption [see @Liu2023-bp for an overview]. @Tutz2020-xq suggested a trade-off between assuming/relaxing the PO assumption by fitting *location-shift* or *location-scale* models. Basically these methods should guarantee more flexibility in modelling the observed probabilities reducing the number of parameters. However, these methods and models are outside the scope of the tutorial.
+There are CM models relaxing this assumption completely [*non proportional odds*, @Tutz2022-dg] or partially [*partial proportional odds*, @Peterson1990-cz]. The advantage of the PO model is the parsimony. In some scenarios, the PO assumption can be considered too strict. There are several methods for testing if data are supporting the PO [see @Liu2023-bp for an overview]. @Tutz2020-xq suggested a trade-off between assuming/relaxing the PO assumption by fitting *location-shift* or *location-scale* models. Basically these methods should guarantee more flexibility in modelling the observed probabilities reducing the number of parameters. However, these methods and models are outside the scope of the tutorial.
 
-In the previous code block, we estimated the $k - 1$ odds ratios and they were different even if data have been simulated under the PO assumption (see the Simulating data section). Calculating the odds ratios using predicted probabilities from the model fitted with `clm()` (that by default assume the PO) the odds ratios are the same. In the following code block we computed the odds ratio comparing $x_a$ and $x_b$ when $k \leq 1$ and $k \leq 2$.
+The PO can also be clearly seen calculating the ORs using predicted probabilities. By default, the model fitted with `clm()` assume the PO. In the following code block we computed the odds ratio comparing $x_a$ and $x_b$ when $k \leq 1$ and $k \leq 2$.
 
 ```{r poa-logit-example}
 #| echo: true
@@ -554,15 +547,17 @@ odds(y12a) / odds(y12b)
 
 ## *Probit Model* and $\mathbf{z}$ scores
 
-When assuming a standard Gaussian distribution we are fitting *probit* model. The main difference regards the parameters interpretation. In the logit model the $\boldsymbol{\beta}$ are the log odds ratio. For categorical variables they represents the increase in the log odds of moving from one level to the other while for numerical variables is the increase in the log odds for a unit increase in $x$. 
+The previous model was fitted using a *logit* link function. When assuming a standard normal distribution we are fitting *probit* model. The main difference regards the parameters interpretation. In the logit model the $\boldsymbol{\beta}$ are the log odds ratio. For categorical variables they represents the increase in the log odds of moving from one category to another while for numerical variables is the increase in the log odds for a unit increase in $x$. 
 
-For the *probit* model, the $\beta$ is the increase in terms of $z$ scores for a unit increase in $x$. This is very convenient especially for categorical variables because parameters can be interpreted as a Cohen's $d$ like measure. Thinking about the latent distributions, the $\beta$ is the shift in the latent mean comparing two or more groups or the slope of latent scores as a function of a numeric $x$. More formally the shift in the latent distribution is $\beta/\sigma$ (for the *probit* model $\sigma = 1$). The interpretation in terms of shifting the latent mean holds also for the logistic model. However, the standard deviation of the standard logistic regression is $\frac{\pi}{\sqrt{3}} \approx 1.81$[^4]. The $\beta$ for the logistic distribution can be interpreted as the location shift of the latent logistic distribution by $\beta/(\frac{\pi}{\sqrt{3}})$ standard deviations [@Agresti2010-rz].
+In the *probit* model, the $\beta$ is the increase in terms of $z$ scores for a unit increase in $x$. This is very convenient especially for categorical variables because parameters can be interpreted as a Cohen's $d$ like measure. In terms of latent distributions, the $\beta$ is the shift in the latent mean comparing two or more groups or the slope of latent scores as a function of a numeric $x$. More formally the shift in the latent distribution is $\beta/\sigma$ (for the *probit* model $\sigma = 1$). The interpretation in terms of shifting the latent mean holds also for the logistic model. However, the standard deviation of the standard logistic regression is $\frac{\pi}{\sqrt{3}} \approx 1.81$[^4]. The $\beta$ for the logistic distribution can be interpreted as the location shift of the latent logistic distribution by $\beta/(\frac{\pi}{\sqrt{3}})$ standard deviations [@Agresti2010-rz].
 
 [^4]: Actually the variance of the logistic distribution is $\frac{s^2\pi^2}{3}$ and the standard deviation $\frac{s\pi}{\sqrt{3}}$ where $s$ is the scale of the distribution. For the standard logistic distribution $s = 1$ (as for the standard normal distribution).
 
 ### Proportional odds and *probit* model
 
-The PO assumption is relevant only for the *logit* model. When using the *probit* link function we can use the terms *parallel slopes* for the assumption of a common $\beta$ (see Equation \@ref(eq:probit-prop-odds)). In practical terms, difference in $z$ scores for a unit increase in $x$ (the actual interpretation of $\beta$ in a *probit* model) is the same regardless of the threshold. As for the previous example, we can fit the *probit* model and manually calculate the difference in $z$ scores.
+More generally, the PO assumption can be called *parallel slopes*. When applying the link function, cumulative probabilities have no longer a sigmoid shape but linear (see Figure \@ref(fig:fig-prop-odds)). If the steepness of the sigmoid (i.e., $\beta_j$) is not constant the $k - 1$ lines have different slopes. The PO assumption is relevant only for the *logit* model because parameters are ORs. 
+
+For the *probit* model, the difference in $z$ scores for a unit increase in $x$ is the same regardless of the threshold (see Equation \@ref(eq:probit-prop-odds). As for the previous example, we can fit the CM and manually calculate the difference in $z$ scores (from predicted probabilities).
 
 \begin{equation}
 z_{x_1 - x_0} = \Phi(P \leq 1|x_1) - \Phi(P \leq 1|x_0) = \dots = \Phi(P \leq k - 1|x_1) - \Phi(P \leq k - 1|x_0)
@@ -594,17 +589,15 @@ qnorm(y12a) - qnorm(y12b)
 
 ## Simulating data
 
-In this tutorial we present two method for simulating ordinal data. Simulating data is a powerful strategy to understand the model [@DeBruine2021-id] and estimate statistical properties (e.g., power or type-1 error). The first simulation method calculate the probabilities of each $Y$ level as a function of predictors and generate data from a *multinomial* distribution. The second method simulate data using the the latent formulation. Whenever random number generation occurs, it is appropriate to set a `seed` (`set.seed()` function, in this case we use `set.seed(2024)`). Running again the same code will produce the same result. A general simulation approach concerns generating a dataset from the assumed data generation process, fitting the statistical model and assessing the recovery of simulated parameters. To check the simulation approach, using a large sample size produce estimations with small sampling error. A limited sample size even when fitting the true model will produce variable estimations.
+In this tutorial we present two method for simulating ordinal data. Simulating data is a powerful strategy to understand the model [@DeBruine2021-id] and estimate statistical properties (e.g., power or type-1 error). The first simulation method calculate the probabilities of each $Y$ level as a function of predictors and generate data from a *multinomial* distribution. The second method simulate data using the the latent formulation. Whenever random number generation occurs, it is appropriate to set a `seed` (`set.seed()` function, in this case we use `set.seed(2024)`). Running again the same code with the same seed will produce the same result. A general simulation approach concerns generating a dataset from the assumed data generation process, fitting the statistical model and assessing the recovery of simulated parameters. To check the simulation approach, using a large sample size produce estimations with small sampling error. A limited sample size even when fitting the true model will produce variable estimations.
 
 ### Simulating from a multinomial distribution
 
-For the first method we need to calculate $g^{-1}(\eta)$ as a function of predictors and then sample from a *multinomial* (more specifically *categorical*) distribution using the `sample()` function in R. This method is similar to the general way of simulating data for a generalized linear model (see the supplementary materials for a general overview).
+For the first method we need to calculate $P(Y \leq k) = g^{-1}(\eta)$ as a function of predictors and then sample from a *multinomial* (more specifically *categorical*) distribution using the `sample()` function in R. This method is similar to the general way of simulating data for a generalized linear model (see the supplementary materials).
 
-As a simple example, let's simulate two groups with $n = 100$ participants responding to an item ($Y$) with $k = 4$ ordered options. We simulate the second group having higher probability of responding higher categories of $Y$. 
+As a simple example, we simulate two groups with $n = 100$ participants responding to an item ($Y$) with $k = 4$ ordered options. As explained in the previous sections, we can summarise the effect size of a CM (assuming PO) using a single $\beta = \log(OR) = \log(3)$. For simplicity, the probabilities of the first group $x = 0$ are uniform thus $P(Y = 1|x_0) = \dots P(Y = k|x_0) = 1/k$. The following code summarise the first steps of the simulation. Basically we define the simulation parameters, we calculate the $k - 1$ thresholds $\alpha$ and we apply Equations \@ref(eq:prob-cum-model1) and \@ref(eq:prob-cum-model2) calculating the probability of each response.
 
-As explained in the previous sections, we can summarise the effect size of a CM (assuming PO) using a single $\beta = \log(OR)$. We can assume that the odds ratio is $OR = 2$. For simplicity, the probabilities of the first group $x = 0$ are uniform thus $P(Y = 1|x_0) = \dots P(Y = k|x_0) = 1/k$. The following code summarise the first steps of the simulation. Basically we define the simulation parameters, we calculate the $k - 1$ thresholds $\alpha$ and we apply Equations \@ref(eq:prob-cum-model1) and \@ref(eq:prob-cum-model2). In this way we calculated the true probability of each $Y$ level for the two groups.
-
-An important step is converting from $\alpha$ to probabilities or the opposite. This steps are implemented in the `alpha_to_prob()` and `prob_to_alpha()` functions that given the input return thresholds or probabilities.
+The other parameters to define are the thresholds. We can consider them as intercepts thus the transformed probabilities of each ordinal response when $x = 0$ (in this case the first group). The `alpha_to_prob()` and `prob_to_alpha()` can be used to go back and forth from thresholds and probabilities.
 
 ```{r alpha-prob-example}
 #| echo: true
@@ -624,7 +617,7 @@ alpha_to_prob(alpha, link = "logit")
 ## SIMULATION PARAMETERS
 
 N <- 100 # sample size
-or <- 2 # odds ratio
+or <- 3 # odds ratio
 k <- 4 # number of ordinal alternatives
 prob0 <- rep(1/k, k) # probabilities for the first group
 alpha <- prob_to_alpha(prob0, link = "logit")
@@ -732,7 +725,7 @@ We can generalize the previous workflow as:
 
 ### Simulating from the latent distribution
 
-A more efficient way to simulate an ordinal outcome is using the latent formulation of the model. This require simulating a standard linear regression using the appropriate data generation function (*logistic* or *normal*) and the cutting the latent values according to the thresholds $\alpha$. The workflow is slightly different compared to the previous approach.
+A more efficient way to simulate an ordinal outcome is using the latent formulation of the model. This require simulating a standard linear regression using the appropriate data generation function (*logistic* or *normal*) and cutting the latent variable using the thresholds. The workflow is slightly different compared to the previous approach.
 
 1.  Define simulation parameters as in the previous simulation. `prob0` are the probabilities when all predictors $\mathbf{X}$ are zero.
 2.  Define regression coefficients $\boldsymbol{\beta}$ and calculate the linear predictor $\eta$ using the Equation \@ref(eq:latent-model)
@@ -819,7 +812,7 @@ head_tail(dat, n = 3)
 
 #### Thresholds $\alpha$
 
-The previous simulation can be easily extended by adding more predictors and their interactions. The crucial part is setting appropriate and empirically meaningful parameters. In the PO model thresholds are usually not of main interest as intercepts in standard linear regression. Thresholds are essentially quantiles of the latent distribution that produced certain $k$ probabilities. To set meaningful $\alpha$ values we can convert probabilities into thresholds (`alpha_to_prob()`). The function `show_alpha()` produce a meaningful visual representation of using a specific set of thresholds (see Figure \@ref(fig:fig-show-th-example)). Thus with two groups for example, the thresholds are the $k$ probabilities of the ordinal variable $Y$ for the reference group (when $x = 0$).
+The previous simulation can be easily extended by adding more predictors and their interactions. The crucial part is setting appropriate and empirically meaningful parameters. Thresholds are the quantiles of the latent distribution that produced certain $k$ probabilities when $\mathbf{X} = 0$. To set meaningful $\alpha$ values we can convert probabilities into thresholds (`alpha_to_prob()`). The function `show_alpha()` produce a meaningful visual representation of using a specific set of thresholds (see Figure \@ref(fig:fig-show-th-example)). Thus with two groups for example, the thresholds are the $k$ probabilities of the ordinal variable $Y$ for the reference group (when $x = 0$).
 
 ```{r fig-show-th-example, fig.cap=filor::get_caption(), fig.place = TRUE}
 p1 <- show_alpha(prob = rep(1/4, 4), link = "probit", plot = FALSE)
