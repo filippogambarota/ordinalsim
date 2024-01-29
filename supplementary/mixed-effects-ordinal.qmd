@@ -1,0 +1,111 @@
+---
+title: "Random-effects Models"
+format: 
+  html:
+    toc: true
+bibliography: "`r filor::fil()$bib`"
+csl: "`r filor::fil()$csl`"
+---
+  
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(cowplot)
+library(ordinal)
+devtools::load_all()
+
+knitr::opts_chunk$set(echo = TRUE,
+                      dev = "svg",
+                      warning = FALSE,
+                      message = FALSE)
+mtheme <- function(){
+  theme_minimal(15)
+}
+theme_set(mtheme())
+```
+
+We can extended the base CM model by including random-effects. For example, if the same participant responds to the same item/trial multiple times or responds to multiple items we need to take into account the nested data-structure. @Agresti2010-rz formalized the random-intercept CM model in @eq-cm-random-intercept.
+
+$$
+P(Y \leq k) = g^{-1}[(\alpha_k + u_i) - \mathbf{X}\boldsymbol{\beta}]
+$$ {#eq-cm-random-intercept}
+
+Where $u_i$ is the by-subject adjustment to the overall intercept-threshold. As in standard mixed-effects models, the random-effect of the intercept is sampled from a normal distribution with $\mu = 0$ and standard deviation $\sigma_{u}$, thus $u_i \sim \mathcal{N}(0, \sigma_u)$. We can use the same simulation strategies (sampling from multinomial distribution or latent approach) of the paper but introducing the random-effect. We simulate $N = 100$ subjects divided into two groups. Each subject performs $100$ trial responding on a ordinal item.
+
+```{r}
+# Simulation parameters
+set.seed(2024)
+k <- 4
+probs0 <- rep(1/k, k)
+N <- 100 # sample size
+n <- N/2
+nt <- 100 # number of trials
+b1 <- log(3)
+sb0 <- 0.5 # intercept standard deviation
+group <- c(0, 1) # group
+alpha <- prob_to_alpha(probs0, link = "logit")
+
+# Data structure
+dat0 <- dat1 <- expand.grid(id = 1:n, trial = 1:nt)
+dat0$group <- 0
+dat1$group <- 1
+dat0$id <- rep(1:n, nt)
+dat1$id <- rep((n + 1):N, nt)
+dat <- rbind(dat0, dat1)
+
+alphai <- rnorm(N, 0, sb0)
+```
+
+## Sampling from multinomial distribution
+
+```{r}
+set.seed(2024)
+cump <- lapply(alpha, function(a) plogis(with(dat, (a + alphai[id]) - (b1 * group))))
+p <- t(apply(cbind(0, data.frame(cump), 1), 1, diff))
+names(p) <- paste0("py", 1:k)
+dat <- cbind(dat, p)
+
+dat$y <- apply(dat[, 4:ncol(dat)], 1, function(p) sample(1:k, 1, replace = TRUE, prob = p))
+dat$y <- ordered(dat$y)
+
+fit <- clmm(y ~ group + (1|id), data = dat, link = "logit")
+summary(fit)
+```
+
+## Sampling from the latent variable
+
+```{r}
+set.seed(2024)
+ystar <- with(dat, alphai[id] + (b1*group)) + rlogis(nrow(dat), 0, 1)
+dat$y2 <- ordered(findInterval(ystar, alpha) + 1)
+fit2 <- clmm(y2 ~ group + (1|id), data = dat, link = "logit")
+summary(fit2)
+```
+
+In both simulations we are able to recover the parameters. For fitting the model we use the `clmm()` function that allows specifying the random-effects structure. The syntax is the same as the `lme4` package for standard mixed-effects models.
+
+We can extend the simulation including also random slopes. The `group` effect need to be a within effect now, thus we can imagine to have two conditions in the experiment with 100 trials each. We can extend the @eq-cm-random-intercept with @eq-cm-random-slope. $\beta_{1_i}$ are the by-subjects adjustments to the overall $\beta_1$ effect, still sampled from a normal distribution.
+
+$$
+P(Y \leq k) = g^{-1}[(\alpha_k + u_i) - (\beta_1 + \beta_{1_i})X_1]
+$${#eq-cm-random-slope}
+
+Let's use the latent formulation directly:
+
+```{r}
+#| cache: true
+
+set.seed(2024)
+dat <- expand.grid(id = 1:N, trials = 1:nt, cond = c(0, 1))
+sb1 <- 0.2 # slope standard deviation
+alphai <- rnorm(N, 0, sb0)
+b1i <- rnorm(N, 0, sb1)
+
+ystar <- with(dat, alphai[id] + ((b1 + b1i[id]) * cond)) + rlogis(nrow(dat), 0, 1)
+dat$y <- ordered(findInterval(ystar, alpha) + 1)
+fit <- clmm(y ~ cond + (cond|id), data = dat, link = "logit", )
+summary(fit)
+```
+

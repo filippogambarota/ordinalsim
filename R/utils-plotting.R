@@ -129,7 +129,7 @@ cat_latent_plot <- function(location = 0,
     sum_to_1(prob0)
     alpha <- prob_to_alpha(prob0, link = link)
   }
-  
+
   data <- data.frame(x = factor(1:length(location)))
   k <- length(alpha) + 1
   if(length(location) > 1){

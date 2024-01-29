@@ -595,9 +595,9 @@ In this tutorial we present two method for simulating ordinal data. Simulating d
 
 For the first method we need to calculate $P(Y \leq k) = g^{-1}(\eta)$ as a function of predictors and then sample from a *multinomial* (more specifically *categorical*) distribution using the `sample()` function in R. This method is similar to the general way of simulating data for a generalized linear model (see the supplementary materials).
 
-As a simple example, we simulate two groups with $n = 100$ participants responding to an item ($Y$) with $k = 4$ ordered options. As explained in the previous sections, we can summarise the effect size of a CM (assuming PO) using a single $\beta = \log(OR) = \log(3)$. For simplicity, the probabilities of the first group $x = 0$ are uniform thus $P(Y = 1|x_0) = \dots P(Y = k|x_0) = 1/k$. The following code summarise the first steps of the simulation. Basically we define the simulation parameters, we calculate the $k - 1$ thresholds $\alpha$ and we apply Equations \@ref(eq:prob-cum-model1) and \@ref(eq:prob-cum-model2) calculating the probability of each response.
+As a simple example, we simulate two groups with $n = 100$ participants responding to an item ($Y$) with $k = 4$ ordered options. As explained in the previous sections, we can summarise the effect size of a CM (assuming PO) using a single $\beta = \log(OR) = \log(3)$. For simplicity, the probabilities of the first group $x = 0$ are uniform thus $P(Y = 1|x_0) = \dots P(Y = k|x_0) = 1/k$. The following code summarise the first steps of the simulation. We define the simulation parameters, calculate the $k - 1$ thresholds $\alpha$ and apply Equations \@ref(eq:prob-cum-model1) and \@ref(eq:prob-cum-model2) calculating the probability of each response.
 
-The other parameters to define are the thresholds. We can consider them as intercepts thus the transformed probabilities of each ordinal response when $x = 0$ (in this case the first group). The `alpha_to_prob()` and `prob_to_alpha()` can be used to go back and forth from thresholds and probabilities.
+To set the thresholds, we can consider them as intercepts thus the transformed probabilities of each ordinal response when $x = 0$ (in this case the first group). The `alpha_to_prob()` and `prob_to_alpha()` can be used to go back and forth from thresholds and probabilities.
 
 ```{r alpha-prob-example}
 #| echo: true
@@ -630,15 +630,17 @@ dat <- data.frame(x = rep(c(0, 1), each = N/2))
 lp <- lapply(alpha, function(a) a - log(or) * dat$x)
 names(lp) <- sprintf("lp_leq%s", 1:(k - 1)) # giving appropriate names
 lp <- data.frame(lp)
-head(lp)
+head_tail(lp, n = 3)
 
 ## CUMULATIVE PROBABILITIES
 
 # apply the inverse of the link function (invlogit) to calculate cumulative probabilities
 cump <- lapply(lp, plogis)
 cump <- data.frame(cump)
-names(cump) <- sprintf("cump_leq%s", 1:(k - 1)) # giving appropriate names
-head(cump)
+
+# giving appropriate names, cump = cumulative probability, leq = less or equal
+names(cump) <- sprintf("cump_leq%s", 1:(k - 1))
+head_tail(cump, n = 3)
 
 ## PROBABILITIES OF Y
 
@@ -654,7 +656,6 @@ p <- apply(cump, 1, diff, simplify = FALSE)
 
 p <- data.frame(do.call(rbind, p)) # collapse list of rows into a dataframe
 names(p) <- sprintf("p%s", 1:k) # giving appropriate names
-head(p)
 
 # probabilities for id = 1 (x = 0) and id = 51 (x = 1)
 p[c(1, 51), ]
@@ -679,14 +680,14 @@ odds(x0) / odds(x1)
 
 set.seed(2024)
 
-# example of a random Y outcome based on the probabilities
-sample(x = 1:k, size = 1, prob = p[1, ])
+# example of n random Y outcome based on the probabilities
+sample(x = 1:k, size = 10, prob = p[1, ], replace = TRUE)
 
 # we can apply it to the full dataset, this step lead to different results
 # each time we run the code because we are sampling from a distribution
 
 dat$y <- apply(p, 1, function(ps) sample(1:k, size = 1, prob = ps))
-head(dat)
+head_tail(dat, n = 3)
 
 # let's compute the observed probabilities, to be compared to the true
 # probabilities
@@ -716,20 +717,20 @@ summary(fit)
 
 We can generalize the previous workflow as:
 
-1.  Define simulation parameters, baseline probabilities (`prob0`), sample size, etc.
+1.  Define simulation parameters, intercept probabilities (`prob0`), sample size, etc.
 4.  Define regression coefficients $\boldsymbol{\beta}$ and calculate the $k - 1$ linear predictors ($\eta$) using the equations
 5.  Apply the inverse of the link function $g^{-1}(\eta)$ on the linear predictor and calculate the cumulative probabilities $p(y \leq 1|x), p(y \leq 2|x), ... p(y \leq k - 1|x)$.
 6.  Calculate the probabilities of $k$ outcomes
-7.  Sample $n$ outcomes from a *multinomial* distribution, choosing between $k$ alternatives using the calculated probabilities
+7.  Sample $n$ outcomes from a *multinomial* distribution using the calculated probabilities
 8.  Fit the appropriate model using `ordinal::clm()`
 
 ### Simulating from the latent distribution
 
-A more efficient way to simulate an ordinal outcome is using the latent formulation of the model. This require simulating a standard linear regression using the appropriate data generation function (*logistic* or *normal*) and cutting the latent variable using the thresholds. The workflow is slightly different compared to the previous approach.
+More efficiently, we can use the latent formulation of the CM. This require simulating a standard linear regression using the appropriate data generation function (*logistic* or *normal*) and cutting the latent variable using the thresholds. The workflow is slightly different compared to the previous approach.
 
 1.  Define simulation parameters as in the previous simulation. `prob0` are the probabilities when all predictors $\mathbf{X}$ are zero.
 2.  Define regression coefficients $\boldsymbol{\beta}$ and calculate the linear predictor $\eta$ using the Equation \@ref(eq:latent-model)
-3.  Add the random errors $\epsilon_i$ sampling from the chosen distribution (logistic or normal)
+3.  Add the random errors $\epsilon_i$ sampling from the logistic or normal distributions
 4.  Cut the latent variable into $k$ areas using the thresholds $\alpha$ and assign the corresponding ordinal value. This can be done using the `cut()` or the `findInterval()` functions.
 
 The Figure \@ref(fig:fig-sim-from-latent) depicts the simulated $Y^{*}$ and the corresponding ordinal value. As for the previous simulation we can fit the model using `clm()` and check the estimated parameters.
@@ -745,7 +746,7 @@ N <- 1e3 # sample size
 or <- 4 # odds ratio, higher here just for a more clear plot
 k <- 4 # number of ordinal alternatives
 probs0 <- rep(1/k, k) # probabilities for the first group
-alpha <- prob_to_alpha(probs0, link = "logit")
+alpha <- prob_to_alpha(probs0, link = "logit") # thresholds
 dat <- data.frame(x = rep(c(0, 1), each = N/2))
 
 ## LINEAR PREDICTOR
@@ -788,7 +789,7 @@ fit <- clm(y ~ x, data = dat, link = "logit")
 summary(fit)
 ```
 
-The simulation using the latent formulation of the model is implemented in the `sim_ord_latent()` function. Basically, we define the dataset `dat` with predictors. Then the model formula is specified within the function as `location = ~` along with the vector of regression coefficients (`beta`), baseline probabilities (`prob0`) and the link function. The function return a dataset with the simulated $Y$ and the latent variable (this is possible only because we simulate the data, otherwise $Y^{\star}$ cannot be observed by definition).
+The simulation using the latent formulation of the model is implemented in the `sim_ord_latent()` function. Basically, we define the dataset `dat` with predictors. Then the model formula is specified within the function as `location = ~` along with the vector of regression coefficients (`beta`), baseline probabilities (`prob0`) and the link function. The function return a dataset with the simulated $Y$ and the latent variable (this is possible only because we simulateds the data, otherwise $Y^{\star}$ cannot be observed by definition).
 
 ```{r simulating-from-latent3}
 #| echo: true
@@ -828,12 +829,12 @@ plot_grid(p1,
 
 #### Regression coefficients
 
-For *probit* models we can set the $\beta_j$ to be in standardized (i.e., Cohen's $d$-like) units. For a categorical variable as the previous example with the group, $\beta_j$ is the degree of separation in standard deviation unit between the two latent distributions. For *logit* models we can set the odds ratio. Meaningful odds ratios can be derived from previous literature, meta-analyses or converting to other effect sizes. For example, @Sanchez-Meca2003-ji proposed some equations to convert between odds ratios and Cohen's $d$. Using their approach, a Cohen's $d = 0.5$ usually considered a plausible medium effect size corresponds to and odds ratio of $\approx 2.47$. 
+For *probit* models we can set the $\beta_j$ to be in standardized (i.e., Cohen's $d$-like) units. For a categorical variable as the previous example with the group, $\beta_j$ is the degree of separation in standard deviation unit between the two latent distributions. For *logit* models we can set the odds ratio. Meaningful odds ratios can be derived from previous literature, meta-analyses or converting from other effect sizes. For example, @Sanchez-Meca2003-ji proposed some equations to convert between odds ratios and Cohen's $d$. Using their approach, a Cohen's $d = 0.5$ usually considered a plausible medium effect size corresponds to and odds ratio of $\approx 2.47$. 
 
 We can also calculate and plot the predicted probabilities (i.e., $g^{-1}(\eta)$) given the predictors and the chosen regression coefficients. In this way we can try different values and see if predicted probabilities are plausible or not. The `cat_latent_plot()` and `num_latent_plot()` functions can be for respectively a categorical (Figures \@ref(fig:fig-example-cat-latent)) and numerical predictor (Figures \@ref(fig:fig-example-num-latent)). In the supplementary materials we show how to use the `sim_ord_latent()` function for checking the impact of certain $\beta$ for more complex models.
 
 ```{r fig-example-cat-latent, fig.cap=filor::get_caption(), fig.place = TRUE}
-cp <- cat_latent_plot(location = c(0, 1), scale = 1, prob0 = rep(1/4, 4), link = "logit", plot = FALSE) 
+cp <- cat_latent_plot(location = c(0, 1), scale = c(1, 1), prob0 = rep(1/4, 4), link = "logit", plot = FALSE)
 legend <- cowplot::get_legend(cp$probs_plot)
 plt <- cowplot::plot_grid(
   cp$lat_plot + rm_legend(),
@@ -891,10 +892,10 @@ fit <- clm(y ~ x1 * x2, data = dat, link = "probit")
 summary(fit)
 ```
 
-The parameters interpretation is the same as introduced in the general case. The thresholds $\alpha$ are fixed representing the probabilities $P(Y = k)$ when all predictors are zero. In this case by doing `alpha_to_prob(fit$alpha, link = "probit")` we should recover the `probs0` vector. `x1` is the main effect thus the difference in $z$ scores between *a* and *b* averaging over `x2`. The same holds for `x2`. `x1:x2` is the interaction thus difference of differences in $z$ scores (see Figure \@ref(fig:fig-effects-2-by-2-interaction)).
+The thresholds are fixed, representing the probabilities $P(Y = k)$ when all predictors are zero. In this case by doing `alpha_to_prob(fit$alpha, link = "probit")` we should recover the `probs0` vector. `x11` is the main effect thus the difference in $z$ scores between *a* and *b* averaging over `x2`. The same holds for `x21`. `x11:x21` is the interaction thus difference of differences in $z$ scores (see Figure \@ref(fig:fig-effects-2-by-2-interaction)).
 
 ```{r fig-effects-2-by-2-interaction, fig.place = TRUE, fig.cap=filor::get_caption()}
-# plot(ggpredict(fit, terms = c("x1", "x2")))
+# plot(ggpredict(fit, terms = c ("x1", "x2")))
 ggpredict(fit, terms = c("x1", "x2")) |> 
   data.frame() |>
   mutate(response.level = paste("Y = ", response.level)) |> 
@@ -928,7 +929,7 @@ fit <- clm(y ~ x * g, data = dat, link = "probit")
 summary(fit)
 ```
 
-Again, `x` is the slope of the numerical predictor averaging over `g` (given that `g` has been coded with sum-to-zero contrasts) thus the increase in $z$ scores for a unit increase in `x`. `g1` is the main effect of the factor evaluated when $x = 0$ (centering $x$ will change the parameter interpretation). The `x:g1` is the slopes difference the two groups. Figure \@ref(fig:fig-effects-num-by-cat-interaction) depicts the model results.
+Again, `x` is the slope of the numerical predictor averaging over `g` (given that `g` has been coded with sum-to-zero contrast) thus the increase in $z$ scores for a unit increase in `x`. `g1` is the main effect of the factor evaluated when $x = 0$ (centering $x$ will change the parameter interpretation). The `x:g1` is the difference between the slopes of the two groups. Figure \@ref(fig:fig-effects-num-by-cat-interaction) depicts the model results.
 
 ```{r fig-effects-num-by-cat-interaction, fig.place = TRUE, fig.width=9, fig.height=9, fig.cap=filor::get_caption()}
 # plot(ggpredict(fit, terms = c("x[all]", "g")))
@@ -1027,6 +1028,10 @@ ggplot(power_df, aes(x = n, y = power)) +
   geom_hline(yintercept = 0.8, lty = "dashed", color = "firebrick")
 ```
 
+# Conclusions
+
+In this tutorial we presented the CM model in terms of model fitting, parameters interpretation and data simulation. The basic model can be expanded in several ways. When assuming PO or considering only a location effect is limiting, including scale (*location-scale*), thresholds (*location-shift*) effects or relaxing the PO assumption can help in modeling complex phenomenon. The supplementary materials contains some examples of these complex models. Furtermore, with clustered data (e.g., multiple items/repetitions for the same participant), a random-effect CM model can be fitted including random intercepts and slopes.
+
 \newpage
 
 # References
@@ -1046,7 +1051,7 @@ ggplot(power_df, aes(x = n, y = power)) +
 
 (ref:fig-sim-from-latent) Example of cutting a latent variable for $k = 4$ ordinal outcomes with the effect of a binary predictor $x$. The thresholds are fixed and the difference between the latent means of the two groups increase the number of points (thus probability) in higher outcomes.
 
-(ref:fig-show-th-example) Example of the `show_alpha()` function. On the left the assumed latent variable and $k - 1$ thresholds with the corresponding probabilities on the right.
+(ref:fig-show-th-example) Example of the `show_alpha()` function. On the left the assumed latent variable and $k - 1$ thresholds with the corresponding probabilities on the right. The distance between thresholds (quantiles) determine the probability of the $k$ outcomes.
 
 (ref:fig-example-cat-latent) Example of the `cat_latent_plot()` function depicting the effect of a categorical predictor. On the left the shift in the latent mean and on the right the impact on the expected probabilities. The plot can be created using `cat_latent_plot(m = c(0, 1), s = 1, prob0 = rep(1/4, 4), link = "logit")`.
 
@@ -1060,9 +1065,9 @@ ggplot(power_df, aes(x = n, y = power)) +
 
 <!-- TABLES -->
 
-(ref:tab-model-summary-docx) Summary of the probit and logit models in terms of link ($g(\cdot)$) and inverse link function ($g^{-1}(\cdot)$) and the corresponding R code.
+(ref:tab-model-summary-docx) Summary of the probit and logit models in terms of link $g(\cdot)$ and inverse link function $g^{-1}(\cdot)$ and the corresponding R code.
 
-(ref:tab-model-summary-latex) Summary of the probit and logit models in terms of link ($g(\cdot)$) and inverse link function ($g^{-1}(\cdot)$) and the corresponding R code.
+(ref:tab-model-summary-latex) Summary of the probit and logit models in terms of link $g(\cdot)$ and inverse link function $g^{-1}(\cdot)$ and the corresponding R code.
 
 (ref:tab-dataset-example-docx) Summary of the simulated dataset. For each group (a and b) we reported mean, median and standard deviation of the ordinal outcome (metric descriptive statistics). For each ordinal outcome ($Y$) we reported the frequency and (within parentheses) the probability.
 

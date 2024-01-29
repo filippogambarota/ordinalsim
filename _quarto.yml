@@ -1,5 +1,6 @@
 project:
   type: website
+  output-dir: docs
   render:
     - "*.qmd"
     - "!scripts-review"
@@ -7,7 +8,7 @@ project:
     - "!README.md"
     - "!LICENSE.md"
     - "!supplementary/deprecated"
-
+    
 execute:
   freeze: auto  # re-render only when source changes
 

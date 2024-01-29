@@ -10,3 +10,4 @@ In the next links there are useful materials and examples that extended what pre
 - [Ordinal notes](supplementary/ordinal-notes.qmd): a miscellanea of code snippets and quick examples about ordinal regression models
 - [Location-scale models](supplementary/location-scale-models.qmd): a tutorial to fit, interpret and simulate location-scale cumulative link models.
 - [Simulating a GLM](supplementary/simulating-glm.qmd): a quick example on how to simulate data for a Generalized Linear Model (GLM).
+- [Mixed-effects models](supplementary/mixed-effects-ordinal.qmd): a quick example on how to simulate data for a Generalized Linear Model (GLM).
