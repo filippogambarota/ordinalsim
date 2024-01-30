@@ -1,0 +1,29 @@
+---
+author: "Filippo Gambarota"
+role: "Postdoctoral Researcher"
+journal: "International Journal of Psychology"
+affiliation: "Department of Developmental Psychology and Socialization"
+paper: "Ordinal regression models made easy. A tutorial on parameter interpretation, data simulation, and power analysis"
+university: "University of Padova"
+editor: "Prof. Antonio Zuffianò and Prof. David Giofrè"
+date: "31\\textsuperscript{th} January 2024"
+output: filor::letter
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We wish to submit our work "*`r rmarkdown::metadata$paper`*" for consideration by `r rmarkdown::metadata$journal` (special issue "Tutorials on Quantitative Methods"). Ordinal data are very common in any area of Psychology from social psychology, to clinical assessment and also experimental psychology. Several authors suggested that ordinal data requires appropriate descriptive statistics and modeling methods but very often researchers ignore the ordinal nature of the variable using standard statistical techniques e.g., linear regressions. This approach can introduce inferential errors, biased estimates, and wrong predictions.
+
+Ordinal regression models are not new statistical approaches but one of the reasons why researchers are not using them could be the challenging statistical implementation, the not intuitive parameters interpretation, and the difficulty in implementing research-related activities such as power or design analysis. All these aspects are surely more challenging for ordinal models compared to the standard linear regression.
+
+This tutorial aims to introduce a specific but very applicable class of ordinal regression models called cumulative models. We adopted a specific approach for the tutorial as a mixture of concise but necessary statistical background (model assumptions, minimal equations, and model components). Beyond the theoretical introduction, we used a simulation-based approach where we showed how to generate realistic data under different common research scenarios. The simulation-based approach has several advantages in terms of forcing people to understand the model foundations still not requiring them to completely understand the statistical details. Furthermore, introducing Monte Carlo simulations has the advantage of giving a powerful tool also for daily research work. By using simulations, researchers can not only understand but plan their experiments/research in terms of power and design analysis. We presented a simple but extendable framework to simulate data and implement a power analysis. We believe that when presenting or revisiting a statistical approach is always important to suggest or propose methods to estimate the statistical power. Given the widespread of registered reports and preregistration, power analysis is often a mandatory step.
+
+In addition to the topics and examples proposed in the tutorial, we created a set of custom R functions supporting the simulation and visualization of ordinal models. Furthermore, we added other examples and model extensions such as mixed-effects models and scale-location models. All the materials to reproduce the paper and the additional materials are available on the online OSF repository ([https://osf.io/93h5j/](https://osf.io/93h5j/)) linked to a Github repository ([github.com/shared-research/ordinalsim](github.com/shared-research/ordinalsim)).
+
+Thank you for your consideration of this manuscript.
+
+Best regards,
+
+Filippo Gambarota and Gianmarco Altoè

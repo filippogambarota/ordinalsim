@@ -23,10 +23,10 @@ affiliation:
   - id            : "1"
     institution   : "Department of Developmental Psychology and Socialization, University of Padova, Italy"
 abstract: |
-  Ordinal data are very common in psychology such as Likert items, ratings or generic ordered variables. Despite the widespread, these variables are usually analyzed using metric models (e.g., standard linear regression). This approach can have important drawbacks in terms of statistical inference (e.g., reduced power and increased type-1 error) and prediction. One of the possible reason of not using ordinal regression models could be the difficulty in understanding parameters (e.g., odds ratios) or conduting a power analysis. The aim of the tutorial is presenting ordinal regression models using a simulation-based approach. In the first section we introduced the general model highlighting the crucial components and assumptions. Then we explained how to intepret the parameters for a logit and probit model. Then we proposed two way for simulating ordinal data as a function of predictors showing common research design such as a 2x2 interaction with categorical predictors and the interaction between a numeric and categorical predictor. Finally, we showed an example of power analysis using simulations that can be easily extended to complex models with multiple predictors. The tutorial is supported by a collection of custom R functions developed to simulate and understand ordinal regression models. The code to reproduce the proposed simulation, the custom R functions and other examples of ordinal regression models can be found on the online Open Science Framework repository ([https://osf.io/93h5j](https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34)).
+    Ordinal data are widespread in psychology such as Likert items, ratings, or generic ordered variables. These variables are usually analyzed using metric models (e.g., standard linear regression) with important drawbacks in terms of statistical inference (reduced power and increased type-1 error) and prediction. One possible reason for not using ordinal regression models could be difficulty in understanding parameters or conducting a power analysis. The tutorial aims to present ordinal regression models using a simulation-based approach. Firstly, we introduced the general model highlighting crucial components and assumptions. Then we explained how to interpret parameters for a logit and probit model. Then we proposed two ways for simulating data as a function of predictors showing a 2x2 interaction with categorical predictors and the interaction between a numeric and categorical predictor. Finally, we showed an example of power analysis using simulations that can be easily extended to complex models with multiple predictors. The tutorial is supported by a collection of custom R functions developed to simulate and understand ordinal regression models. The code to reproduce the proposed simulation, the custom R functions, and additional examples of ordinal regression models can be found on the online Open Science Framework repository ([https://osf.io/93h5j](https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34)).
   
-keywords          : "ordinal, simulations, power"
-wordcount         : "X"
+keywords          : "ordinal regression, monte carlo simulations, power analysis"
+wordcount         : "6987"
 bibliography:
   - "packages.bib"
   - "`r filor::fil()$bib`"
@@ -197,13 +197,13 @@ head_tail <- function(x, n = 5){
 
 We can generally define as *ordinal regression*, a statistical model explicitly considering the ordinal (and not metric) nature of the response variable. The nomenclature of *ordinal regression* models can be confusing but @Tutz2022-dg and @Burkner2019-aw provide a clear and updated taxonomy of ordinal regression models.
 
-We can identify three main models: *cumulative models* [CM, @McCullagh1980-cw; @Agresti2010-rz], *sequential models* [@Tutz1990-fe], and *adjacent category models*. Among these, the CM is the most widely used, assuming the existence of a latent variable categorized using a set of thresholds. The *sequential model* is appropriate when modeling sequential processes where responding to a certain category implies have already reached lower categories. The *adjacent category model* compares a category with the successive one and can be seen  the adjacent-category model can be seen as a series of binomial regressions taking into account the ordering [@Tutz2022-dg].
+We can identify three main models: *cumulative models* [CM, @Agresti2010-rz;  @McCullagh1980-cw], *sequential models* [@Tutz1990-fe], and *adjacent category models*. Among these, the CM is the most widely used, assuming the existence of a latent variable categorized using a set of thresholds. The *sequential model* is appropriate when modeling sequential processes where responding to a certain category implies have already reached lower categories. The *adjacent category model* compares a category with the successive one and can be seen  the adjacent-category model can be seen as a series of binomial regressions taking into account the ordering [@Tutz2022-dg].
 
 In the current paper we focus on the CM for several reasons. Firstly, the latent formulation of the model is particularly convenient for parameter interpretation and data simulation. The second reason is that several psychological construct can be formalized as a latent continuous variable observed as an ordinal item(s). Furthermore, the signal detection theory framework that is very common in experimental psychology can be implemented using a CM [e.g., @DeCarlo2010-lj]. Figure \@ref(fig:fig-explain-cumulative) depicts the overall structure of the CM.
 
 ## Model notation
 
-In this section we introduce some notation for the CM to be consistent with the existing literature and the `ordinal` R package [@Christensen2022-jk]. We define $Y_k$ as the observed ordinal variable with $k$ levels and $Y^\star$ is the underlying latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \dots, \alpha_{k - 1}$. Similarly to the generalized linear models framework [e.g., @Fox2015-ps], we define $g(p) = \eta$ as the link function that maps probabilities into the linear predictor $\eta$. To transform back $\eta$ into probabilities we use the inverse of the link function $p = g^{-1}(\eta)$. The specific link function define the type of model and require different R functions. For example, using a Normal distribution (*probit* link function) requires using the cumulative distribution function $g(p) = \Phi^{-1}(p) = \eta$ and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined $p = g^{-1}(\eta) = \Phi(\eta)$. 
+In this section we introduce some notation for the CM to be consistent with the existing literature and the `ordinal` R package. We define $Y_k$ as the observed ordinal variable with $k$ levels and $Y^\star$ is the underlying latent variable. The latent variable is segmented using $k - 1$ thresholds $\alpha_1, \dots, \alpha_{k - 1}$. Similarly to the generalized linear models framework [e.g., @Fox2015-ps], we define $g(p) = \eta$ as the link function that maps probabilities into the linear predictor $\eta$. To transform back $\eta$ into probabilities we use the inverse of the link function $p = g^{-1}(\eta)$. The specific link function define the type of model and require different R functions. For example, using a Normal distribution (*probit* link function) requires using the cumulative distribution function $g(p) = \Phi^{-1}(p) = \eta$ and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined $p = g^{-1}(\eta) = \Phi(\eta)$. 
 
 When modelling an ordinal variable in a CM we include predictors on the cumulative probability $P(Y \leq k), k = 1, \dots, k - 1$^[As done by @Agresti2010-rz, when referring to $P(Y \leq k)$ we are implicitly conditioning on a particular $\mathbf{X}$ value $P(Y \leq k | \mathbf{X}_i)$]. Equation \@ref(eq:prob-cum-model1) shows the general cumulative model with predictors $\mathbf{X}$ and coefficients $\boldsymbol{\beta}$. The minus sign in $\mathbf{X} \boldsymbol{\beta}$ is used to interpret the $\beta_j$ as in the standard regression models where higher positive values corresponds to increased probability of responding higher $k$ categories [@Agresti2010-rz].
 
@@ -255,7 +255,7 @@ Equation \@ref(eq:latent-model) shows the latent formulation of the previous mod
 
 The $\epsilon$ term is the random part (errors) of the model. For a *probit* model, errors are distributed as a standard Normal distribution and for a *logit* model as a standard logistic distribution. Following the notation by @Tutz2022-dg, the observed ordinal value $Y_i = k$ comes from $Y^\star_i$ belonging to the interval defined by the thresholds $Y_i = k \iff \alpha_{k - 1} < Y^\star_i < \alpha_{k}$ where $- \infty = \alpha_0 < \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k = \infty$.
 
-In the CM, thresholds $\alpha_k$ are considered fixed and part of the measurement procedure [@Liddell2018-wu; but see the *location-shift* models by @Tutz2022-dg, where thresholds vary as a function of predictors] and can be considered as intercepts. The proposed CM can be parametrized in different ways. @Liddell2018-wu and @Kruschke2015-re proposed a Bayesian version of the model and @Gelman2020-tg proposed other thresholds parametrizations.
+In the CM, thresholds $\alpha_k$ are considered fixed and part of the measurement procedure [@Liddell2018-wu; but see the *location-shift* models by @Tutz2022-dg, where thresholds vary as a function of predictors] and can be considered as intercepts. The proposed CM can be parametrized in different ways. @Liddell2018-wu proposed a Bayesian version of the model and @Gelman2020-tg proposed other thresholds parametrizations.
 
 ## Link function
 
@@ -337,9 +337,9 @@ papaja::apa_table(models_table, escape = FALSE, align = "c", row.names = FALSE, 
 
 # Model fitting
 
-For fitting the CM we used the `ordinal` package [@Christensen2019-cz]. The `ordinal` package provide a complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R with functions to calculate predictions, perform model comparison and extract relevant model information.[^2]
+For fitting the CM we used the `ordinal` package [@Christensen2023-yi]. The `ordinal` package provide a complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R with functions to calculate predictions, perform model comparison and extract relevant model information.[^2]
 
-[^2]: For a very complete overview of the ordinal package see @Christensen2019-cz and the Package documentation <https://cran.r-project.org/web/packages/ordinal/ordinal.pdf>
+[^2]: For a very complete overview of the ordinal package see <https://cran.r-project.org/web/packages/ordinal/ordinal.pdf> and <https://cran.uni-muenster.de/web/packages/ordinal/vignettes/clm_article.pdf>
 
 The main function is `clm()` and the formula is specified using the syntax `y ~ ...` where `y` is the ordinal response and `...` is a combination of predictors. The package also implements mixed-effects models including random intercepts and slopes.
 
@@ -392,8 +392,8 @@ names(ss)[names(ss) == "Sd"] <- "SD"
 ```{r tab-dataset-example-latex, eval = which_output("latex")}
 ss |> 
   kable(booktabs = TRUE, format = "latex", caption = filor::get_caption(), escape = FALSE, align = "c", row.names = FALSE) |> 
-  kable_styling(full_width = FALSE) |> 
-  row_spec(0, bold = TRUE) 
+  kable_styling(full_width = FALSE, latex_options = c("scale_down")) |> 
+  row_spec(0, bold = TRUE)
 ```
 
 
@@ -931,7 +931,7 @@ summary(fit)
 
 Again, `x` is the slope of the numerical predictor averaging over `g` (given that `g` has been coded with sum-to-zero contrast) thus the increase in $z$ scores for a unit increase in `x`. `g1` is the main effect of the factor evaluated when $x = 0$ (centering $x$ will change the parameter interpretation). The `x:g1` is the difference between the slopes of the two groups. Figure \@ref(fig:fig-effects-num-by-cat-interaction) depicts the model results.
 
-```{r fig-effects-num-by-cat-interaction, fig.place = TRUE, fig.width=9, fig.height=9, fig.cap=filor::get_caption()}
+```{r fig-effects-num-by-cat-interaction, fig.place = TRUE, fig.width=7, fig.height=12, fig.cap=filor::get_caption()}
 # plot(ggpredict(fit, terms = c("x[all]", "g")))
 ggpredict(fit, terms = c("x[all]", "g")) |> 
   data.frame() |>
@@ -940,7 +940,7 @@ ggpredict(fit, terms = c("x[all]", "g")) |>
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = group),
               alpha = 0.3) +
   geom_line(aes(group = group), linewidth = 1) +
-  facet_grid(response.level~1) +
+  facet_grid(response.level~.) +
   ylab("Probability") +
   mtheme() +
   viridis::scale_fill_viridis(discrete = TRUE)

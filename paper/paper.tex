@@ -208,7 +208,7 @@
     {}{\InnerPatchFailed}%
   }
 {}{\PatchFailed}
-\keywords{ordinal, simulations, power\newline\indent Word count: X}
+\keywords{ordinal regression, monte carlo simulations, power analysis\newline\indent Word count: 6987}
 \usepackage{csquotes}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
@@ -220,7 +220,7 @@
   pdftitle={Ordinal regression models made easy. A tutorial on parameter interpretation, data simulation, and power analysis.},
   pdfauthor={Filippo Gambarota1 \& Gianmarco Altoè1},
   pdflang={en-EN},
-  pdfkeywords={ordinal, simulations, power},
+  pdfkeywords={ordinal regression, monte carlo simulations, power analysis},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
@@ -242,7 +242,7 @@ Correspondence concerning this article should be addressed to Filippo Gambarota,
 \affiliation{\vspace{0.5cm}\textsuperscript{1} Department of Developmental Psychology and Socialization, University of Padova, Italy}
 
 \abstract{%
-Ordinal data are very common in psychology such as Likert items, ratings or generic ordered variables. Despite the widespread, these variables are usually analyzed using metric models (e.g., standard linear regression). This approach can have important drawbacks in terms of statistical inference (e.g., reduced power and increased type-1 error) and prediction. One of the possible reason of not using ordinal regression models could be the difficulty in understanding parameters (e.g., odds ratios) or conduting a power analysis. The aim of the tutorial is presenting ordinal regression models using a simulation-based approach. In the first section we introduced the general model highlighting the crucial components and assumptions. Then we explained how to intepret the parameters for a logit and probit model. Then we proposed two way for simulating ordinal data as a function of predictors showing common research design such as a 2x2 interaction with categorical predictors and the interaction between a numeric and categorical predictor. Finally, we showed an example of power analysis using simulations that can be easily extended to complex models with multiple predictors. The tutorial is supported by a collection of custom R functions developed to simulate and understand ordinal regression models. The code to reproduce the proposed simulation, the custom R functions and other examples of ordinal regression models can be found on the online Open Science Framework repository (\href{https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34}{https://osf.io/93h5j}).
+Ordinal data are widespread in psychology such as Likert items, ratings, or generic ordered variables. These variables are usually analyzed using metric models (e.g., standard linear regression) with important drawbacks in terms of statistical inference (reduced power and increased type-1 error) and prediction. One possible reason for not using ordinal regression models could be difficulty in understanding parameters or conducting a power analysis. The tutorial aims to present ordinal regression models using a simulation-based approach. Firstly, we introduced the general model highlighting crucial components and assumptions. Then we explained how to interpret parameters for a logit and probit model. Then we proposed two ways for simulating data as a function of predictors showing a 2x2 interaction with categorical predictors and the interaction between a numeric and categorical predictor. Finally, we showed an example of power analysis using simulations that can be easily extended to complex models with multiple predictors. The tutorial is supported by a collection of custom R functions developed to simulate and understand ordinal regression models. The code to reproduce the proposed simulation, the custom R functions, and additional examples of ordinal regression models can be found on the online Open Science Framework repository (\href{https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34}{https://osf.io/93h5j}).
 }
 
 
@@ -297,13 +297,13 @@ In the first part we introduce the ordinal models explaining the general structu
 
 We can generally define as \emph{ordinal regression}, a statistical model explicitly considering the ordinal (and not metric) nature of the response variable. The nomenclature of \emph{ordinal regression} models can be confusing but Tutz (2022) and Bürkner and Vuorre (2019) provide a clear and updated taxonomy of ordinal regression models.
 
-We can identify three main models: \emph{cumulative models} (Agresti, 2010; CM, McCullagh, 1980), \emph{sequential models} (Tutz, 1990), and \emph{adjacent category models}. Among these, the CM is the most widely used, assuming the existence of a latent variable categorized using a set of thresholds. The \emph{sequential model} is appropriate when modeling sequential processes where responding to a certain category implies have already reached lower categories. The \emph{adjacent category model} compares a category with the successive one and can be seen the adjacent-category model can be seen as a series of binomial regressions taking into account the ordering (Tutz, 2022).
+We can identify three main models: \emph{cumulative models} (CM, Agresti, 2010; McCullagh, 1980), \emph{sequential models} (Tutz, 1990), and \emph{adjacent category models}. Among these, the CM is the most widely used, assuming the existence of a latent variable categorized using a set of thresholds. The \emph{sequential model} is appropriate when modeling sequential processes where responding to a certain category implies have already reached lower categories. The \emph{adjacent category model} compares a category with the successive one and can be seen the adjacent-category model can be seen as a series of binomial regressions taking into account the ordering (Tutz, 2022).
 
 In the current paper we focus on the CM for several reasons. Firstly, the latent formulation of the model is particularly convenient for parameter interpretation and data simulation. The second reason is that several psychological construct can be formalized as a latent continuous variable observed as an ordinal item(s). Furthermore, the signal detection theory framework that is very common in experimental psychology can be implemented using a CM (e.g., DeCarlo, 2010). Figure \ref{fig:fig-explain-cumulative} depicts the overall structure of the CM.
 
 \subsection{Model notation}\label{model-notation}
 
-In this section we introduce some notation for the CM to be consistent with the existing literature and the \texttt{ordinal} R package (Christensen, 2022). We define \(Y_k\) as the observed ordinal variable with \(k\) levels and \(Y^\star\) is the underlying latent variable. The latent variable is segmented using \(k - 1\) thresholds \(\alpha_1, \dots, \alpha_{k - 1}\). Similarly to the generalized linear models framework (e.g., Fox, 2015), we define \(g(p) = \eta\) as the link function that maps probabilities into the linear predictor \(\eta\). To transform back \(\eta\) into probabilities we use the inverse of the link function \(p = g^{-1}(\eta)\). The specific link function define the type of model and require different R functions. For example, using a Normal distribution (\emph{probit} link function) requires using the cumulative distribution function \(g(p) = \Phi^{-1}(p) = \eta\) and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined \(p = g^{-1}(\eta) = \Phi(\eta)\).
+In this section we introduce some notation for the CM to be consistent with the existing literature and the \texttt{ordinal} R package. We define \(Y_k\) as the observed ordinal variable with \(k\) levels and \(Y^\star\) is the underlying latent variable. The latent variable is segmented using \(k - 1\) thresholds \(\alpha_1, \dots, \alpha_{k - 1}\). Similarly to the generalized linear models framework (e.g., Fox, 2015), we define \(g(p) = \eta\) as the link function that maps probabilities into the linear predictor \(\eta\). To transform back \(\eta\) into probabilities we use the inverse of the link function \(p = g^{-1}(\eta)\). The specific link function define the type of model and require different R functions. For example, using a Normal distribution (\emph{probit} link function) requires using the cumulative distribution function \(g(p) = \Phi^{-1}(p) = \eta\) and the inverse of the link function is the inverse cumulative distribution function (or quantile function) defined \(p = g^{-1}(\eta) = \Phi(\eta)\).
 
 When modelling an ordinal variable in a CM we include predictors on the cumulative probability \(P(Y \leq k), k = 1, \dots, k - 1\)\footnote{As done by Agresti (2010), when referring to \(P(Y \leq k)\) we are implicitly conditioning on a particular \(\mathbf{X}\) value \(P(Y \leq k | \mathbf{X}_i)\)}. Equation \eqref{eq:prob-cum-model1} shows the general cumulative model with predictors \(\mathbf{X}\) and coefficients \(\boldsymbol{\beta}\). The minus sign in \(\mathbf{X} \boldsymbol{\beta}\) is used to interpret the \(\beta_j\) as in the standard regression models where higher positive values corresponds to increased probability of responding higher \(k\) categories (Agresti, 2010).
 
@@ -345,7 +345,7 @@ Equation \eqref{eq:latent-model} shows the latent formulation of the previous mo
 
 The \(\epsilon\) term is the random part (errors) of the model. For a \emph{probit} model, errors are distributed as a standard Normal distribution and for a \emph{logit} model as a standard logistic distribution. Following the notation by Tutz (2022), the observed ordinal value \(Y_i = k\) comes from \(Y^\star_i\) belonging to the interval defined by the thresholds \(Y_i = k \iff \alpha_{k - 1} < Y^\star_i < \alpha_{k}\) where \(- \infty = \alpha_0 < \alpha_1 < \dots< \alpha_{k - 1} < \alpha_k = \infty\).
 
-In the CM, thresholds \(\alpha_k\) are considered fixed and part of the measurement procedure (Liddell \& Kruschke, 2018; but see the \emph{location-shift} models by Tutz, 2022, where thresholds vary as a function of predictors) and can be considered as intercepts. The proposed CM can be parametrized in different ways. Liddell and Kruschke (2018) and Kruschke (2015) proposed a Bayesian version of the model and Gelman, Hill, and Vehtari (2020) proposed other thresholds parametrizations.
+In the CM, thresholds \(\alpha_k\) are considered fixed and part of the measurement procedure (Liddell \& Kruschke, 2018; but see the \emph{location-shift} models by Tutz, 2022, where thresholds vary as a function of predictors) and can be considered as intercepts. The proposed CM can be parametrized in different ways. Liddell and Kruschke (2018) proposed a Bayesian version of the model and Gelman, Hill, and Vehtari (2020) proposed other thresholds parametrizations.
 
 \subsection{Link function}\label{link-function}
 
@@ -400,7 +400,7 @@ Cumulative Probit & $z = \Phi^{-1}(p)$ & \texttt{qnorm()} & $p = \Phi(z)$ & \tex
 
 \section{Model fitting}\label{model-fitting}
 
-For fitting the CM we used the \texttt{ordinal} package (Christensen, 2019). The \texttt{ordinal} package provide a complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R with functions to calculate predictions, perform model comparison and extract relevant model information.\footnote{For a very complete overview of the ordinal package see Christensen (2019) and the Package documentation \url{https://cran.r-project.org/web/packages/ordinal/ordinal.pdf}}
+For fitting the CM we used the \texttt{ordinal} package (Christensen, 2023). The \texttt{ordinal} package provide a complete and intuitive way to implement the ordinal models. The syntax is very similar to standard linear models in R with functions to calculate predictions, perform model comparison and extract relevant model information.\footnote{For a very complete overview of the ordinal package see \url{https://cran.r-project.org/web/packages/ordinal/ordinal.pdf} and \url{https://cran.uni-muenster.de/web/packages/ordinal/vignettes/clm_article.pdf}}
 
 The main function is \texttt{clm()} and the formula is specified using the syntax \texttt{y\ \textasciitilde{}\ ...} where \texttt{y} is the ordinal response and \texttt{...} is a combination of predictors. The package also implements mixed-effects models including random intercepts and slopes.
 
@@ -434,6 +434,7 @@ We can start by fitting a simple model, highlighting the crucial parameters wher
 \centering
 \caption{\label{tab:tab-dataset-example-latex}Summary of the simulated dataset. For each group (a and b) we reported mean, median and standard deviation of the ordinal outcome (metric descriptive statistics). For each ordinal outcome (\(Y\)) we reported the frequency and (within parentheses) the probability.}
 \centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}[t]{cccccccc}
 \toprule
 \textbf{Group} & \textbf{Mean} & \textbf{Median} & \textbf{SD} & \textbf{Y1} & \textbf{Y2} & \textbf{Y3} & \textbf{Y4}\\
@@ -441,7 +442,7 @@ We can start by fitting a simple model, highlighting the crucial parameters wher
 a & 2.5 & 2 & 1.1 & \textbf{599} (p = \textit{11.98}) & \textbf{662} (p = \textit{13.24}) & \textbf{627} (p = \textit{12.54}) & \textbf{612} (p = \textit{12.24})\\
 b & 3.17 & 3.5 & 0.99 & \textbf{221} (p = \textit{4.42}) & \textbf{381} (p = \textit{7.62}) & \textbf{648} (p = \textit{12.96}) & \textbf{1250} (p = \textit{25})\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \normalsize
@@ -1315,11 +1316,8 @@ Carifio, J., \& Perla, R. J. (2007). Ten common misunderstandings, misconception
 \bibitem[\citeproctext]{ref-Chambers2022-tz}
 Chambers, C. D., \& Tzavella, L. (2022). The past, present and future of registered reports. \emph{Nature Human Behaviour}, \emph{6}, 29--42. \url{https://doi.org/10.1038/s41562-021-01193-7}
 
-\bibitem[\citeproctext]{ref-Christensen2019-cz}
-Christensen, R. H. B. (2019). \emph{Ordinal---regression models for ordinal data}.
-
-\bibitem[\citeproctext]{ref-Christensen2022-jk}
-Christensen, R. H. B. (2022). \emph{Ordinal---regression models for ordinal data}.
+\bibitem[\citeproctext]{ref-Christensen2023-yi}
+Christensen, R. H. B. (2023). \emph{Ordinal---regression models for ordinal data}. Retrieved from \url{https://CRAN.R-project.org/package=ordinal}
 
 \bibitem[\citeproctext]{ref-Cliff1996-qo}
 Cliff, N. (1996). Answering ordinal questions with ordinal data using ordinal statistics. \emph{Multivariate Behavioral Research}, \emph{31}, 331--350. \url{https://doi.org/10.1207/s15327906mbr3103_4}
@@ -1334,7 +1332,7 @@ DeBruine, L. M., \& Barr, D. J. (2021). Understanding mixed-effects models throu
 DeCarlo, L. T. (2010). On the statistical and theoretical basis of signal detection theory and extensions: Unequal variance, random coefficient, and mixture models. \emph{Journal of Mathematical Psychology}, \emph{54}, 304--313. \url{https://doi.org/10.1016/j.jmp.2010.01.001}
 
 \bibitem[\citeproctext]{ref-Fox2015-ps}
-Fox, J. (2015). \emph{Applied regression analysis and generalized linear models}. SAGE Publications. Retrieved from \url{https://play.google.com/store/books/details?id=BlsKogEACAAJ}
+Fox, J. (2015). \emph{Applied regression analysis and generalized linear models}. SAGE Publications.
 
 \bibitem[\citeproctext]{ref-Gambarota2023-on}
 Gambarota, F., \& Altoè, G. (2023). Understanding meta-analysis through data simulation with applications to power analysis. \emph{Advances in Methods and Practices in Psychological Science}. \url{https://doi.org/10.1177/25152459231209330}
@@ -1348,9 +1346,6 @@ Jamieson, S. (2004). Likert scales: How to (ab)use them. \emph{Medical Education
 \bibitem[\citeproctext]{ref-Kemp2021-dj}
 Kemp, S., \& Grace, R. C. (2021). Using ordinal scales in psychology. \emph{Methods in Psychology (Online)}, \emph{5}, 100054. \url{https://doi.org/10.1016/j.metip.2021.100054}
 
-\bibitem[\citeproctext]{ref-Kruschke2015-re}
-Kruschke, J. K. (2015). \emph{Doing bayesian data analysis}. \url{https://doi.org/10.1016/c2012-0-00477-2}
-
 \bibitem[\citeproctext]{ref-Lakens2022-jp}
 Lakens, D. (2022). Sample size justification. \emph{Collabra. Psychology}, \emph{8}. \url{https://doi.org/10.1525/collabra.33267}
 
@@ -1358,7 +1353,7 @@ Lakens, D. (2022). Sample size justification. \emph{Collabra. Psychology}, \emph
 Liddell, T. M., \& Kruschke, J. K. (2018). Analyzing ordinal data with metric models: What could possibly go wrong? \emph{Journal of Experimental Social Psychology}, \emph{79}, 328--348. \url{https://doi.org/10.1016/j.jesp.2018.08.009}
 
 \bibitem[\citeproctext]{ref-Likert1932-xw}
-Likert, R. (1932). A technique for the measurement of attitudes. \emph{Archives of Psychology}, \emph{22}, 55. Retrieved from \url{https://psycnet.apa.org/record/1933-01885-001}
+Likert, R. (1932). A technique for the measurement of attitudes. \emph{Archives of Psychology}, \emph{22}, 55.
 
 \bibitem[\citeproctext]{ref-Liu2023-bp}
 Liu, A., He, H., Tu, X. M., \& Tang, W. (2023). On testing proportional odds assumptions for proportional odds models. \emph{General Psychiatry}, \emph{36}, e101048. \url{https://doi.org/10.1136/gpsych-2023-101048}
@@ -1367,7 +1362,7 @@ Liu, A., He, H., Tu, X. M., \& Tang, W. (2023). On testing proportional odds ass
 McCullagh, P. (1980). Regression models for ordinal data. \emph{Journal of the Royal Statistical Society}, \emph{42}, 109--127. \url{https://doi.org/10.1111/j.2517-6161.1980.tb01109.x}
 
 \bibitem[\citeproctext]{ref-Overgaard2021-hs}
-Overgaard, M., \& Sandberg, K. (2021). The perceptual awareness scale---recent controversies and debates. \emph{Neuroscience of Consciousness}. Retrieved from \url{https://academic.oup.com/nc/article-pdf/doi/10.1093/nc/niab044/41765024/niab044.pdf}
+Overgaard, M., \& Sandberg, K. (2021). The perceptual awareness scale---recent controversies and debates. \emph{Neuroscience of Consciousness}. \url{https://doi.org/10.1093/nc/niab044/41765024/niab044}
 
 \bibitem[\citeproctext]{ref-Peterson1990-cz}
 Peterson, B., \& Harrell, F. E. (1990). Partial proportional odds models for ordinal response variables. \emph{Journal of the Royal Statistical Society. Series C, Applied Statistics}, \emph{39}, 205. \url{https://doi.org/10.2307/2347760}
