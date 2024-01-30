@@ -14,7 +14,7 @@ output: filor::letter
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-We wish to submit our work "*`r rmarkdown::metadata$paper`*" for consideration by `r rmarkdown::metadata$journal` (special issue "Tutorials on Quantitative Methods"). Ordinal data are very common in any area of Psychology from social psychology, to clinical assessment and also experimental psychology. Several authors suggested that ordinal data requires appropriate descriptive statistics and modeling methods but very often researchers ignore the ordinal nature of the variable using standard statistical techniques e.g., linear regressions. This approach can introduce inferential errors, biased estimates, and wrong predictions.
+We wish to submit our full manuscript "*`r rmarkdown::metadata$paper`*" for consideration by `r rmarkdown::metadata$journal` (special issue "Tutorials on Quantitative Methods"). Ordinal data are very common in any area of Psychology from social psychology, to clinical assessment and also experimental psychology. Several authors suggested that ordinal data requires appropriate descriptive statistics and modeling methods but very often researchers ignore the ordinal nature of the variable using standard statistical techniques e.g., linear regressions. This approach can introduce inferential errors, biased estimates, and wrong predictions.
 
 Ordinal regression models are not new statistical approaches but one of the reasons why researchers are not using them could be the challenging statistical implementation, the not intuitive parameters interpretation, and the difficulty in implementing research-related activities such as power or design analysis. All these aspects are surely more challenging for ordinal models compared to the standard linear regression.
 
