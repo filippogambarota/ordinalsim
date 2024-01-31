@@ -7,10 +7,24 @@ In this document we collect some useful resources for ordinal regression models.
 
 # Books
 
-# Papers
+- [Analysis of Ordinal Categorical Data](https://onlinelibrary.wiley.com/doi/book/10.1002/9780470594001): a very complete book about modeling ordinal data.
+- [Categorical Data Analysis](https://onlinelibrary.wiley.com/doi/book/10.1002/0471249688)
+- [An Introduction to Categorical Data Analysis](https://onlinelibrary.wiley.com/doi/book/10.1002/0470114754): Introduction about categorical data in R with some examples with ordinal data (Chapter 6)
+- [Doing Bayesian Data Analysis](https://www.sciencedirect.com/book/9780124058880/doing-bayesian-data-analysis): Overview of Bayesian data analysis. Chapter 23 is about ordinal regression models.
+- [Regression and Other Stories](https://avehtari.github.io/ROS-Examples/): Chapter 15 contains some examples and parametrizations of ordinal regression models
 
 # Posts
 
 - [Violation of Proportional Odds is Not Fatal](https://www.fharrell.com/post/po/)
 - [Assessing the Proportional Odds Assumption and Its Impact](https://www.fharrell.com/post/impactpo/)
 - [Resources for Ordinal Regression Models](https://www.fharrell.com/post/rpo/)
+- [Bayesian Estimation of Signal Detection Models](https://mvuorre.github.io/posts/2017-10-09-bayesian-estimation-of-signal-detection-theory-models/)
+- [Causal inference with ordinal regression](https://solomonkurz.netlify.app/blog/2023-05-21-causal-inference-with-ordinal-regression/)
+
+# Packages
+
+- `ordinal`: https://cran.r-project.org/web/packages/ordinal/index.html
+- `VGAM`: https://cran.r-project.org/web/packages/VGAM/index.html
+- `brms`: https://paul-buerkner.github.io/brms/
+- `MASS::polr()`: https://rdrr.io/cran/MASS/man/polr.html
+- `ordDisp`: https://cran.r-project.org/web/packages/ordDisp/index.html

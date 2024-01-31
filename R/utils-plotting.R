@@ -29,10 +29,10 @@ show_alpha <- function(prob = NULL,
   
   if(link == "logit"){
     xlim <- c(-7, 7)
-    dist <- distributional::dist_logistic
+    dist <- function(...) distributional::dist_logistic(...)
   }else{
     xlim <- c(-5, 5)
-    dist <- distributional::dist_normal
+    dist <- function(...) distributional::dist_normal(...)
   }
   
   k <- length(prob)
@@ -68,7 +68,6 @@ show_alpha <- function(prob = NULL,
   pplot <- ggplot(data = NULL, aes(x = xlim)) +
     geom_line(stat = "function", 
               fun = lf$pfun, 
-              #aes(color = factor(after_stat(findInterval(x, alpha)))),
               linewidth = 1.5) +
     geom_segment(data = NULL, aes(x = alpha, y = 0, xend = alpha, yend = lf$pfun(alpha))) +
     geom_segment(data = NULL,aes(x = -Inf, y = lf$pfun(alpha), xend = alpha, yend = lf$pfun(alpha))) +
@@ -125,6 +124,10 @@ cat_latent_plot <- function(location = 0,
   require(ggplot2)
   lf <- get_link(link)
   
+  if(is.null(prob0) & is.null(alpha)){
+    stop("alpha or prob0 must be specified!")
+  }
+  
   if(is.null(alpha)){
     sum_to_1(prob0)
     alpha <- prob_to_alpha(prob0, link = link)
@@ -148,11 +151,11 @@ cat_latent_plot <- function(location = 0,
   thl <- latex2exp::TeX(sprintf("$\\alpha_{%s}$", 1:length(alpha)))
   
   if(link == "logit"){
-    dfun <- distributional::dist_logistic
+    dfun <- function(...) distributional::dist_logistic(...)
     sd <- sqrt(vlogit(scale))
     ylab <- latex2exp::TeX("Logistic Distribution $Y^{*}$")
   }else{
-    dfun <- distributional::dist_normal
+    dfun <- function(...) distributional::dist_normal(...)
     sd <- data$scale
     ylab <- latex2exp::TeX("Gaussian Distribution $Y^{*}$")
   }
@@ -223,6 +226,16 @@ num_latent_plot <- function(x,
                             size = 20,
                             linewidth = 1,
                             plot = TRUE){
+  
+  if(is.null(prob0) & is.null(alpha)){
+    stop("alpha or prob0 must be specified!")
+  }
+  
+  if(is.null(alpha)){
+    sum_to_1(prob0)
+    alpha <- prob_to_alpha(prob0, link = link)
+  }
+  
   lf <- get_link(link)
   
   if(link == "logit"){

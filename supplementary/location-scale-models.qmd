@@ -42,11 +42,11 @@ $$
 Y^\star = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon} \;\;\; \epsilon_i \sim \mathcal{N}(0, e^{Z\zeta})
 $$ {#eq-latent-scale-location}
 
-Where $X\zeta$ is the linear predictor for the scale of the distribution. By default for both the *logit* and *probit* model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function $\eta = \text{log}(X\zeta)$. As suggested by @Tutz2017-de location-scale models can be considered as a more parsimonious approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexibility. Furthermore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The @fig-scale-effect-example depict the impact of having different scales between two groups on the ordinal probabilities.
+Where $X\zeta$ is the linear predictor for the scale of the distribution. By default for both the *logit* and *probit* model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function $\eta = \text{log}(X\zeta)$. As suggested by @Tutz2017-de location-scale models can be considered as a more parsimonious approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexibility. Furthermore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The @fig-scale-effect-example depict the impact of having different scales between two groups on the ordinal probabilities but the same location. Clearly, there is no location effect and the two groups are predicted to be the same considering only the location effect.
 
 ```{r}
 #| label: fig-scale-effect-example
-cat_latent_plot(location = c(0, 1), scale = c(1, 2), prob0 = rep(1/4, 4), link = "logit", plot = FALSE) |> 
+cat_latent_plot(location = c(0, 0), scale = c(1, 2), prob0 = rep(1/4, 4), link = "logit", plot = FALSE) |> 
   cowplot::plot_grid(plotlist = _, nrow = 1)
 ```
 
@@ -102,27 +102,20 @@ plot_grid(
 
 ### Simulating scale effects
 
-The location-scale model can be simulated using the `sim_ord_latent()` function and providing the predictors for the scale parameters. Given the `log` link function, predictors are provided on the `log` scale. For example, we simulate the effect of a binary variable $x$ representing two independent groups predicting the $k = 5$ response. We simulate a *location* effect of $\beta_1 = 0.5$ (in *probit* scale) and $\zeta_1 = \text{log}(2) = 0.70$. The first group has a $\sigma = 1$ and the second group has $\sigma = 2$. Again we simulate that the baseline probabilities are uniform for the first group.
+The location-scale model can be simulated using the `sim_ord_latent()` function and providing the predictors for the scale parameters. Given the `log` link function, predictors are provided on the `log` scale. For example, we simulate the effect of a binary variable $x$ representing two independent groups predicting the $k = 5$ response. We simulate a *location* effect of $\beta_1 = 0.5$ (in *probit* scale) and $\zeta_1 = \text{log}(2) = 0.70$. The first group has a $\sigma = 1$ and the second group has $\sigma = 2$. Again we simulate that the baseline probabilities are uniform for the first group. The $\log$ link function (and $e$ as inverse link function) is used to make sure that the variance is always positive. If the first group has a scale of 1 and the second group a scale of 2, the $\zeta_1 = \log(\frac{s_2}{s_1}) = \log(\frac{2}{1}) \approx 0.7$. Thus the two groups have a log difference in terms of scale of 0.7 (or a ratio of 2).
 
 ```{r}
-k <- 5  # number of options (1)
-n <- 1e5 # number of observations (1)
-b1 <- 0.5 # beta1, the shift in the latent distribution (2)
+#| echo: true
+k <- 5  # number of options
+n <- 1e5 # number of observations
+b1 <- 0.5 # beta1, the shift in the latent distribution
 z1 <- log(2) # zeta1, the change in the scale
-probs0 <- rep(1/k, k) # probabilities when x = 0 (3)
-alphas <- prob_to_alpha(probs0, link = "probit") # get true thresholds from probabilities (3)
+probs0 <- rep(1/k, k) # probabilities when x = 0
+alphas <- prob_to_alpha(probs0, link = "probit") # get true thresholds from probabilities
 dat <- data.frame(x = rep(c(0, 1), each = n/2))
 dat <- sim_ord_latent(~x, scale = ~x, beta = b1, zeta = z1, prob0 = probs0, data = dat, link = "probit")
 fit <- clm(y ~ x, scale = ~ x, data = dat, link = "probit")
-```
-
-The table (put ref) reports the simulation results.
-
-```{r}
-#| eval: false
-truth <- c(alphas, b1, z1)
-names(truth) <- c(names(fit$alpha), names(fit$beta), names(fit$zeta))
-#clm_table(fit, truth)
+summary(fit)
 ```
 
 To better understand the impact of assuming (or simulating) a different latent scale we fit $k - 1$ binomial regressions and check the estimated coefficients. We are not simulating a specific beta for each outcome but simulating a scale effect is actually impacting the regression coefficients. When generating data for a binary outcome the linear predictor is composed by $\eta = \beta_0 + \beta_1x$. The threshold $\alpha$ and slope of the function can be estimated using $\alpha = -\frac{\beta_0}{\beta_1}$ and the slope is $\frac{1}{\beta_1}$ [@Knoblauch2012-to; @Faraggi2003-hm]. Under the proportional odds assumption, there is only a change in thresholds $\alpha$ this a shift in the sigmoid along the $x$ axis. When including a scale effect a change in the sigmoid is combined with a change in the slope.

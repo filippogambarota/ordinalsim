@@ -4,8 +4,8 @@ test_that("alpha_to_prob() and prob_to_alpha() are working", {
   p1 <- rep(1/6, 6)
   a1l <- prob_to_alpha(p1, link = "logit")
   a1p <- prob_to_alpha(p1, link = "probit")
-  expect_equal(p1, alpha_to_prob(a1l, link = "logit"), info = "logit link")
-  expect_equal(p1, alpha_to_prob(a1p, link = "probit"), info = "probit link")
+  expect_equal(p1, alpha_to_prob(a1l, link = "logit"), info = "logit link", ignore_attr = TRUE)
+  expect_equal(p1, alpha_to_prob(a1p, link = "probit"), info = "probit link", ignore_attr = TRUE)
 })
 
 test_that("dummy_ord() is working!", {
@@ -24,7 +24,7 @@ test_that("sim_ord_latent(link = 'logit') works with a binary x, k = 4", {
   alpha <- prob_to_alpha(probs0, link = "logit")
   b1 <- log(2) # log odds ratio
   dat <- data.frame(x = rep(0:1, each = n))
-  dat <- sim_ord_latent(~x, By = b1, prob = probs0, data = dat, link = "logit")
+  dat <- sim_ord_latent(~x, beta = b1, prob0 = probs0, data = dat, link = "logit")
   fit <- ordinal::clm(y~x, data = dat, link = "logit")
   
   expect_equal(b1, fit$beta, tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -43,7 +43,7 @@ test_that("sim_ord_latent(link = 'probit') works with a binary x, k = 4", {
   alpha <- prob_to_alpha(probs0, link = "probit")
   b1 <- log(2) # log odds ratio
   dat <- data.frame(x = rep(0:1, each = n))
-  dat <- sim_ord_latent(~x, By = b1, prob = probs0, data = dat, link = "probit")
+  dat <- sim_ord_latent(~x, beta = b1, prob0 = probs0, data = dat, link = "probit")
   fit <- ordinal::clm(y~x, data = dat, link = "probit")
   
   expect_equal(b1, fit$beta, tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -62,7 +62,7 @@ test_that("sim_ord_latent(link = 'logit') works with a continuous x, k = 4", {
   alpha <- prob_to_alpha(probs0, link = "logit")
   b1 <- log(1.5) # log odds ratio
   dat <- data.frame(x = rnorm(n*2))
-  dat <- sim_ord_latent(~x, By = b1, prob = probs0, data = dat, link = "logit")
+  dat <- sim_ord_latent(~x, beta = b1, prob0 = probs0, data = dat, link = "logit")
   fit <- ordinal::clm(y~x, data = dat, link = "logit")
   
   expect_equal(b1, fit$beta, tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -81,7 +81,7 @@ test_that("sim_ord_latent(link = 'probit') works with a continuous x, k = 4", {
   alpha <- prob_to_alpha(probs0, link = "probit")
   b1 <- log(1.5) # log odds ratio
   dat <- data.frame(x = rnorm(n*2))
-  dat <- sim_ord_latent(~x, By = b1, prob = probs0, data = dat, link = "probit")
+  dat <- sim_ord_latent(~x, beta = b1, prob0 = probs0, data = dat, link = "probit")
   fit <- ordinal::clm(y~x, data = dat, link = "probit")
   
   expect_equal(b1, fit$beta, tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -103,7 +103,7 @@ test_that("sim_ord_latent(link = 'logit') works with a 2x2 factorial interaction
   b2 <- log(1)
   b3 <- log(1.3)
   dat <- expand.grid(x1 = c("a", "b"), x2 = c("c", "d"), n = 1:((n*2)/4))
-  dat <- sim_ord_latent(~x1*x2, By = c(b1, b2, b3), prob = probs0, data = dat, link = "logit")
+  dat <- sim_ord_latent(~x1*x2, beta = c(b1, b2, b3), prob0 = probs0, data = dat, link = "logit")
   fit <- ordinal::clm(y~x1*x2, data = dat, link = "logit")
   
   expect_equal(fit$beta, c(b1, b2, b3), tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -124,7 +124,7 @@ test_that("sim_ord_latent(link = 'probit') works with a 2x2 factorial interactio
   b2 <- log(1)
   b3 <- log(1.3)
   dat <- expand.grid(x1 = c("a", "b"), x2 = c("c", "d"), n = 1:((n*2)/4))
-  dat <- sim_ord_latent(~x1*x2, By = c(b1, b2, b3), prob = probs0, data = dat, link = "probit")
+  dat <- sim_ord_latent(~x1*x2, beta = c(b1, b2, b3), prob0 = probs0, data = dat, link = "probit")
   fit <- ordinal::clm(y~x1*x2, data = dat, link = "probit")
   
   expect_equal(fit$beta, c(b1, b2, b3), tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -144,7 +144,7 @@ test_that("sim_ord_latent(link = 'logit') works with a binary predictor x on loc
   b1 <- log(2) # log odds ratio
   z1 <- log(3)
   dat <- expand.grid(x = rep(0:1, each = n))
-  dat <- sim_ord_latent(~x, ~x, By = b1, Bscale = z1, prob = probs0, data = dat, link = "logit")
+  dat <- sim_ord_latent(~x, ~x, beta = b1, zeta = z1, prob0 = probs0, data = dat, link = "logit")
   fit <- ordinal::clm(y~x, scale = ~x, data = dat, link = "logit")
   
   expect_equal(fit$beta, b1, tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -165,7 +165,7 @@ test_that("sim_ord_latent(link = 'probit') works with a binary predictor x on lo
   b1 <- log(2) # log odds ratio
   z1 <- log(3)
   dat <- expand.grid(x = rep(0:1, each = n))
-  dat <- sim_ord_latent(~x, ~x, By = b1, Bscale = z1, prob = probs0, data = dat, link = "probit")
+  dat <- sim_ord_latent(~x, ~x, beta = b1, zeta = z1, prob0 = probs0, data = dat, link = "probit")
   fit <- ordinal::clm(y~x, scale = ~x, data = dat, link = "probit")
   
   expect_equal(fit$beta, b1, tolerance = .tol["clm"], info = "beta", ignore_attr = TRUE)
@@ -177,3 +177,15 @@ test_that("sim_ord_latent(link = 'probit') works with a binary predictor x on lo
   expect_equal(fit$model, dat_fit, info = "dataset is the same after passing within the function", ignore_attr = TRUE)
 })
 
+test_that("sum_to_1() correctly check", {
+  expect_no_error(sum_to_1(rep(1/6, 6)))
+  expect_no_error(sum_to_1(rep(1/10, 10)))
+  expect_no_error(sum_to_1(rep(1/15, 15)))
+  expect_error(sum_to_1(rep(1/4, 3)))
+})
+
+test_that("vlogit() correctly calculate the variance", {
+  expect_equal((1^2*pi^2)/3, vlogit(1), info = "scale = 1")
+  expect_equal((2^2*pi^2)/3, vlogit(2), info = "scale = 2")
+  expect_equal((0.5^2*pi^2)/3, vlogit(0.5), info = "scale = 0.5")
+})

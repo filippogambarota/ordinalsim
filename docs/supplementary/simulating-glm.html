@@ -256,13 +256,14 @@ P(Y = 1|\mathbf{X}) = g^{-1}(\mathbf{X} \boldsymbol{\beta})
 </div>
 </div>
 </div>
-<p>The curve depict the true probability of success for each value of <span class="math inline">\(x\)</span>. To include the random error we need to sample the observed values from a Binomial distribution using the vector of probabilities <code>p</code>. We sample a vector of 0 and 1.</p>
+<p>The curve depicts the true probability of success for each value of <span class="math inline">\(x\)</span>. To include the random error we need to sample the observed values from a Binomial distribution using the vector of probabilities <code>p</code>. We sample a vector of 0 and 1.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ns <span class="ot">&lt;-</span> <span class="fu">length</span>(x) <span class="co"># number of subjects</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(ns, <span class="dv">1</span>, p)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0 0 0 0 0 0</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0100  0.1096  0.5999  0.5396  0.9481  0.9955 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -297,24 +298,24 @@ glm(formula = y ~ x, family = binomial(link = "logit"), data = dat)
 
 Coefficients:
             Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)  -4.6064     0.9119  -5.051 4.39e-07 ***
-x             9.3075     1.7329   5.371 7.83e-08 ***
+(Intercept)  -3.2173     0.6743  -4.772 1.83e-06 ***
+x             7.4514     1.3814   5.394 6.89e-08 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 140.006  on 100  degrees of freedom
-Residual deviance:  68.083  on  99  degrees of freedom
-AIC: 72.083
+    Null deviance: 138.338  on 100  degrees of freedom
+Residual deviance:  80.606  on  99  degrees of freedom
+AIC: 84.606
 
-Number of Fisher Scoring iterations: 6</code></pre>
+Number of Fisher Scoring iterations: 5</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(Intercept)           x 
-  -4.606366    9.307514 </code></pre>
+  -3.217343    7.451356 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># truth</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">b0 =</span> b0, <span class="at">b1 =</span> b1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

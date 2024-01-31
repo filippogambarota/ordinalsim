@@ -85,7 +85,7 @@ Using the second parametrization, with positive $\beta$ we have higher probabili
 The negative-sign parametrization is implicit when simulating from the latent distribution. Let's see an example. We use a continuous $x$ predictor because it is easier to see the results.
 
 ```{r}
-#| fig-cap: Simulated data using the latent variable approach. The dotted lines are the thresholds $\\alpha$
+#| fig-cap: Simulated data using the latent variable approach. The dotted lines are the thresholds $\alpha$
 n <- 1e3
 x <- runif(1e3)
 B <- 3

@@ -54,12 +54,12 @@ p <- plogis(b0 + b1 * x)
 plot(x, p, type = "l")
 ```
 
-The curve depict the true probability of success for each value of $x$. To include the random error we need to sample the observed values from a Binomial distribution using the vector of probabilities `p`. We sample a vector of 0 and 1.
+The curve depicts the true probability of success for each value of $x$. To include the random error we need to sample the observed values from a Binomial distribution using the vector of probabilities `p`. We sample a vector of 0 and 1.
 
 ```{r}
 ns <- length(x) # number of subjects
 y <- rbinom(ns, 1, p)
-head(y)
+summary(p)
 
 par(mfrow = c(1,2))
 

@@ -24,7 +24,6 @@ affiliation:
     institution   : "Department of Developmental Psychology and Socialization, University of Padova, Italy"
 abstract: |
     Ordinal data are widespread in psychology such as Likert items, ratings, or generic ordered variables. These variables are usually analyzed using metric models (e.g., standard linear regression) with important drawbacks in terms of statistical inference (reduced power and increased type-1 error) and prediction. One possible reason for not using ordinal regression models could be difficulty in understanding parameters or conducting a power analysis. The tutorial aims to present ordinal regression models using a simulation-based approach. Firstly, we introduced the general model highlighting crucial components and assumptions. Then we explained how to interpret parameters for a logit and probit model. Then we proposed two ways for simulating data as a function of predictors showing a 2x2 interaction with categorical predictors and the interaction between a numeric and categorical predictor. Finally, we showed an example of power analysis using simulations that can be easily extended to complex models with multiple predictors. The tutorial is supported by a collection of custom R functions developed to simulate and understand ordinal regression models. The code to reproduce the proposed simulation, the custom R functions, and additional examples of ordinal regression models can be found on the online Open Science Framework repository ([https://osf.io/93h5j](https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34)).
-  
 keywords          : "ordinal regression, monte carlo simulations, power analysis"
 wordcount         : "6987"
 bibliography:
@@ -40,13 +39,14 @@ footnotelist      : no
 params:
   floatplaceh: true
   preprint: true
+  submission: true
 classoption       : "man"
 output: 
+  papaja::apa6_docx: default
   papaja::apa6_pdf:
     latex_engine: xelatex
     header_includes:
       - \usepackage{booktabs, caption, longtable, colortbl, array, hhline, mathbf}
-  papaja::apa6_docx: default
 ---
 
 ```{r setup, include = FALSE}
@@ -396,9 +396,8 @@ ss |>
   row_spec(0, bold = TRUE)
 ```
 
-
 ```{r tab-dataset-example-docx, eval = which_output("docx")}
-papaja::apa_table(ss, caption = filor::get_caption())
+papaja::apa_table(ss, caption = filor::get_caption(), escape = FALSE)
 ```
 
 ```{r model-example-1}
@@ -1030,7 +1029,10 @@ ggplot(power_df, aes(x = n, y = power)) +
 
 # Conclusions
 
-In this tutorial we presented the CM model in terms of model fitting, parameters interpretation and data simulation. The basic model can be expanded in several ways. When assuming PO or considering only a location effect is limiting, including scale (*location-scale*), thresholds (*location-shift*) effects or relaxing the PO assumption can help in modeling complex phenomenon. The supplementary materials ([https://osf.io/93h5j](https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34)) contains some examples of these complex models. Furtermore, with clustered data (e.g., multiple items/repetitions for the same participant), a random-effect CM model can be fitted including random intercepts and slopes.
+In this tutorial we presented the CM model in terms of model fitting, parameters interpretation and data simulation. The basic model can be expanded in several ways. When assuming PO or considering only a location effect is limiting, including scale (*location-scale*), thresholds (*location-shift*) effects or relaxing the PO assumption can help in modeling complex phenomenon. The supplementary materials ([https://osf.io/93h5j](https://osf.io/93h5j/?view_only=33f262ee28374a88b935f0a25cefdb34)) contains some examples of these complex models. Furthermore, with clustered data (e.g., multiple items/repetitions for the same participant), a random-effect CM model can be fitted including random intercepts and slopes.
+
+```{r, child = 'ethical-section.Rmd'}
+```
 
 \newpage
 

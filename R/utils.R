@@ -2,9 +2,9 @@
 #'
 #' @param location a formula with predictors for the location parameter. The components of the formula need to be columns of the \code{data} object.
 #' @param scale a formula with predictors for the scale parameter. Default to \code{NULL} thus if not specified the scale is assumed to be 1.
-#' @param By vector of regression coefficients for the location formula. The order is the same as returned by running \code{model.matrix(~formula, data = data)}
-#' @param Bscale vector of regression coefficients for the scale formula. Default to \code{NULL} thus if not specified the scale is assumed to be 1.
-#' @param prob vector of baseline probabilities from which thresholds are calculated. They have a role similar to intercepts in standard regression modelling. The probabilities are fixed assuming all predictors to 0.
+#' @param beta vector of regression coefficients for the location formula. The order is the same as returned by running \code{model.matrix(~formula, data = data)}
+#' @param zeta vector of regression coefficients for the scale formula. Default to \code{NULL} thus if not specified the scale is assumed to be 1.
+#' @param prob0 vector of baseline probabilities from which thresholds are calculated. They have a role similar to intercepts in standard regression modelling. The probabilities are fixed assuming all predictors to 0.
 #' @param alpha vector of baseline thresholds. Either \code{probs} or \code{alpha} must be specified. The function calculated thresholds from \code{probs} and viceversa
 #' @param data a dataframe with predictors. both \code{location} and \code{scale} formulas refers to columns of the dataframe.
 #' @param link character vector indicating the link function. Can be \code{logit} or \code{probit}.
@@ -20,7 +20,7 @@
 #' k <- 5 # 5 ordinal values
 #' probs0 <- rep(1/k, k) # baseline probabilities for the group 0
 #' dat <- data.frame(x = rep(c(0, 1), each = n))
-#' dat <- sim_ord_latent(~x, By = 0.5, prob = probs0, data = dat, link = "probit")
+#' dat <- sim_ord_latent(~x, beta = 0.5, prob0 = probs0, data = dat, link = "probit")
 sim_ord_latent <- function(location,
                            scale = NULL,
                            beta,

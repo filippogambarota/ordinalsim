@@ -260,9 +260,9 @@ P(Y \leq k) = g^{-1}\left(\frac{\alpha_k - \mathbf{X}\boldsymbol{\beta}}{e^{\bol
 <p><span id="eq-latent-scale-location"><span class="math display">\[
 Y^\star = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon} \;\;\; \epsilon_i \sim \mathcal{N}(0, e^{Z\zeta})
 \tag{2}\]</span></span></p>
-<p>Where <span class="math inline">\(X\zeta\)</span> is the linear predictor for the scale of the distribution. By default for both the <em>logit</em> and <em>probit</em> model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function <span class="math inline">\(\eta = \text{log}(X\zeta)\)</span>. As suggested by <span class="citation" data-cites="Tutz2017-de">Tutz &amp; Berger (<a href="#ref-Tutz2017-de" role="doc-biblioref">2017</a>)</span> location-scale models can be considered as a more parsimonious approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexibility. Furthermore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The <a href="#fig-scale-effect-example" class="quarto-xref">Figure&nbsp;1</a> depict the impact of having different scales between two groups on the ordinal probabilities.</p>
+<p>Where <span class="math inline">\(X\zeta\)</span> is the linear predictor for the scale of the distribution. By default for both the <em>logit</em> and <em>probit</em> model the scale is fixed to 1. On scale-location models we put predictors on both parameters. Given that the scale cannot be negative we use a log link function <span class="math inline">\(\eta = \text{log}(X\zeta)\)</span>. As suggested by <span class="citation" data-cites="Tutz2017-de">Tutz &amp; Berger (<a href="#ref-Tutz2017-de" role="doc-biblioref">2017</a>)</span> location-scale models can be considered as a more parsimonious approach compared to partially or completely relaxing the proportional odds assumption. Allowing the scale to be different as a function of the predictor create more modelling flexibility. Furthermore, two groups could be theoretically different only in the scale of the latent distribution with a similar location. In this example, the only way to capture group differences is by including a scale effect. The <a href="#fig-scale-effect-example" class="quarto-xref">Figure&nbsp;1</a> depict the impact of having different scales between two groups on the ordinal probabilities but the same location. Clearly, there is no location effect and the two groups are predicted to be the same considering only the location effect.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_latent_plot</span>(<span class="at">location =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">scale =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">prob0 =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">4</span>), <span class="at">link =</span> <span class="st">"logit"</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_latent_plot</span>(<span class="at">location =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">scale =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">prob0 =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">4</span>), <span class="at">link =</span> <span class="st">"logit"</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  cowplot<span class="sc">::</span><span class="fu">plot_grid</span>(<span class="at">plotlist =</span> _, <span class="at">nrow =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-scale-effect-example" class="quarto-figure quarto-figure-center anchored" width="672">
@@ -295,7 +295,7 @@ Figure&nbsp;2
 </div>
 <section id="simulating-scale-effects" class="level3">
 <h3 class="anchored" data-anchor-id="simulating-scale-effects">Simulating scale effects</h3>
-<p>The location-scale model can be simulated using the <code>sim_ord_latent()</code> function and providing the predictors for the scale parameters. Given the <code>log</code> link function, predictors are provided on the <code>log</code> scale. For example, we simulate the effect of a binary variable <span class="math inline">\(x\)</span> representing two independent groups predicting the <span class="math inline">\(k = 5\)</span> response. We simulate a <em>location</em> effect of <span class="math inline">\(\beta_1 = 0.5\)</span> (in <em>probit</em> scale) and <span class="math inline">\(\zeta_1 = \text{log}(2) = 0.70\)</span>. The first group has a <span class="math inline">\(\sigma = 1\)</span> and the second group has <span class="math inline">\(\sigma = 2\)</span>. Again we simulate that the baseline probabilities are uniform for the first group.</p>
+<p>The location-scale model can be simulated using the <code>sim_ord_latent()</code> function and providing the predictors for the scale parameters. Given the <code>log</code> link function, predictors are provided on the <code>log</code> scale. For example, we simulate the effect of a binary variable <span class="math inline">\(x\)</span> representing two independent groups predicting the <span class="math inline">\(k = 5\)</span> response. We simulate a <em>location</em> effect of <span class="math inline">\(\beta_1 = 0.5\)</span> (in <em>probit</em> scale) and <span class="math inline">\(\zeta_1 = \text{log}(2) = 0.70\)</span>. The first group has a <span class="math inline">\(\sigma = 1\)</span> and the second group has <span class="math inline">\(\sigma = 2\)</span>. Again we simulate that the baseline probabilities are uniform for the first group. The <span class="math inline">\(\log\)</span> link function (and <span class="math inline">\(e\)</span> as inverse link function) is used to make sure that the variance is always positive. If the first group has a scale of 1 and the second group a scale of 2, the <span class="math inline">\(\zeta_1 = \log(\frac{s_2}{s_1}) = \log(\frac{2}{1}) \approx 0.7\)</span>. Thus the two groups have a log difference in terms of scale of 0.7 (or a ratio of 2).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">5</span>  <span class="co"># number of options (1)</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fl">1e5</span> <span class="co"># number of observations (1)</span></span>
@@ -305,13 +305,35 @@ Figure&nbsp;2
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> <span class="fu">prob_to_alpha</span>(probs0, <span class="at">link =</span> <span class="st">"probit"</span>) <span class="co"># get true thresholds from probabilities (3)</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">each =</span> n<span class="sc">/</span><span class="dv">2</span>))</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">sim_ord_latent</span>(<span class="sc">~</span>x, <span class="at">scale =</span> <span class="sc">~</span>x, <span class="at">beta =</span> b1, <span class="at">zeta =</span> z1, <span class="at">prob0 =</span> probs0, <span class="at">data =</span> dat, <span class="at">link =</span> <span class="st">"probit"</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">clm</span>(y <span class="sc">~</span> x, <span class="at">scale =</span> <span class="sc">~</span> x, <span class="at">data =</span> dat, <span class="at">link =</span> <span class="st">"probit"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">clm</span>(y <span class="sc">~</span> x, <span class="at">scale =</span> <span class="sc">~</span> x, <span class="at">data =</span> dat, <span class="at">link =</span> <span class="st">"probit"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>formula: y ~ x
+scale:   ~x
+data:    dat
+
+ link   threshold nobs  logLik     AIC       niter max.grad cond.H 
+ probit flexible  1e+05 -151151.38 302314.76 11(0) 7.09e-07 3.2e+01
+
+Coefficients:
+  Estimate Std. Error z value Pr(&gt;|z|)    
+x  0.50451    0.01176   42.89   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+log-scale coefficients:
+  Estimate Std. Error z value Pr(&gt;|z|)    
+x 0.701164   0.008418   83.29   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Threshold coefficients:
+     Estimate Std. Error z value
+1|2 -0.835177   0.006287 -132.84
+2|3 -0.254419   0.005425  -46.90
+3|4  0.248568   0.005411   45.93
+4|5  0.829602   0.006277  132.17</code></pre>
 </div>
-<p>The table (put ref) reports the simulation results.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>truth <span class="ot">&lt;-</span> <span class="fu">c</span>(alphas, b1, z1)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(truth) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">names</span>(fit<span class="sc">$</span>alpha), <span class="fu">names</span>(fit<span class="sc">$</span>beta), <span class="fu">names</span>(fit<span class="sc">$</span>zeta))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#clm_table(fit, truth)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To better understand the impact of assuming (or simulating) a different latent scale we fit <span class="math inline">\(k - 1\)</span> binomial regressions and check the estimated coefficients. We are not simulating a specific beta for each outcome but simulating a scale effect is actually impacting the regression coefficients. When generating data for a binary outcome the linear predictor is composed by <span class="math inline">\(\eta = \beta_0 + \beta_1x\)</span>. The threshold <span class="math inline">\(\alpha\)</span> and slope of the function can be estimated using <span class="math inline">\(\alpha = -\frac{\beta_0}{\beta_1}\)</span> and the slope is <span class="math inline">\(\frac{1}{\beta_1}\)</span> <span class="citation" data-cites="Knoblauch2012-to Faraggi2003-hm">(<a href="#ref-Faraggi2003-hm" role="doc-biblioref">Faraggi et al., 2003</a>; <a href="#ref-Knoblauch2012-to" role="doc-biblioref">Knoblauch &amp; Maloney, 2012</a>)</span>. Under the proportional odds assumption, there is only a change in thresholds <span class="math inline">\(\alpha\)</span> this a shift in the sigmoid along the <span class="math inline">\(x\)</span> axis. When including a scale effect a change in the sigmoid is combined with a change in the slope.</p>
 <div class="cell">
@@ -346,7 +368,7 @@ Figure&nbsp;2
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="location-scale-models_files/figure-html/unnamed-chunk-6-1.svg" class="img-fluid figure-img" width="672"></p>
+<p><img src="location-scale-models_files/figure-html/unnamed-chunk-5-1.svg" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -410,7 +432,7 @@ Figure&nbsp;3
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="location-scale-models_files/figure-html/unnamed-chunk-9-1.svg" class="img-fluid figure-img" width="672"></p>
+<p><img src="location-scale-models_files/figure-html/unnamed-chunk-8-1.svg" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
